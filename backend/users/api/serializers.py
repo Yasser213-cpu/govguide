@@ -1,10 +1,11 @@
 from rest_framework import serializers
-from django.contrib.auth.models import User
 from django.core.validators import RegexValidator
+from ..models import User
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 
 
-class RegistrationSerializer(serializers.Serializer):
+class ClientRegistrationSerializer(serializers.Serializer):
     username_validator = RegexValidator(
     regex=r'^[a-zA-Z][a-zA-Z0-9_]{2,29}$',
     message=(
@@ -34,5 +35,29 @@ class RegistrationSerializer(serializers.Serializer):
     def create(self,validated_data):
         username=validated_data["username"]
         password = validated_data["password"]
-        user = User.objects.create_user(username=username, password=password)
+        user = User.objects.create_user(username=username, password=password , role=User.CLIENT_ROLE)
         return user
+
+
+
+
+
+
+
+
+class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+
+        token["role"] = user.role
+
+        return token
+    
+    def validate(self, attrs):
+        data = super().validate(attrs)
+
+        data["role"] = self.user.role
+
+        return data

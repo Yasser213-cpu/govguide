@@ -1,18 +1,42 @@
 from rest_framework.views import APIView
-from .serilizers import RegistrationSerializer
-from rest_framework_simplejwt.views import token_obtain_pair
+from .serializers import ClientRegistrationSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import TokenObtainPairView 
+from .serializers import MyTokenObtainPairSerializer
 
 
 
 
-class RegisterAPIView (APIView):
-    def post(self ,request):
-        serializer =  RegistrationSerializer(data=request.data)
+class RegisterAPIView(APIView):
+    def post(self, request):
+        serializer = ClientRegistrationSerializer(data=request.data)
+
         if serializer.is_valid():
             user = serializer.save()
-            token = RefreshToken.for_user(user)
-            return Response({"refresh": str(token) , "access":str(token.access_token)} ,status.HTTP_201_CREATED)
-        return Response(serializer.errors , status.HTTP_400_BAD_REQUEST)
+
+            refresh = RefreshToken.for_user(user)
+            refresh["role"] = user.role
+
+            access = refresh.access_token
+            access["role"] = user.role
+
+            return Response(
+                {
+                    "refresh": str(refresh),
+                    "access": str(access),
+                    "role": user.role,
+                },
+                status=status.HTTP_201_CREATED,
+            )
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+
+
+
+class MyTokenObtainPairView(TokenObtainPairView):
+    serializer_class = MyTokenObtainPairSerializer
+    
