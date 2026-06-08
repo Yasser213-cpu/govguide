@@ -2,6 +2,19 @@ from pathlib import Path
 from dotenv import load_dotenv
 import os
 
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
+
+sentry_sdk.init(
+    dsn="YOUR_SENTRY_DSN",
+
+    # ده “رابط المشروع على Sentry dashboard”
+
+    integrations=[DjangoIntegration()],
+    traces_sample_rate=1.0,
+    send_default_pii=True
+)
+
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
