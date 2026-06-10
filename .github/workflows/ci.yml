@@ -50,3 +50,7 @@ jobs:
 
       - name: Django check
         run: python manage.py check
+
+    env:
+      SECRET_KEY: django-insecure-ci-key
+      DEBUG: "True"
