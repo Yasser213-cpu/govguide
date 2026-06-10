@@ -2,18 +2,18 @@ from pathlib import Path
 from dotenv import load_dotenv
 import os
 
-import sentry_sdk
-from sentry_sdk.integrations.django import DjangoIntegration
+SENTRY_DSN = os.getenv("SENTRY_DSN")
 
-sentry_sdk.init(
-    dsn="YOUR_SENTRY_DSN",
+if SENTRY_DSN:
+    import sentry_sdk
+    from sentry_sdk.integrations.django import DjangoIntegration
 
-    # ده “رابط المشروع على Sentry dashboard”
-
-    integrations=[DjangoIntegration()],
-    traces_sample_rate=1.0,
-    send_default_pii=True
-)
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        integrations=[DjangoIntegration()],
+        traces_sample_rate=1.0,
+        send_default_pii=True
+    )
 
 load_dotenv()
 
