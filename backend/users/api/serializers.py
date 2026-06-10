@@ -1,11 +1,12 @@
 from rest_framework import serializers
 from django.core.validators import RegexValidator
-from ..models import User
+from ..models import User 
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 
 
-class ClientRegistrationSerializer(serializers.Serializer):
+class RegistrationSerializer(serializers.Serializer):
+    role = serializers.ChoiceField(choices=[User.CLIENT_ROLE,User.COMPANY_ROLE])
     username_validator = RegexValidator(
     regex=r'^[a-zA-Z][a-zA-Z0-9_]{2,29}$',
     message=(
@@ -35,10 +36,26 @@ class ClientRegistrationSerializer(serializers.Serializer):
     def create(self,validated_data):
         username=validated_data["username"]
         password = validated_data["password"]
-        user = User.objects.create_user(username=username, password=password , role=User.CLIENT_ROLE)
+        role=validated_data["role"]
+        user = User.objects.create_user(username=username, password=password , role=role)
         return user
 
 
+
+class RegisterCompanySerializer(RegistrationSerializer):
+    name = serializers.CharField(max_length=100)
+    description= serializers.CharField()
+    phone= serializers.CharField(max_length=15)
+    city = serializers.CharField(max_length=100)
+    street = serializers.CharField(max_length=100)
+    governorate = serializers.CharField(max_length=100)
+
+    def create(self, validated_data):
+        user =  super().create(validated_data)
+        """
+        create company
+        """
+        return user
 
 
 
