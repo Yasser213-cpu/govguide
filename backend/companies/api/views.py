@@ -5,10 +5,19 @@ from rest_framework import status
 from rest_framework.exceptions import NotFound
 from ..models import Company
 from .serializers import CompanySerializer
+from core.permissions import IsCompany 
+
 
 
 
 class CompanyAPIView(APIView):
+
+    def get_permissions(self):
+        if self.request.method == "GET" or self.request.method == "POST":
+            return [AllowAny()]
+        
+        return [IsAuthenticated() , IsCompany() ]
+
     
     def get_object(self, id):
         try:

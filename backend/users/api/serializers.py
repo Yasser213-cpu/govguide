@@ -2,6 +2,7 @@ from rest_framework import serializers
 from django.core.validators import RegexValidator
 from ..models import User 
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from companies.models import Company
 
 
 
@@ -51,13 +52,26 @@ class RegisterCompanySerializer(RegistrationSerializer):
     governorate = serializers.CharField(max_length=100)
 
     def create(self, validated_data):
-        user =  super().create(validated_data)
-        """
-        create company
-        """
-        return user
+     name = validated_data.pop("name")
+     description = validated_data.pop("description")
+     phone = validated_data.pop("phone")
+     governorate = validated_data.pop("governorate")
+     city = validated_data.pop("city")
+     street = validated_data.pop("street")
 
+     user = super().create(validated_data)
 
+     Company.objects.create(
+        owner=user,
+        name=name,
+        description=description,
+        phone=phone,
+        governorate=governorate,
+        city=city,
+        street=street
+     )
+
+     return user
 
 
 
