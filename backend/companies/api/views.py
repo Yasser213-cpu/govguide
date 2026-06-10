@@ -50,6 +50,7 @@ class CompanyAPIView(APIView):
 
     def delete(self,request , id):
        company = self.get_object(id)
+       self.check_object_permissions(request, company)
        company.delete()
        return Response(status.HTTP_204_NO_CONTENT)
     
@@ -57,6 +58,8 @@ class CompanyAPIView(APIView):
 
     def patch(self, request, id):
       company = self.get_object(id)
+      self.check_object_permissions(request, company)
+
       serializer = CompanySerializer(
         company,
         data=request.data,
@@ -73,6 +76,8 @@ class CompanyAPIView(APIView):
 
     def put(self, request, id):
         company = self.get_object(id)
+        self.check_object_permissions(request, company)
+
 
         serializer = CompanySerializer(
         company,
