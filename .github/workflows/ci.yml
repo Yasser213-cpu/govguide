@@ -1,3 +1,5 @@
+
+D:\ITI 4 months\Graduation Project\govguide>type .github\workflows\ci.yml
 name: CI
 
 on:
@@ -50,3 +52,7 @@ jobs:
 
       - name: Django check
         run: python manage.py check
+
+    env:
+      SECRET_KEY: django-insecure-ci-key
+      DEBUG: "True"
