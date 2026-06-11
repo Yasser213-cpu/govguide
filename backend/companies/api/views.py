@@ -6,6 +6,7 @@ from rest_framework.exceptions import NotFound
 from ..models import Company
 from .serializers import CompanySerializer
 from core.permissions import IsCompany 
+from ..filters import CompanyFilter
 
 
 
@@ -32,9 +33,11 @@ class CompanyAPIView(APIView):
             company = self.get_object(id)
             serializer = CompanySerializer(company)
             return Response(serializer.data, status.HTTP_200_OK)
+        
 
         companies = Company.objects.all()
-        serializer = CompanySerializer(companies, many=True)
+        company_filter = CompanyFilter(request.GET , queryset=companies )
+        serializer = CompanySerializer(company_filter.qs, many=True)
         return Response(serializer.data, status.HTTP_200_OK)
     
 
