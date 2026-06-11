@@ -1,0 +1,44 @@
+{
+  "common": {
+    "appName": "GovGuide",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "success": "Success",
+    "back": "Back"
+  },
+  "auth": {
+    "register": "Sign Up",
+    "login": "Sign In",
+    "logout": "Sign Out",
+    "email": "Email",
+    "phone": "Phone Number",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "otp": "One-Time Password",
+    "enterOtp": "Enter the OTP sent to your phone",
+    "resendOtp": "Resend OTP",
+    "createAccount": "Create an account",
+    "haveAccount": "Already have an account?",
+    "noAccount": "Don't have an account?",
+    "forgotPassword": "Forgot password?",
+    "resetPassword": "Reset Password",
+    "enterNewPassword": "Enter your new password",
+    "passwordReset": "Your password has been reset successfully",
+    "verifyOtp": "Verify OTP",
+    "passwordsDoNotMatch": "Passwords do not match",
+    "invalidEmail": "Please enter a valid email",
+    "passwordTooShort": "Password must be at least 8 characters",
+    "registerSuccess": "Account created successfully",
+    "loginSuccess": "Logged in successfully",
+    "registerError": "Failed to create account",
+    "loginError": "Failed to log in"
+  },
+  "validation": {
+    "required": "This field is required",
+    "email": "Please enter a valid email",
+    "minLength": "Minimum length is {{count}} characters",
+    "maxLength": "Maximum length is {{count}} characters"
+  }
+}
