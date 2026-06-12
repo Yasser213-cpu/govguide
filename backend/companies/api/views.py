@@ -14,9 +14,8 @@ from ..filters import CompanyFilter
 class CompanyAPIView(APIView):
 
     def get_permissions(self):
-        if self.request.method == "GET" or self.request.method == "POST":
+        if self.request.method == "GET":
             return [AllowAny()]
-        
         return [IsAuthenticated() , IsCompany() ]
 
     
@@ -25,7 +24,7 @@ class CompanyAPIView(APIView):
             company = Company.objects.get(pk=id)
             return company
         except Company.DoesNotExist:
-            raise NotFound({"error":"there is no company matches this id"})
+            raise NotFound({"detail":"there is no company matches this id"})
         
 
     def get(self, request, id=None):
@@ -43,6 +42,11 @@ class CompanyAPIView(APIView):
 
 
     def post(self ,request):
+        if Company.objects.filter(owner=request.user).exists():
+            return Response(
+            {"detail": "You already have a company"},
+            status=400
+             )
         serializer =  CompanySerializer(data= request.data)
         if serializer.is_valid():
             serializer.save(owner=request.user)

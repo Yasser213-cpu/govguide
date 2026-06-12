@@ -8,5 +8,4 @@ urlpatterns = [
     path("token",views.MyTokenObtainPairView.as_view()),
     path("token/refresh",TokenRefreshView.as_view() ),
     path("register/client" ,  views.RegisterAPIView.as_view() ),
-    path("register/company" , views.RegisterCompanyAPIView.as_view())
 ]
