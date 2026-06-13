@@ -1,0 +1,19 @@
+
+from rest_framework.permissions import BasePermission
+from users.models import User
+
+
+class  IsCompany(BasePermission):
+        def has_permission(self , request , view):
+                return request.user.role ==  User.COMPANY_ROLE
+        
+
+        def has_object_permission(self , request , view , obj):
+                return request.user == obj.owner
+        
+
+
+
+class IsClient(BasePermission):
+            def has_permission(self , request , view):
+                return request.user.role ==  User.CLIENT_ROLE
