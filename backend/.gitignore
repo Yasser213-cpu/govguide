@@ -1,2 +1,4 @@
 .env 
 venv/ 
+# RAG / Chroma
+ai_agents/rag/chroma_store/
