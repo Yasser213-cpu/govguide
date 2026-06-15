@@ -17,3 +17,10 @@ class  IsCompany(BasePermission):
 class IsClient(BasePermission):
             def has_permission(self , request , view):
                 return request.user.role ==  User.CLIENT_ROLE
+            
+
+
+
+class IsAdmin(BasePermission):
+        def has_permission(self , request , view):
+                return request.user.is_superuser
