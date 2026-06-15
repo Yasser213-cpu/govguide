@@ -127,3 +127,12 @@ REST_FRAMEWORK = {
     ],
 }
 AUTH_USER_MODEL = "users.User"
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+
+EMAIL_HOST = "sandbox.smtp.mailtrap.io"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
+EMAIL_HOST_USER = "934892aa10239d"
+EMAIL_HOST_PASSWORD = "6c1a427ba0407e"
+DEFAULT_FROM_EMAIL = "mohamed.mouza469@gmail.com"
