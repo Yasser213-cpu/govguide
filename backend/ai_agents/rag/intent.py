@@ -24,18 +24,11 @@ Message: {message}
 Category:"""
 
     response = llm.invoke(prompt)
-    intent = response.content.strip().lower()
-    return intent
-if __name__ == "__main__":
-    # Test with different messages
-    test_messages = [
-        "How do I renew my passport?",
-        "I want to book an appointment",
-        "The app is not working",
-        "Hello",
-    ]
+    raw= response.content.strip().lower()
+    # The free model sometimes returns extra text, so we search for the category
+    categories = ["procedure_query", "booking", "support", "greeting"]
+    for category in categories:
+        if category in raw:
+            return category
 
-    for msg in test_messages:
-        intent = detect_intent(msg)
-        print(f"Message: {msg}")
-        print(f"Intent: {intent}\n")
+    return "unknown"
