@@ -39,10 +39,8 @@ def retrieve(query, top_k=3):
     return context
 def ask(query):
     """Full RAG: retrieve context, then ask the LLM to answer from it."""
-    # 1. Retrieve relevant context from Chroma
     context = retrieve(query)
 
-    # 2. Build the prompt for the LLM
     prompt = f"""You are a helpful assistant for Egyptian government procedures.
 Answer the user's question using ONLY the context below.
 If the answer is not in the context, say you don't have that information.
@@ -54,9 +52,14 @@ Question: {query}
 
 Answer:"""
 
-    # 3. Send the prompt to the LLM and get the answer
     response = llm.invoke(prompt)
-    return response.content
+
+    # Extract token usage from the LLM response
+    tokens = 0
+    if hasattr(response, "usage_metadata") and response.usage_metadata:
+        tokens = response.usage_metadata.get("total_tokens", 0)
+
+    return {"answer": response.content, "tokens": tokens}
 
 
 # let's test
