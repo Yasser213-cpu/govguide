@@ -8,8 +8,11 @@ export function AuthProvider({ children }) {
   const [token, setToken] = useState(localStorage.getItem("token"));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [initialized, setInitialized] = useState(false);
+
 
   useEffect(() => {
+      setInitialized(true);
     if (token) {
       localStorage.setItem("token", token);
     } else {
@@ -17,14 +20,15 @@ export function AuthProvider({ children }) {
     }
   }, [token]);
 
-  const register = useCallback(async (email, phone, password) => {
+  const register = useCallback(async (username,email, role, password) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axiosClient.post("/v1/auth/register", {
+      const response = await axiosClient.post("/v1/auth/register/client", {
+        username,
         email,
-        phone,
-        password,
+        role,
+        password
       });
       return response.data;
     } catch (err) {
@@ -64,6 +68,10 @@ export function AuthProvider({ children }) {
       });
 
       const { access, user: userData } = response.data;
+
+      if (!access) {
+        throw new Error(response.data?.detail || "Login failed");
+      }
 
       setToken(access);
       if (userData) {
@@ -110,6 +118,7 @@ export function AuthProvider({ children }) {
     token,
     loading,
     error,
+    initialized,
     isAuthenticated: !!token,
     register,
     verifyOtp,

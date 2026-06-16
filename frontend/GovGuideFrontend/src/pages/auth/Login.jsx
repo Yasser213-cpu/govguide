@@ -6,10 +6,11 @@ import { Button, Input } from "../../components/ui";
 import LanguageSwitcher from "../../components/LanguageSwitcher";
 import { getValidationErrors } from "../../utils/validation";
 import { FiLock, FiMail, FiKey } from "react-icons/fi";
+
 export default function Login() {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { login, loading, error: authError, setError } = useAuth();
+  const { login, loading, error: authError, setError: setAuthError } = useAuth();
 
   const [formData, setFormData] = useState({
     email: "",
@@ -33,18 +34,34 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(null);
+    e.stopPropagation();  // ADD THIS
 
+  console.log("1. handleSubmit fired", formData);
+
+      setAuthError(null);
     const newErrors = getValidationErrors(formData, fields);
+  console.log("2. validation errors:", newErrors);
+
     if (Object.keys(newErrors).length > 0) {
+          console.log("3. STOPPED by validation");
+
       setErrors(newErrors);
       return;
     }
 
+      console.log("4. calling login...");
+
     try {
-      await login(formData.email, formData.password);
-      navigate("/dashboard");
+      const result = await login(formData.email, formData.password);
+      // Only navigate if we actually got a token back
+          console.log("5. login result:", result);
+
+      if (result?.access) {
+        navigate("/dashboard");
+      }
     } catch (err) {
+          console.log("6. login threw error:", err.message);
+
       setErrors({ submit: err.message });
     }
   };
@@ -86,7 +103,10 @@ export default function Login() {
             </div>
             <p className="text-[var(--text-secondary)] mb-8">Enter your credentials to access your account</p>
 
-            <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+            <form onSubmit={handleSubmit}
+              onClick={() => console.log("FORM CLICKED")}  // ADD THIS
+
+            className="flex flex-col gap-5">
               <Input
                 label={t("auth.email")}
                 type="email"

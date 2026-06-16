@@ -33,7 +33,11 @@
     "registerSuccess": "تم إنشاء الحساب بنجاح",
     "loginSuccess": "تم تسجيل الدخول بنجاح",
     "registerError": "فشل إنشاء الحساب",
-    "loginError": "فشل تسجيل الدخول"
+    "loginError": "فشل تسجيل الدخول",
+    "username":"اسم المستخدم",
+    "role":"دور",
+    "company":"Company",
+    "client":"Citizen"
   },
   "validation": {
     "required": "هذا الحقل مطلوب",

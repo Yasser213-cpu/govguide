@@ -4,9 +4,11 @@ import { useAuth } from "../hooks/useAuth";
 export default function ProtectedRoute({ children }) {
   const { isAuthenticated, loading } = useAuth();
 
-  if (loading) {
+   if (!initialized || loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">Loading...</div>
+      <div className="flex items-center justify-center min-h-screen">
+        Loading...
+      </div>
     );
   }
 

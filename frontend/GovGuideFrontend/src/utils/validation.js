@@ -7,6 +7,10 @@ export const validateEmail = (email) => {
   return emailRegex.test(email);
 };
 
+export const validateRole = (role)=>{
+  return (role == "client" || role == "company") ? true : false
+}
+
 export const validatePhone = (phone) => {
   const phoneRegex = /^\+?[1-9]\d{1,14}$/;
   return phoneRegex.test(phone.replace(/\s/g, ""));
@@ -40,6 +44,11 @@ export const getValidationErrors = (formData, fields) => {
         errors[field.name] = "Please enter a valid email (e.g., user@example.com)";
         return;
       }
+    }
+
+    if(field.type=="text" && field.name=="role" && value && !validateRole(value)){
+        errors[field.name] = "choose role"
+        return;
     }
 
     if (field.type === "phone" && value && !validatePhone(value)) {

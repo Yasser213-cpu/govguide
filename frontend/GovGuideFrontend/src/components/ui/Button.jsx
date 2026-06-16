@@ -47,7 +47,9 @@ export default function Button({
       disabled={disabled || loading}
       onClick={onClick}
       className={classes}
+      onClick={() => console.log("OUTSIDE BUTTON CLICKED")}
       {...props}
+
     >
       {loading ? "..." : children}
     </button>
