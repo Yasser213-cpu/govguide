@@ -13,7 +13,7 @@ class Company(models.Model):
 
 
 
-    owner = models.OneToOneField(User , on_delete=models.CASCADE ,related_name="company")
+    owner = models.ForeignKey(User , on_delete=models.CASCADE ,related_name="company")
     name= models.CharField(max_length=100  ,null=False , blank=False)
     description = models.TextField(null=False , blank=False)
     phone = models.CharField(max_length=15, null=False , blank=False ,validators=[phone_validator])
