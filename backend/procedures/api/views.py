@@ -3,21 +3,21 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.exceptions import NotFound
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import AllowAny , IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from core.permissions import IsAdmin
 
 from ..models import Procedure
 from .serializers import ProcedureSerializer
-from ..filters import ProcedureFilter 
+from ..filters import ProcedureFilter
 
 
 class ProceduresAPIView(APIView):
 
     def get_permissions(self):
-        if self.request.method == " GET":
-            return [AllowAny()]
-        
-        return [IsAuthenticated() , IsAdmin() ]
+        if self.request.method == "GET":
+            return [IsAuthenticated()]
+
+        return [IsAuthenticated(), IsAdmin()]
 
     def get_object(self, id):
         try:
@@ -42,9 +42,10 @@ class ProceduresAPIView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
+
         serializer = ProcedureSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save() 
+            serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
