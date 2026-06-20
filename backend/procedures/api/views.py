@@ -7,7 +7,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from core.permissions import IsAdmin
 
 from ..models import Procedure
-from .serializers import ProcedureSerializer
+from .serializers import ProcedureSerializer,ProcedureListSerializer
 from ..filters import ProcedureFilter
 
 
@@ -15,7 +15,7 @@ class ProceduresAPIView(APIView):
 
     def get_permissions(self):
         if self.request.method == "GET":
-            return [IsAuthenticated()]
+            return [AllowAny()]
 
         return [IsAuthenticated(), IsAdmin()]
 
@@ -29,16 +29,19 @@ class ProceduresAPIView(APIView):
     def get(self, request, id=None):
         if id:
             procedure = self.get_object(id)
+            if not procedure.is_active:
+                raise NotFound({"detail": "There is no procedure matches this id"})
+
             serializer = ProcedureSerializer(procedure)
             return Response(serializer.data, status=status.HTTP_200_OK)
 
-        procedures = Procedure.objects.all()
+        procedures = Procedure.objects.filter(is_active=True)
         procedure_filter = ProcedureFilter(request.GET, queryset=procedures)
         paginator = PageNumberPagination()
         paginator.page_size = 10
         result_page = paginator.paginate_queryset(procedure_filter.qs, request)
 
-        serializer = ProcedureSerializer(result_page, many=True)
+        serializer = ProcedureListSerializer(result_page, many=True)       
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
