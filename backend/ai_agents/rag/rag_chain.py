@@ -7,36 +7,57 @@ from langchain_openai import ChatOpenAI
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CHROMA_DIR = os.path.join(BASE_DIR, "chroma_store")
 
-# ---------- LLM setup (OpenRouter) ----------
-llm = ChatOpenAI(
-    model="openrouter/free",   
-    openai_api_key=os.getenv("OPENROUTER_API_KEY"),
-    openai_api_base="https://openrouter.ai/api/v1",
-    temperature=0.3,
-)
+# ---------- Lazy singletons (created only on first use, not at import) ----------
+_llm = None
+_embed_model = None
+_collection = None
 
-# ---------- Embedding model + Chroma ----------
-print("Loading embedding model...")
-embed_model = SentenceTransformer("all-MiniLM-L6-v2")
 
-client = chromadb.PersistentClient(path=CHROMA_DIR)
-collection = client.get_collection(name="gov_procedures")
+def get_llm():
+    """Create the LLM client once, on first use."""
+    global _llm
+    if _llm is None:
+        _llm = ChatOpenAI(
+            model="openrouter/free",
+            openai_api_key=os.getenv("OPENROUTER_API_KEY"),
+            openai_api_base="https://openrouter.ai/api/v1",
+            temperature=0.3,
+        )
+    return _llm
+
+
+def get_embed_model():
+    """Load the embedding model once, on first use."""
+    global _embed_model
+    if _embed_model is None:
+        print("Loading embedding model...")
+        _embed_model = SentenceTransformer("all-MiniLM-L6-v2")
+    return _embed_model
+
+
+def get_collection():
+    """Connect to the Chroma collection once, on first use."""
+    global _collection
+    if _collection is None:
+        client = chromadb.PersistentClient(path=CHROMA_DIR)
+        _collection = client.get_collection(name="gov_procedures")
+    return _collection
+
 
 def retrieve(query, top_k=3):
     """Search Chroma and return the most relevant chunks as one text block."""
-    # Convert the question into an embedding
-    query_embedding = embed_model.encode(query).tolist()
+    query_embedding = get_embed_model().encode(query).tolist()
 
-    # Get the top_k most similar chunks
-    results = collection.query(
+    results = get_collection().query(
         query_embeddings=[query_embedding],
         n_results=top_k,
     )
 
-    # Join all retrieved chunks into a single context string
     chunks = results["documents"][0]
     context = "\n\n".join(chunks)
     return context
+
+
 def ask(query):
     """Full RAG: retrieve context, then ask the LLM to answer from it."""
     context = retrieve(query)
@@ -52,9 +73,8 @@ Question: {query}
 
 Answer:"""
 
-    response = llm.invoke(prompt)
+    response = get_llm().invoke(prompt)
 
-    # Extract token usage from the LLM response
     tokens = 0
     if hasattr(response, "usage_metadata") and response.usage_metadata:
         tokens = response.usage_metadata.get("total_tokens", 0)
