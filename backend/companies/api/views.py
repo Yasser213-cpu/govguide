@@ -5,7 +5,7 @@ from rest_framework import status
 from rest_framework.exceptions import NotFound
 from ..models import Company, CompanyService
 from .serializers import CompanySerializer, CompanyServicesSerializer
-from core.permissions import IsCompany, isCompanyServiceOwner
+from core.permissions import IsCompany, isCompanyOwner
 from ..filters import CompanyFilter, CompanyServicesFilter
 from rest_framework.pagination import PageNumberPagination
 
@@ -82,7 +82,7 @@ class CompanyServices(APIView):
     def get_permissions(self):
         if self.request.method == "GET":
             return [AllowAny()]
-        return [IsAuthenticated(), isCompanyServiceOwner()]
+        return [IsAuthenticated(), isCompanyOwner()]
 
     def get_object(self, id):
         try:
