@@ -20,7 +20,7 @@ export default function Register() {
   const [formData, setFormData] = useState({
     username: "",
     email: "",
-    role: "citizen",
+    role: "",
     password: "",
     confirmPassword: "",
   });
@@ -72,11 +72,9 @@ export default function Register() {
       return;
     }
 
-    const fullPhone = "+20" + formData.phone;
-
     try {
       await register(formData.username,formData.email,formData.role, formData.password);
-      navigate("/verify-otp", { state: { phone: fullPhone } });
+      navigate("/verify-otp", { state: { email: formData.email } });
     } catch (err) {
       setErrors({ submit: err.message });
     }
