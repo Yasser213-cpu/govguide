@@ -31,10 +31,11 @@ services:
     ports:
       - "8000:8000"
     env_file:
-      - ./backend/.env
+      - .env
     depends_on:
       db:
         condition: service_healthy
+
   celery:
     build: ./backend
     command: celery -A config worker --loglevel=info
