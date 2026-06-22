@@ -20,3 +20,18 @@ class Procedure(models.Model):
     is_active = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+
+#  requirements class
+class Requirement(models.Model):
+    procedure=models.ForeignKey(
+        Procedure,
+        on_delete=models.CASCADE,
+        related_name="requirements"
+    )
+    title=models.CharField(max_length=200)
+    description = models.CharField(max_length=500, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    def __str__(self):
+        return f"{self.title} - {self.procedure.name}"
