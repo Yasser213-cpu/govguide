@@ -1,9 +1,9 @@
 @import "tailwindcss";
 
 :root {
-    --primary: #1E40AF;
-    --primary-light: #DBEAFE;
-    --primary-dark: #1E3A8A;
+    --primary: #0052FF;
+    --primary-light: #EBF2FF;
+    --primary-dark: #0040CC;
     --secondary: #7C3AED;
     --secondary-light: #EDE9FE;
     --success: #16A34A;
@@ -22,13 +22,13 @@
     --neutral-800: #1F2937;
     --neutral-900: #111827;
 
-    --text-primary: #1F2937;
+    --text-primary: #1A1A1A;
     --text-secondary: #6B7280;
     --text-light: #9CA3AF;
     --text-inverse: #FFFFFF;
 
     --background-primary: #FFFFFF;
-    --background-secondary: #F9FAFB;
+    --background-secondary: #F8F9FB;
     --background-tertiary: #F3F4F6;
 
     --border: #E5E7EB;

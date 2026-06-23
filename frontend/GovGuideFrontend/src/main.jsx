@@ -16,9 +16,6 @@ if (environment === "production") {
   });
 }
 
-import "./index.css";
-import App from "./App.jsx";
-
 Sentry.init({
   dsn: "YOUR_SENTRY_DSN",
 
