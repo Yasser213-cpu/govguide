@@ -1,17 +1,24 @@
 {
   "common": {
     "appName": "GovConnect AI",
-    "appNameAr": "جوف كونيكت",
+    "appNameAr": "GovConnect AI",
     "submit": "Submit",
     "cancel": "Cancel",
     "loading": "Loading...",
     "error": "An error occurred",
     "success": "Success",
-    "back": "Back"
+    "back": "Back",
+    "admin": "Admin",
+    "company": "Company",
+    "user": "User"
   },
   "sidebar": {
     "userName": "Ahmed Mohamed",
-    "userRole": "Citizen"
+    "userRole": "Citizen",
+    "companyName": "Company Name",
+    "companyRole": "Service Provider",
+    "adminRole": "Admin",
+    "adminName": "Admin Name"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -22,7 +29,17 @@
     "documents": "Documents",
     "messages": "Messages",
     "notifications": "Notifications",
-    "settings": "Settings"
+    "settings": "Settings",
+    "companyDashboard": "Dashboard",
+    "companyServices": "Services",
+    "companyBookings": "Bookings",
+    "companySettings": "Settings",
+    "companyNotifications": "Notifications",
+    "companyProfile": "Profile",
+    "adminDashboard": "Dashboard",
+    "adminUsers": "Users",
+    "adminCompanies": "Companies",
+    "adminReports": "Reports"
   },
   "pages": {
     "dashboard": {
@@ -69,6 +86,56 @@
       "title": "Settings",
       "subtitle": "Manage your account preferences and security",
       "placeholder": "Settings options will appear here."
+    },
+    "companyDashboard": {
+      "title": "Company Dashboard",
+      "subtitle": "Welcome to your company dashboard",
+      "placeholder": "Dashboard content will appear here."
+    },
+    "companyServices": {
+      "title": "Services",
+      "subtitle": "Manage your company services",
+      "placeholder": "Services content will appear here."
+    },
+    "companyBookings": {
+      "title": "Bookings",
+      "subtitle": "Manage customer bookings",
+      "placeholder": "Bookings content will appear here."
+    },
+    "companySettings": {
+      "title": "Settings",
+      "subtitle": "Manage your company settings",
+      "placeholder": "Settings content will appear here."
+    },
+    "companyNotifications": {
+      "title": "Notifications",
+      "subtitle": "Stay updated on your requests and activities",
+      "placeholder": "Your notifications will appear here."
+    },
+    "companyProfile": {
+      "title": "Profile",
+      "subtitle": "Manage your company profile",
+      "placeholder": "Profile content will appear here."
+    },
+    "adminDashboard": {
+      "title": "Admin Dashboard",
+      "subtitle": "Welcome to your admin dashboard",
+      "placeholder": "Dashboard content will appear here."
+    },
+    "adminUsers": {
+      "title": "Users",
+      "subtitle": "Manage users",
+      "placeholder": "User management content will appear here."
+    },
+    "adminCompanies": {
+      "title": "Companies",
+      "subtitle": "Manage companies",
+      "placeholder": "Company management content will appear here."
+    },
+    "adminReports": {
+      "title": "Reports",
+      "subtitle": "View and manage reports",
+      "placeholder": "Report content will appear here."
     }
   },
   "auth": {
