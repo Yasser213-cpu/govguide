@@ -1,13 +1,14 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
-import ProtectedRoute from "./components/ProtectedRoute";
 
 import Register from "./pages/auth/Register";
 import Login from "./pages/auth/Login";
 import VerifyOtp from "./pages/auth/VerifyOtp";
 import ForgotPassword from "./pages/auth/ForgotPassword";
-import Dashboard from "./pages/home/Dashboard";
 import Home from "./pages/Home";
+import AppLayout from "./components/layout/AppLayout";
+import PlaceholderPage from "./pages/app/PlaceholderPage";
+import { navItems } from "./components/layout/navConfig";
 
 export default function AppRoutes() {
   return (
@@ -21,16 +22,17 @@ export default function AppRoutes() {
           <Route path="/verify-otp" element={<VerifyOtp />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
 
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
+          <Route element={<AppLayout />}>
+            {navItems.map((item) => (
+              <Route
+                key={item.path}
+                path={item.path}
+                element={<PlaceholderPage pageKey={item.key} />}
+              />
+            ))}
+          </Route>
 
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </AuthProvider>
     </Router>

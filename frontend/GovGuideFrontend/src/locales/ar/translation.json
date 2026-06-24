@@ -1,12 +1,75 @@
 {
   "common": {
-    "appName": "دليل الحكومة",
+    "appName": "GovConnect AI",
+    "appNameAr": "جوف كونيكت",
     "submit": "إرسال",
     "cancel": "إلغاء",
     "loading": "جاري التحميل...",
     "error": "حدث خطأ",
     "success": "نجح",
     "back": "رجوع"
+  },
+  "sidebar": {
+    "userName": "أحمد محمد",
+    "userRole": "مواطن"
+  },
+  "nav": {
+    "dashboard": "لوحة التحكم",
+    "aiAssistant": "المساعد الذكي",
+    "companies": "الشركات",
+    "myRequests": "طلباتي",
+    "bookings": "الحجوزات",
+    "documents": "المستندات",
+    "messages": "الرسائل",
+    "notifications": "الإشعارات",
+    "settings": "الإعدادات"
+  },
+  "pages": {
+    "dashboard": {
+      "title": "مرحباً بعودتك، أحمد!",
+      "subtitle": "نظرة عامة على خدماتك الحكومية",
+      "placeholder": "محتوى لوحة التحكم سيظهر هنا."
+    },
+    "aiAssistant": {
+      "title": "المساعد الذكي",
+      "subtitle": "احصل على المساعدة في الخدمات الحكومية والمعاملات",
+      "placeholder": "واجهة المحادثة الذكية ستظهر هنا."
+    },
+    "companies": {
+      "title": "الشركات",
+      "subtitle": "تصفح وتواصل مع مقدمي الخدمات",
+      "placeholder": "قائمة الشركات ستظهر هنا."
+    },
+    "myRequests": {
+      "title": "طلباتي",
+      "subtitle": "تتبع وإدارة طلباتك والمعاملات",
+      "placeholder": "طلباتك ستظهر هنا."
+    },
+    "bookings": {
+      "title": "الحجوزات",
+      "subtitle": "إدارة مواعيدك وجدولك",
+      "placeholder": "حجوزاتك ستظهر هنا."
+    },
+    "documents": {
+      "title": "المستندات",
+      "subtitle": "الوصول إلى وإدارة مستنداتك الرسمية",
+      "placeholder": "مستنداتك ستظهر هنا."
+    },
+    "messages": {
+      "title": "الرسائل",
+      "subtitle": "تواصل مع مقدمي الخدمات والمسؤولين",
+      "placeholder": "رسائلك ستظهر هنا."
+    },
+    "notifications": {
+      "title": "الإشعارات",
+      "subtitle": "ابقَ على اطلاع على طلباتك وأنشطتك",
+      "placeholder": "إشعاراتك ستظهر هنا."
+    },
+    "settings": {
+      "title": "الإعدادات",
+      "subtitle": "إدارة تفضيلات حسابك والأمان",
+      "placeholder": "خيارات الإعدادات ستظهر هنا."
+    }
   },
   "auth": {
     "register": "إنشاء حساب",

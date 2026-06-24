@@ -28,7 +28,9 @@ export default function LanguageSwitcher() {
             </button>
 
             {isOpen && (
-                <div className="absolute top-full mt-2 right-0 bg-[var(--background-primary)] border border-[var(--border)] rounded-lg shadow-lg z-50 min-w-max">
+                <div className={`absolute top-full mt-2 bg-[var(--background-primary)] border border-[var(--border)] rounded-lg shadow-lg z-50 min-w-max ${ document.documentElement.dir === "rtl"
+                        ? "left-0"
+                        : "right-0" }`}>
                     {languages.map((lang) => (
                         <button
                             key={lang.code}
