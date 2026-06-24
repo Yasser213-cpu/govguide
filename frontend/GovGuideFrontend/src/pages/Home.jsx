@@ -7,7 +7,9 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-[var(--background-secondary)] p-6 text-center">
-      <h1 className="text-4xl font-bold mb-6 text-[var(--primary)]">{t("common.appName")}</h1>
+      <h1 className="text-4xl font-bold mb-6 text-[var(--primary)]">
+        {t("common.appName")}
+      </h1>
 
       <p className="text-lg text-[var(--text-secondary)] mb-10 max-w-xl">
         Your gateway to government services and information
