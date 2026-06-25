@@ -39,22 +39,26 @@ export default function Login() {
     try {
       const result = await login(formData.email, formData.password);
       const { next_step } = result;
-
       if (next_step === "create_company") {
-        navigate("/company/create");
-      } else if (next_step === "dashboard") {
-        navigate("/dashboard");
+        navigate("/company/create",{ replace: true });
+      } else if (next_step === "home") {
+        navigate("/dashboard",{ replace: true });
       } else {
         // "home" or any other value
-        navigate("/dashboard");
+        // navigate("/dashboard");
       }
     } catch (err) {
-      if (err.next_step === "verify_email") {
-        navigate("/verify-otp", { state: { email: formData.email } });
-        return;
-      }
-      setErrors({ submit: err.message });
-    }
+  if (
+    err.message?.includes("verify your email")
+  ) {
+    navigate("/verify-otp", {
+      state: { email: formData.email },
+    });
+    return;
+  }
+
+  setErrors({ submit: err.message });
+}
   };
 
   return (

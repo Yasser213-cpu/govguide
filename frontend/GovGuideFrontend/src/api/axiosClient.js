@@ -32,7 +32,7 @@ axiosClient.interceptors.response.use(
         if (!refresh) throw new Error("No refresh token");
 
         const { data } = await axios.post(
-          "http://localhost:8000/api/users/token/refresh",
+          "http://localhost:8000/api/v1/auth/token/refresh",
           { refresh },
         );
 
@@ -42,7 +42,7 @@ axiosClient.interceptors.response.use(
       } catch {
         sessionStorage.removeItem("access");
         localStorage.removeItem("refresh");
-        window.location.href = "/login";
+        // window.location.href = "/login";
       }
     }
 

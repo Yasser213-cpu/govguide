@@ -17,11 +17,14 @@ export default function VerifyOtp() {
     setError: setAuthError,
   } = useAuth();
 
-  const email = location.state?.email || "";
+  const email =
+  location.state?.email ||
+  sessionStorage.getItem("pendingEmail") ||
+  "";
   const [otp, setOtp] = useState("");
   const [error, setError] = useState("");
-  // OTP expires in 5 min — start countdown at 300s
-  const [resendCountdown, setResendCountdown] = useState(300);
+  // OTP expires in 1 min — start countdown at 60s
+  const [resendCountdown, setResendCountdown] = useState(60);
 
   useEffect(() => {
     if (!email) {
@@ -54,11 +57,12 @@ export default function VerifyOtp() {
     setError("");
     setAuthError(null);
 
+    
     if (!validateOtp(otp)) {
       setError("OTP must be 6 digits");
       return;
     }
-
+    
     try {
       await verifyOtp(email, otp);
       navigate("/login");
@@ -70,10 +74,9 @@ export default function VerifyOtp() {
   const handleResendOtp = async () => {
     setError("");
     setAuthError(null);
-
     try {
       await resendOtp(email);
-      setResendCountdown(300); // reset 5-min countdown
+      setResendCountdown(60); // reset 1-min countdown
     } catch (err) {
       setError(err.message || "Failed to resend OTP");
     }

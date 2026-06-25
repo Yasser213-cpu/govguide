@@ -53,12 +53,12 @@ function CompanyCard({ company, onViewDetails }) {
             </div>
           </div>
         </div>
-        <button
+        {/* <button
           className="text-[var(--text-secondary)] hover:text-[var(--danger)] transition-colors shrink-0"
           aria-label="Save company"
         >
           <FiHeart size={18} />
-        </button>
+        </button> */}
       </div>
 
       {/* Description */}

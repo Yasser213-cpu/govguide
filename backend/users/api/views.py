@@ -79,7 +79,7 @@ class ResendOTP(APIView):
         try:
             user = User.objects.get(email=email)
 
-            if user.is_active:
+            if user.is_verified:
                 return Response(
                     {"detail": "This email has been verified"},
                     status.HTTP_400_BAD_REQUEST,

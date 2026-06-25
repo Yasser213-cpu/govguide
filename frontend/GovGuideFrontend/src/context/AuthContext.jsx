@@ -26,7 +26,7 @@ export function AuthProvider({ children }) {
     setLoading(true);
     setError(null);
     try {
-      const response = await axiosClient.post("/api/users/register/client", {
+      const response = await axiosClient.post("/api/v1/auth/register/client", {
         username, email, role, password,
       });
       return response.data;
@@ -49,7 +49,7 @@ export function AuthProvider({ children }) {
     setLoading(true);
     setError(null);
     try {
-      const response = await axiosClient.post("/api/users/verify", { email, otp });
+      const response = await axiosClient.post("api/v1/auth/verify", { email, otp });
       return response.data;
     } catch (err) {
       const message = err.response?.data?.detail || err.message || "OTP verification failed";
@@ -64,7 +64,8 @@ export function AuthProvider({ children }) {
     setLoading(true);
     setError(null);
     try {
-      const response = await axiosClient.post("/api/users/resend-otp", { email });
+      console.log()
+      const response = await axiosClient.post("api/v1/auth/resend-otp", { email });
       return response.data;
     } catch (err) {
       const message = err.response?.data?.detail || err.message || "Failed to resend OTP";
@@ -79,9 +80,8 @@ export function AuthProvider({ children }) {
     setLoading(true);
     setError(null);
     try {
-      const response = await axiosClient.post("/api/users/token", { email, password });
+      const response = await axiosClient.post("api/v1/auth/token", { email, password });
       const { access, refresh, role, next_step } = response.data;
-
       if (!access) throw new Error(response.data?.detail || "Login failed");
 
       sessionStorage.setItem("access", access);
@@ -90,7 +90,7 @@ export function AuthProvider({ children }) {
       const userData = { role, next_step };
       setUser(userData);
       sessionStorage.setItem("user", JSON.stringify(userData));
-
+      sessionStorage.setItem("pendingEmail", email);
       return response.data;
     } catch (err) {
       const data = err.response?.data;
@@ -116,7 +116,7 @@ export function AuthProvider({ children }) {
     setLoading(true);
     setError(null);
     try {
-      const response = await axiosClient.post("/api/users/forget-password", { email });
+      const response = await axiosClient.post("api/v1/auth/forget-password", { email });
       return response.data;
     } catch (err) {
       const message = err.response?.data?.detail || err.message || "Failed to send reset code";
@@ -131,7 +131,7 @@ export function AuthProvider({ children }) {
     setLoading(true);
     setError(null);
     try {
-      const response = await axiosClient.post("/api/users/reset-password", { email, otp, password });
+      const response = await axiosClient.post("api/v1/auth/reset-password", { email, otp, password });
       return response.data;
     } catch (err) {
       const message = err.response?.data?.detail || err.message || "Password reset failed";
