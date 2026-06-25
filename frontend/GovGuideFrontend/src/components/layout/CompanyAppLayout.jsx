@@ -1,14 +1,14 @@
 import { Outlet } from "react-router-dom";
-import Sidebar from "./Sidebar";
-import Topbar from "./Topbar";
+import CompanySidebar from "./CompanySidebar";
+import CompanyTopbar from "./CompanyTopbar";
 
-const AppLayout = () => {
+const CompanyAppLayout = () => {
   return (
     <div className="flex min-h-screen bg-[var(--background-secondary)]">
-      <Sidebar />
+      <CompanySidebar />
 
       <div className="flex-1 flex flex-col min-w-0">
-        <Topbar />
+        <CompanyTopbar />
 
         <main className="flex-1 p-6 md:p-8">
           <Outlet />
@@ -18,4 +18,4 @@ const AppLayout = () => {
   );
 };
 
-export default AppLayout;
+export default CompanyAppLayout;

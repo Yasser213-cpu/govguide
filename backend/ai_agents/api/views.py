@@ -4,8 +4,10 @@ from rest_framework import status
 from rest_framework.permissions import AllowAny
 from ..models import AISession
 
-from .serializers import ChatRequestSerializer
+from .serializers import ChatRequestSerializer,RecommendedCompanySerializer,RecommendRequestSerializer
 from ai_agents.rag.pipeline import handle_message
+from ..recommendation import recommend_companies
+
 
 
 class ChatView(APIView):
@@ -38,3 +40,27 @@ class ChatView(APIView):
 
         # 3. Return the result
         return Response(result, status=status.HTTP_200_OK)
+
+
+
+class RecommendCompaniesView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        request_serializer = RecommendRequestSerializer(data=request.data)
+        request_serializer.is_valid(raise_exception=True)
+
+        procedure_id = request_serializer.validated_data["procedure_id"]
+        governorate = request_serializer.validated_data.get("governorate")
+        if not governorate and request.user.is_authenticated:
+            governorate = request.user.governorate or None
+
+        results = recommend_companies(procedure_id, user_governorate=governorate)
+
+        
+        output_serializer = RecommendedCompanySerializer(results, many=True)
+
+        return Response(
+            {"procedure_id": procedure_id, "results": output_serializer.data},
+            status=status.HTTP_200_OK,
+        )

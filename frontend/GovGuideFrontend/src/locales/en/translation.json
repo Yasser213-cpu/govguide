@@ -1,12 +1,142 @@
 {
   "common": {
-    "appName": "GovGuide",
+    "appName": "GovConnect AI",
+    "appNameAr": "GovConnect AI",
     "submit": "Submit",
     "cancel": "Cancel",
     "loading": "Loading...",
     "error": "An error occurred",
     "success": "Success",
-    "back": "Back"
+    "back": "Back",
+    "admin": "Admin",
+    "company": "Company",
+    "user": "User"
+  },
+  "sidebar": {
+    "userName": "Ahmed Mohamed",
+    "userRole": "Citizen",
+    "companyName": "Company Name",
+    "companyRole": "Service Provider",
+    "adminRole": "Admin",
+    "adminName": "Admin Name"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "aiAssistant": "AI Assistant",
+    "companies": "Companies",
+    "myRequests": "My Requests",
+    "bookings": "Bookings",
+    "documents": "Documents",
+    "messages": "Messages",
+    "notifications": "Notifications",
+    "settings": "Settings",
+    "companyDashboard": "Dashboard",
+    "companyServices": "Services",
+    "companyBookings": "Bookings",
+    "companySettings": "Settings",
+    "companyNotifications": "Notifications",
+    "companyProfile": "Profile",
+    "adminDashboard": "Dashboard",
+    "adminUsers": "Users",
+    "adminCompanies": "Companies",
+    "adminReports": "Reports"
+  },
+  "pages": {
+    "dashboard": {
+      "title": "Welcome back, Ahmed!",
+      "subtitle": "Here's an overview of your government services",
+      "placeholder": "Dashboard content will appear here."
+    },
+    "aiAssistant": {
+      "title": "AI Assistant",
+      "subtitle": "Get help with government services and paperwork",
+      "placeholder": "AI chat interface will appear here."
+    },
+    "companies": {
+      "title": "Companies",
+      "subtitle": "Browse and connect with service providers",
+      "placeholder": "Company listings will appear here."
+    },
+    "myRequests": {
+      "title": "My Requests",
+      "subtitle": "Track and manage your paperwork requests",
+      "placeholder": "Your requests will appear here."
+    },
+    "bookings": {
+      "title": "Bookings",
+      "subtitle": "Manage your appointments and schedules",
+      "placeholder": "Your bookings will appear here."
+    },
+    "documents": {
+      "title": "Documents",
+      "subtitle": "Access and manage your official documents",
+      "placeholder": "Your documents will appear here."
+    },
+    "messages": {
+      "title": "Messages",
+      "subtitle": "Communicate with service providers and officials",
+      "placeholder": "Your messages will appear here."
+    },
+    "notifications": {
+      "title": "Notifications",
+      "subtitle": "Stay updated on your requests and activities",
+      "placeholder": "Your notifications will appear here."
+    },
+    "settings": {
+      "title": "Settings",
+      "subtitle": "Manage your account preferences and security",
+      "placeholder": "Settings options will appear here."
+    },
+    "companyDashboard": {
+      "title": "Company Dashboard",
+      "subtitle": "Welcome to your company dashboard",
+      "placeholder": "Dashboard content will appear here."
+    },
+    "companyServices": {
+      "title": "Services",
+      "subtitle": "Manage your company services",
+      "placeholder": "Services content will appear here."
+    },
+    "companyBookings": {
+      "title": "Bookings",
+      "subtitle": "Manage customer bookings",
+      "placeholder": "Bookings content will appear here."
+    },
+    "companySettings": {
+      "title": "Settings",
+      "subtitle": "Manage your company settings",
+      "placeholder": "Settings content will appear here."
+    },
+    "companyNotifications": {
+      "title": "Notifications",
+      "subtitle": "Stay updated on your requests and activities",
+      "placeholder": "Your notifications will appear here."
+    },
+    "companyProfile": {
+      "title": "Profile",
+      "subtitle": "Manage your company profile",
+      "placeholder": "Profile content will appear here."
+    },
+    "adminDashboard": {
+      "title": "Admin Dashboard",
+      "subtitle": "Welcome to your admin dashboard",
+      "placeholder": "Dashboard content will appear here."
+    },
+    "adminUsers": {
+      "title": "Users",
+      "subtitle": "Manage users",
+      "placeholder": "User management content will appear here."
+    },
+    "adminCompanies": {
+      "title": "Companies",
+      "subtitle": "Manage companies",
+      "placeholder": "Company management content will appear here."
+    },
+    "adminReports": {
+      "title": "Reports",
+      "subtitle": "View and manage reports",
+      "placeholder": "Report content will appear here."
+    }
   },
   "auth": {
     "register": "Sign Up",
