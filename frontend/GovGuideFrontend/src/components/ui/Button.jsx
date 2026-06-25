@@ -48,6 +48,7 @@ export default function Button({
       onClick={onClick}
       className={classes}
       {...props}
+
     >
       {loading ? "..." : children}
     </button>

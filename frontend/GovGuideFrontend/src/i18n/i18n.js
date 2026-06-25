@@ -24,4 +24,13 @@ i18n
     },
   });
 
+const setDocumentDirection = (lng) => {
+  const language = lng?.startsWith("ar") ? "ar" : "en";
+  document.documentElement.dir = language === "ar" ? "rtl" : "ltr";
+  document.documentElement.lang = language;
+};
+
+i18n.on("languageChanged", setDocumentDirection);
+setDocumentDirection(i18n.language);
+
 export default i18n;

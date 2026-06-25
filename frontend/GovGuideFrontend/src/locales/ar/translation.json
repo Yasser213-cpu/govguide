@@ -1,12 +1,142 @@
 {
   "common": {
-    "appName": "دليل الحكومة",
+    "appName": "GovConnect AI",
+    "appNameAr": "رابط الحكومة الذكي",
     "submit": "إرسال",
     "cancel": "إلغاء",
     "loading": "جاري التحميل...",
     "error": "حدث خطأ",
     "success": "نجح",
-    "back": "رجوع"
+    "back": "رجوع",
+    "admin": "مسؤول",
+    "company": "شركة",
+    "user": "مستخدم"
+  },
+  "sidebar": {
+    "userName": "أحمد محمد",
+    "userRole": "مواطن",
+    "companyName": "اسم الشركة",
+    "companyRole": "مقدم خدمات",
+    "adminRole": "مسؤول",
+    "adminName": "اسم المسؤول"
+  },
+  "nav": {
+    "dashboard": "لوحة التحكم",
+    "aiAssistant": "المساعد الذكي",
+    "companies": "الشركات",
+    "myRequests": "طلباتي",
+    "bookings": "الحجوزات",
+    "documents": "المستندات",
+    "messages": "الرسائل",
+    "notifications": "الإشعارات",
+    "settings": "الإعدادات",
+    "companyDashboard": "لوحة التحكم",
+    "companyServices": "الخدمات",
+    "companyBookings": "الحجوزات",
+    "companySettings": "الإعدادات",
+    "companyNotifications": "الإشعارات",
+    "companyProfile": "الملف الشخصي",
+    "adminDashboard": "لوحة التحكم",
+    "adminUsers": "المستخدمون",
+    "adminCompanies": "الشركات",
+    "adminReports": "التقارير"
+  },
+  "pages": {
+    "dashboard": {
+      "title": "مرحباً بعودتك، أحمد!",
+      "subtitle": "نظرة عامة على خدماتك الحكومية",
+      "placeholder": "محتوى لوحة التحكم سيظهر هنا."
+    },
+    "aiAssistant": {
+      "title": "المساعد الذكي",
+      "subtitle": "احصل على المساعدة في الخدمات الحكومية والمعاملات",
+      "placeholder": "واجهة المحادثة الذكية ستظهر هنا."
+    },
+    "companies": {
+      "title": "الشركات",
+      "subtitle": "تصفح وتواصل مع مقدمي الخدمات",
+      "placeholder": "قائمة الشركات ستظهر هنا."
+    },
+    "myRequests": {
+      "title": "طلباتي",
+      "subtitle": "تتبع وإدارة طلباتك والمعاملات",
+      "placeholder": "طلباتك ستظهر هنا."
+    },
+    "bookings": {
+      "title": "الحجوزات",
+      "subtitle": "إدارة مواعيدك وجدولك",
+      "placeholder": "حجوزاتك ستظهر هنا."
+    },
+    "documents": {
+      "title": "المستندات",
+      "subtitle": "الوصول إلى وإدارة مستنداتك الرسمية",
+      "placeholder": "مستنداتك ستظهر هنا."
+    },
+    "messages": {
+      "title": "الرسائل",
+      "subtitle": "تواصل مع مقدمي الخدمات والمسؤولين",
+      "placeholder": "رسائلك ستظهر هنا."
+    },
+    "notifications": {
+      "title": "الإشعارات",
+      "subtitle": "ابقَ على اطلاع على طلباتك وأنشطتك",
+      "placeholder": "إشعاراتك ستظهر هنا."
+    },
+    "settings": {
+      "title": "الإعدادات",
+      "subtitle": "إدارة تفضيلات حسابك والأمان",
+      "placeholder": "خيارات الإعدادات ستظهر هنا."
+    },
+    "companyDashboard": {
+      "title": "لوحة تحكم الشركة",
+      "subtitle": "مرحباً بك في لوحة تحكم الشركة",
+      "placeholder": "سيظهر محتوى لوحة التحكم هنا."
+    },
+    "companyServices": {
+      "title": "الخدمات",
+      "subtitle": "إدارة خدمات الشركة",
+      "placeholder": "سيظهر محتوى الخدمات هنا."
+    },
+    "companyBookings": {
+      "title": "الحجوزات",
+      "subtitle": "إدارة حجوزات العملاء",
+      "placeholder": "سيظهر محتوى الحجوزات هنا."
+    },
+    "companySettings": {
+      "title": "الإعدادات",
+      "subtitle": "إدارة إعدادات الشركة",
+      "placeholder": "سيظهر محتوى الإعدادات هنا."
+    },
+    "companyNotifications": {
+      "title": "الإشعارات",
+      "subtitle": "ابقَ على اطلاع على طلباتك وأنشطتك",
+      "placeholder": "إشعاراتك ستظهر هنا."
+    },
+    "companyProfile": {
+      "title": "الملف الشخصي",
+      "subtitle": "إدارة ملف الشركة الشخصي",
+      "placeholder": "سيظهر محتوى الملف الشخصي هنا."
+    },
+    "adminDashboard": {
+      "title": "لوحة تحكم المسؤول",
+      "subtitle": "مرحباً بك في لوحة تحكم المسؤول",
+      "placeholder": "سيظهر محتوى لوحة التحكم هنا."
+    },
+    "adminUsers": {
+      "title": "المستخدمون",
+      "subtitle": "إدارة المستخدمين",
+      "placeholder": "سيظهر محتوى إدارة المستخدمين هنا."
+    },
+    "adminCompanies": {
+      "title": "الشركات",
+      "subtitle": "إدارة الشركات",
+      "placeholder": "سيظهر محتوى إدارة الشركات هنا."
+    },
+    "adminReports": {
+      "title": "التقارير",
+      "subtitle": "عرض وإدارة التقارير",
+      "placeholder": "سيظهر محتوى التقارير هنا."
+    }
   },
   "auth": {
     "register": "إنشاء حساب",
@@ -33,7 +163,11 @@
     "registerSuccess": "تم إنشاء الحساب بنجاح",
     "loginSuccess": "تم تسجيل الدخول بنجاح",
     "registerError": "فشل إنشاء الحساب",
-    "loginError": "فشل تسجيل الدخول"
+    "loginError": "فشل تسجيل الدخول",
+    "username":"اسم المستخدم",
+    "role":"دور",
+    "company":"Company",
+    "client":"Citizen"
   },
   "validation": {
     "required": "هذا الحقل مطلوب",

@@ -18,6 +18,7 @@ class User(AbstractUser):
     is_verified = models.BooleanField(default=False)
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["username"]
+    governorate = models.CharField(max_length=100, blank=True)
 
 
 
