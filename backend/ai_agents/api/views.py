@@ -51,7 +51,9 @@ class RecommendCompaniesView(APIView):
         request_serializer.is_valid(raise_exception=True)
 
         procedure_id = request_serializer.validated_data["procedure_id"]
-        governorate = request_serializer.validated_data.get("governorate") or None
+        governorate = request_serializer.validated_data.get("governorate")
+        if not governorate and request.user.is_authenticated:
+            governorate = request.user.governorate or None
 
         results = recommend_companies(procedure_id, user_governorate=governorate)
 
