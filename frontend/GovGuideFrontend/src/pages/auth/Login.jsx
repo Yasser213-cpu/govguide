@@ -5,17 +5,14 @@ import { useAuth } from "../../hooks/useAuth";
 import { Button, Input } from "../../components/ui";
 import LanguageSwitcher from "../../components/LanguageSwitcher";
 import { getValidationErrors } from "../../utils/validation";
-import { FiLock, FiMail, FiKey } from "react-icons/fi";
+import { FiLock, FiMail } from "react-icons/fi";
+
 export default function Login() {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { login, loading, error: authError, setError } = useAuth();
+  const { login, loading, error: authError, setError: setAuthError } = useAuth();
 
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
-
+  const [formData, setFormData] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState({});
 
   const fields = [
@@ -26,14 +23,12 @@ export default function Login() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: "" }));
-    }
+    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(null);
+    setAuthError(null);
 
     const newErrors = getValidationErrors(formData, fields);
     if (Object.keys(newErrors).length > 0) {
@@ -42,11 +37,28 @@ export default function Login() {
     }
 
     try {
-      await login(formData.email, formData.password);
-      navigate("/dashboard");
+      const result = await login(formData.email, formData.password);
+      const { next_step } = result;
+      if (next_step === "create_company") {
+        navigate("/company/create",{ replace: true });
+      } else if (next_step === "home") {
+        navigate("/dashboard",{ replace: true });
+      } else {
+        // "home" or any other value
+        // navigate("/dashboard");
+      }
     } catch (err) {
-      setErrors({ submit: err.message });
-    }
+  if (
+    err.message?.includes("verify your email")
+  ) {
+    navigate("/verify-otp", {
+      state: { email: formData.email },
+    });
+    return;
+  }
+
+  setErrors({ submit: err.message });
+}
   };
 
   return (
@@ -56,7 +68,6 @@ export default function Login() {
       </div>
       <div className="w-full max-w-[1100px] min-h-[700px] bg-[var(--background-primary)] rounded-[1rem] overflow-hidden grid gap-0 md:grid-cols-[40%_60%] shadow-xl">
         <div className="bg-gradient-to-b from-[var(--primary-light)] to-[var(--background-primary)] p-12 flex flex-col justify-between relative overflow-hidden">
-
           <div>
             <div className="flex items-center mb-12">
               <img src="/logo-full.png" alt="GovConnect AI" className="h-[73px] w-auto object-contain" />
@@ -66,7 +77,6 @@ export default function Login() {
               Access government services securely and manage your account seamlessly.
             </p>
           </div>
-
           <div className="p-4 bg-[var(--background-primary)] rounded-xl border border-[var(--border)] relative z-10">
             <div className="flex items-center gap-3 mb-2">
               <FiLock className="text-[var(--primary-dark)]" size={20} />
@@ -97,7 +107,6 @@ export default function Login() {
                 error={errors.email}
                 required
               />
-
               <Input
                 label={t("auth.password")}
                 type="password"
@@ -108,7 +117,6 @@ export default function Login() {
                 error={errors.password}
                 required
               />
-
               <div className="text-right">
                 <Link to="/forgot-password" className="text-[var(--primary)] font-medium text-sm hover:underline">
                   {t("auth.forgotPassword")}
@@ -131,7 +139,7 @@ export default function Login() {
               </Button>
 
               <p className="text-center text-[var(--text-secondary)] mt-2">
-                {t("auth.noAccount")} {" "}
+                {t("auth.noAccount")}{" "}
                 <Link to="/register" className="text-[var(--primary)] font-semibold hover:underline">
                   {t("auth.register")}
                 </Link>

@@ -2,9 +2,9 @@ import { Navigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 
 export default function ProtectedRoute({ children }) {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, initialized } = useAuth();
 
-  if (loading) {
+  if (!initialized) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         Loading...

@@ -3,19 +3,22 @@ import { useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../../hooks/useAuth";
 import { Button, Input, Card } from "../../components/ui";
-import { validateEmail, validatePassword } from "../../utils/validation";
+import { validateEmail, validatePassword, validateOtp } from "../../utils/validation";
 
 export default function ForgotPassword() {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { resetPassword, loading, error: authError, setError } = useAuth();
+  const { forgetPassword, resetPassword, loading, error: authError, setError } = useAuth();
 
+  // 3 steps: "email" → "otp" → "reset"
   const [step, setStep] = useState("email");
   const [email, setEmail] = useState("");
+  const [otp, setOtp] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errors, setErrors] = useState({});
 
+  // Step 1 — send OTP to email
   const handleEmailSubmit = async (e) => {
     e.preventDefault();
     setErrors({});
@@ -27,20 +30,38 @@ export default function ForgotPassword() {
     }
 
     try {
-      // API call to send reset link when backend is ready
-      setStep("reset");
+      await forgetPassword(email);
+      setStep("otp");
     } catch (err) {
       setErrors({ submit: err.message });
     }
   };
 
+  // Step 2 — validate OTP locally, advance to password entry
+  const handleOtpSubmit = (e) => {
+    e.preventDefault();
+    setErrors({});
+    setError(null);
+
+    if (!validateOtp(otp)) {
+      setErrors({ otp: "OTP must be 6 digits" });
+      return;
+    }
+
+    setStep("reset");
+  };
+
+  // Step 3 — submit email + otp + new password to API
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
     setErrors({});
     setError(null);
 
     if (!validatePassword(newPassword)) {
-      setErrors({ newPassword: "Password must be at least 8 characters" });
+      setErrors({
+        newPassword:
+          "Password must be at least 8 characters and include uppercase, lowercase, a number, and a special character",
+      });
       return;
     }
 
@@ -50,7 +71,7 @@ export default function ForgotPassword() {
     }
 
     try {
-      await resetPassword(email, newPassword);
+      await resetPassword(email, otp, newPassword);
       navigate("/login");
     } catch (err) {
       setErrors({ submit: err.message });
@@ -64,10 +85,11 @@ export default function ForgotPassword() {
           {t("auth.resetPassword")}
         </h1>
 
-        {step === "email" ? (
+        {/* ── Step 1: Email ── */}
+        {step === "email" && (
           <form onSubmit={handleEmailSubmit} className="flex flex-col gap-4">
             <p className="text-sm text-[var(--text-secondary)] text-center mb-4">
-              Enter your email to receive password reset instructions
+              Enter your email to receive a password reset code
             </p>
 
             <Input
@@ -90,14 +112,59 @@ export default function ForgotPassword() {
             )}
 
             <Button fullWidth loading={loading} type="submit" className="h-14">
-              Send Reset Link
+              Send Reset Code
             </Button>
 
             <Link to="/login" className="text-sm text-[var(--primary)] text-center hover:underline">
               {t("common.back")} to {t("auth.login")}
             </Link>
           </form>
-        ) : (
+        )}
+
+        {/* ── Step 2: OTP ── */}
+        {step === "otp" && (
+          <form onSubmit={handleOtpSubmit} className="flex flex-col gap-4">
+            <p className="text-sm text-[var(--text-secondary)] text-center mb-4">
+              Enter the 6-digit code sent to <strong>{email}</strong>
+            </p>
+
+            <Input
+              label={t("auth.otp")}
+              type="text"
+              placeholder="000000"
+              value={otp}
+              onChange={(e) => {
+                setOtp(e.target.value.replace(/\D/g, "").slice(0, 6));
+                if (errors.otp) setErrors({});
+              }}
+              error={errors.otp}
+              required
+              maxLength="6"
+              inputMode="numeric"
+            />
+
+            {(authError || errors.submit) && (
+              <div className="rounded-md bg-[var(--danger-light)] text-[var(--danger)] text-sm p-3">
+                {authError || errors.submit}
+              </div>
+            )}
+
+            <Button fullWidth type="submit" className="h-14">
+              Verify Code
+            </Button>
+
+            <button
+              type="button"
+              onClick={() => setStep("email")}
+              className="text-sm text-[var(--primary)] underline text-center"
+            >
+              Use a different email
+            </button>
+          </form>
+        )}
+
+        {/* ── Step 3: New password ── */}
+        {step === "reset" && (
           <form onSubmit={handlePasswordSubmit} className="flex flex-col gap-4">
             <p className="text-sm text-[var(--text-secondary)] text-center mb-4">
               {t("auth.enterNewPassword")}
@@ -138,14 +205,6 @@ export default function ForgotPassword() {
             <Button fullWidth loading={loading} type="submit" className="h-14">
               {t("auth.resetPassword")}
             </Button>
-
-            <button
-              type="button"
-              onClick={() => setStep("email")}
-              className="text-sm text-[var(--primary)] underline"
-            >
-              Use a different email
-            </button>
           </form>
         )}
       </Card>

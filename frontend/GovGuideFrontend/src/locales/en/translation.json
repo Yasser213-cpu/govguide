@@ -163,7 +163,11 @@
     "registerSuccess": "Account created successfully",
     "loginSuccess": "Logged in successfully",
     "registerError": "Failed to create account",
-    "loginError": "Failed to log in"
+    "loginError": "Failed to log in",
+    "username":"User Name",
+    "role":"Role",
+    "company":"Company",
+    "client":"Citizen"
   },
   "validation": {
     "required": "This field is required",

@@ -1,14 +1,17 @@
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../../hooks/useAuth";
 import { Button } from "../../components/ui";
+import { useNavigate } from "react-router-dom";
 
 export default function Dashboard() {
   const { t } = useTranslation();
   const { logout } = useAuth();
+  const navigate = useNavigate();
+
 
   const handleLogout = () => {
     logout();
-    window.location.href = "/login";
+    navigate("/login", { replace: true });
   };
 
   return (
