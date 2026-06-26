@@ -106,3 +106,9 @@ class verfiyEmailSerializer(EmailSerializer):
 
 class ResetPasswordSerializer(verfiyEmailSerializer):
     password = serializers.CharField(validators=[password_validator])
+
+
+class UserDataSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["username", "email"]
