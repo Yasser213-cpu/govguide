@@ -17,6 +17,8 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -26,4 +28,10 @@ urlpatterns = [
     path("api/v1/services/", include("companies.api.services_urls")),
     path("api/v1/ai/", include("ai_agents.api.urls")),
     path("api/v1/available-slots/", include("bookings.api.slots_urls")),
+    path("api/v1/orders/", include("orders.api.urls")),
+    path("api/v1/company/", include("orders.api.url_company_orders")),
+    
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
