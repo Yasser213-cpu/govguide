@@ -143,3 +143,14 @@ class CompanyServices(APIView):
         self.check_object_permissions(request, service)
         service.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+class CompanyServiceDetails(APIView):
+        def get(self, request, id):
+            try:
+                company = Company.objects.get(pk=id)
+            except Company.DoesNotExist:
+                raise NotFound({"detail": "there is no company matches this id"})
+
+            services = CompanyService.objects.filter(company=company)
+            serializer = CompanyServicesSerializer(services, many=True)
+            return Response(serializer.data)
