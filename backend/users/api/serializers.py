@@ -17,6 +17,8 @@ class RegistrationSerializer(serializers.Serializer):
             "numbers, and underscores. It must be between 3 and 30 characters long."
         ),
     )
+    first_name = serializers.CharField()
+    last_name = serializers.CharField()
 
     role = serializers.ChoiceField(choices=[User.CLIENT_ROLE, User.COMPANY_ROLE])
     email = serializers.EmailField()
@@ -38,8 +40,15 @@ class RegistrationSerializer(serializers.Serializer):
         username = validated_data["username"]
         password = validated_data["password"]
         role = validated_data["role"]
+        first_name = validated_data["first_name"]
+        last_name = validated_data["last_name"]
         user = User.objects.create_user(
-            email=email, username=username, password=password, role=role
+            email=email,
+            username=username,
+            password=password,
+            role=role,
+            first_name=first_name,
+            last_name=last_name,
         )
         return user
 
@@ -111,4 +120,4 @@ class ResetPasswordSerializer(verfiyEmailSerializer):
 class UserDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["username", "email"]
+        fields = ["username", "email", "first_name", "last_name"]
