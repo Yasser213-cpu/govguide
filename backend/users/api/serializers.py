@@ -49,6 +49,8 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
+        if hasattr(user, "company"):
+            token["company_id"] = user.company.id
 
         token["role"] = user.role
 
