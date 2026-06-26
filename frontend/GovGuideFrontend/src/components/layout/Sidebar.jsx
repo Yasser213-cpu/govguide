@@ -1,12 +1,23 @@
-import { NavLink } from "react-router-dom";
+import { useNavigate, NavLink } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useAuth } from "../../hooks/useAuth";
 import { navItems } from "./navConfig";
+import { FiLogOut } from "react-icons/fi";
 
 const Sidebar = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.dir() === "rtl";
+  const navigate = useNavigate();
+  const { logout, user } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login", { replace: true });
+  };
 
   return (
-    <aside className="w-[260px] min-h-screen shrink-0 bg-[var(--background-primary)] border-e border-[var(--border)] flex flex-col">
+    <aside className="w-[260px] h-screen shrink-0 bg-[var(--background-primary)] border-e border-[var(--border)] flex flex-col">
+      {" "}
       <div className="px-5 pt-6 pb-4">
         <div className="flex items-center gap-3">
           <img
@@ -19,7 +30,6 @@ const Sidebar = () => {
           {t("common.appNameAr")} - {t("common.user")}
         </p>
       </div>
-
       <nav className="flex-1 px-3 py-2 space-y-1">
         {navItems.map((item) => (
           <NavLink
@@ -38,11 +48,10 @@ const Sidebar = () => {
           </NavLink>
         ))}
       </nav>
-
       <div className="px-4 py-5 border-t border-[var(--border)]">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 rounded-full bg-[var(--primary-light)] flex items-center justify-center text-[var(--primary)] font-semibold text-sm shrink-0">
-            AM
+            {user?.role === "user" ? "AM" : "U"}
           </div>
           <div className="min-w-0">
             <p className="text-sm font-semibold text-[var(--text-primary)] truncate">
@@ -53,6 +62,43 @@ const Sidebar = () => {
             </p>
           </div>
         </div>
+        <button
+          type="button"
+          onClick={handleLogout}
+          className="
+          group
+          flex
+          w-full
+          items-center
+          justify-center
+          gap-2
+          rounded-xl
+          border
+          border-[var(--border)]
+          bg-[var(--background-primary)]
+          px-4
+          py-3
+          text-sm
+          font-semibold
+          text-[var(--text-primary)]
+          shadow-sm
+          transition-all
+          duration-200
+          hover:border-red-400
+          hover:bg-red-50
+          hover:text-red-600
+          active:scale-95
+        "
+        >
+          <FiLogOut
+            size={18}
+            className={`transition-transform duration-200 ${
+              isRTL ? "group-hover:translate-x-1" : "group-hover:-translate-x-1"
+            }`}
+          />
+
+          <span>{t("auth.logout")}</span>
+        </button>
       </div>
     </aside>
   );

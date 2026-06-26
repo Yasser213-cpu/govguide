@@ -42,7 +42,7 @@
     "adminReports": "التقارير"
   },
   "pages": {
-    "dashboard": {
+    "userDashboard": {
       "title": "مرحباً بعودتك، أحمد!",
       "subtitle": "نظرة عامة على خدماتك الحكومية",
       "placeholder": "محتوى لوحة التحكم سيظهر هنا."
@@ -50,7 +50,9 @@
     "aiAssistant": {
       "title": "المساعد الذكي",
       "subtitle": "احصل على المساعدة في الخدمات الحكومية والمعاملات",
-      "placeholder": "واجهة المحادثة الذكية ستظهر هنا."
+      "placeholder": "واجهة المحادثة الذكية ستظهر هنا.",
+      "historyEmpty": "لا توجد محادثات سابقة بعد. ابدأ محادثة.",
+      "historyTyping": "المساعد يكتب..."
     },
     "companies": {
       "title": "الشركات",
@@ -164,15 +166,43 @@
     "loginSuccess": "تم تسجيل الدخول بنجاح",
     "registerError": "فشل إنشاء الحساب",
     "loginError": "فشل تسجيل الدخول",
-    "username":"اسم المستخدم",
-    "role":"دور",
-    "company":"Company",
-    "client":"Citizen"
+    "username": "اسم المستخدم",
+    "role": "دور",
+    "company": "شركة",
+    "client": "مواطن",
+    "welcomeBack": "مرحبًا بعودتك!",
+    "loginDescription": "يمكنك الوصول إلى الخدمات الحكومية بأمان وإدارة حسابك بسهولة.",
+    "secureAuthentication": "مصادقة آمنة",
+    "securityDescription": "يتم حماية معلوماتك باستخدام تقنيات أمان على مستوى المؤسسات.",
+    "enterCredentials": "أدخل بيانات تسجيل الدخول للوصول إلى حسابك",
+
+    "createAccountTitle": "إنشاء حساب",
+    "registerDescription": "انضم إلى GovConnect AI للوصول إلى الخدمات الحكومية بسرعة وأمان.",
+    "secureRegistration": "تسجيل آمن",
+    "registrationSecurityDescription": "حسابك محمي باستخدام تقنيات أمان على مستوى المؤسسات.",
+
+    "accountType": "نوع الحساب",
+    "citizen": "مواطن",
+
+    "usernamePlaceholder": "الاسم...",
+    "resetPasswordDescription": "أدخل بريدك الإلكتروني لاستلام رمز إعادة تعيين كلمة المرور",
+    "sendResetCode": "إرسال رمز إعادة التعيين",
+    "backToLogin": "العودة إلى تسجيل الدخول",
+    "enterOtpMessage": "أدخل الرمز المكون من 6 أرقام الذي تم إرساله إلى {{email}}",
+    "verifyCode": "التحقق من الرمز",
+    "useDifferentEmail": "استخدام بريد إلكتروني آخر",
+    "otpPlaceholder": "000000",
+    "emailPlaceholder": "user@example.com",
+    "passwordPlaceholder": "••••••••"
   },
   "validation": {
     "required": "هذا الحقل مطلوب",
     "email": "الرجاء إدخال بريد إلكتروني صحيح",
     "minLength": "الحد الأدنى للطول هو {{count}} أحرف",
-    "maxLength": "الحد الأقصى للطول هو {{count}} أحرف"
+    "maxLength": "الحد الأقصى للطول هو {{count}} أحرف",
+    "invalidEmail": "يرجى إدخال بريد إلكتروني صحيح",
+    "invalidOtp": "يجب أن يتكون رمز التحقق من 6 أرقام",
+    "passwordRequirements": "يجب أن تتكون كلمة المرور من 8 أحرف على الأقل، وتحتوي على حرف كبير وحرف صغير ورقم ورمز خاص",
+    "passwordsDoNotMatch": "كلمتا المرور غير متطابقتين"
   }
 }

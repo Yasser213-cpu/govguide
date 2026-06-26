@@ -3,12 +3,22 @@ import { useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../../hooks/useAuth";
 import { Button, Input, Card } from "../../components/ui";
-import { validateEmail, validatePassword, validateOtp } from "../../utils/validation";
+import {
+  validateEmail,
+  validatePassword,
+  validateOtp,
+} from "../../utils/validation";
 
 export default function ForgotPassword() {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { forgetPassword, resetPassword, loading, error: authError, setError } = useAuth();
+  const {
+    forgetPassword,
+    resetPassword,
+    loading,
+    error: authError,
+    setError,
+  } = useAuth();
 
   // 3 steps: "email" → "otp" → "reset"
   const [step, setStep] = useState("email");
@@ -25,7 +35,7 @@ export default function ForgotPassword() {
     setError(null);
 
     if (!validateEmail(email)) {
-      setErrors({ email: "Please enter a valid email" });
+      setErrors({ email: t("validation.invalidEmail") });
       return;
     }
 
@@ -37,21 +47,19 @@ export default function ForgotPassword() {
     }
   };
 
-  // Step 2 — validate OTP locally, advance to password entry
   const handleOtpSubmit = (e) => {
     e.preventDefault();
     setErrors({});
     setError(null);
 
     if (!validateOtp(otp)) {
-      setErrors({ otp: "OTP must be 6 digits" });
+      setErrors({ otp: t("validation.invalidOtp") });
       return;
     }
 
     setStep("reset");
   };
 
-  // Step 3 — submit email + otp + new password to API
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
     setErrors({});
@@ -59,14 +67,15 @@ export default function ForgotPassword() {
 
     if (!validatePassword(newPassword)) {
       setErrors({
-        newPassword:
-          "Password must be at least 8 characters and include uppercase, lowercase, a number, and a special character",
+        newPassword: t("validation.passwordRequirements"),
       });
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      setErrors({ confirmPassword: "Passwords do not match" });
+      setErrors({
+        confirmPassword: t("validation.passwordsDoNotMatch"),
+      });
       return;
     }
 
@@ -85,17 +94,17 @@ export default function ForgotPassword() {
           {t("auth.resetPassword")}
         </h1>
 
-        {/* ── Step 1: Email ── */}
+        {/* Step 1 */}
         {step === "email" && (
           <form onSubmit={handleEmailSubmit} className="flex flex-col gap-4">
             <p className="text-sm text-[var(--text-secondary)] text-center mb-4">
-              Enter your email to receive a password reset code
+              {t("auth.resetPasswordDescription")}
             </p>
 
             <Input
               label={t("auth.email")}
               type="email"
-              placeholder="user@example.com"
+              placeholder={t("auth.emailPlaceholder")}
               value={email}
               onChange={(e) => {
                 setEmail(e.target.value);
@@ -112,26 +121,29 @@ export default function ForgotPassword() {
             )}
 
             <Button fullWidth loading={loading} type="submit" className="h-14">
-              Send Reset Code
+              {t("auth.sendResetCode")}
             </Button>
 
-            <Link to="/login" className="text-sm text-[var(--primary)] text-center hover:underline">
-              {t("common.back")} to {t("auth.login")}
+            <Link
+              to="/login"
+              className="text-sm text-[var(--primary)] text-center hover:underline"
+            >
+              {t("auth.backToLogin")}
             </Link>
           </form>
         )}
 
-        {/* ── Step 2: OTP ── */}
+        {/* Step 2 */}
         {step === "otp" && (
           <form onSubmit={handleOtpSubmit} className="flex flex-col gap-4">
             <p className="text-sm text-[var(--text-secondary)] text-center mb-4">
-              Enter the 6-digit code sent to <strong>{email}</strong>
+              {t("auth.enterOtpMessage", { email })}
             </p>
 
             <Input
               label={t("auth.otp")}
               type="text"
-              placeholder="000000"
+              placeholder={t("auth.otpPlaceholder")}
               value={otp}
               onChange={(e) => {
                 setOtp(e.target.value.replace(/\D/g, "").slice(0, 6));
@@ -150,7 +162,7 @@ export default function ForgotPassword() {
             )}
 
             <Button fullWidth type="submit" className="h-14">
-              Verify Code
+              {t("auth.verifyCode")}
             </Button>
 
             <button
@@ -158,12 +170,12 @@ export default function ForgotPassword() {
               onClick={() => setStep("email")}
               className="text-sm text-[var(--primary)] underline text-center"
             >
-              Use a different email
+              {t("auth.useDifferentEmail")}
             </button>
           </form>
         )}
 
-        {/* ── Step 3: New password ── */}
+        {/* Step 3 */}
         {step === "reset" && (
           <form onSubmit={handlePasswordSubmit} className="flex flex-col gap-4">
             <p className="text-sm text-[var(--text-secondary)] text-center mb-4">
@@ -173,7 +185,7 @@ export default function ForgotPassword() {
             <Input
               label={t("auth.password")}
               type="password"
-              placeholder="••••••••"
+              placeholder={t("auth.passwordPlaceholder")}
               value={newPassword}
               onChange={(e) => {
                 setNewPassword(e.target.value);
@@ -186,7 +198,7 @@ export default function ForgotPassword() {
             <Input
               label={t("auth.confirmPassword")}
               type="password"
-              placeholder="••••••••"
+              placeholder={t("auth.passwordPlaceholder")}
               value={confirmPassword}
               onChange={(e) => {
                 setConfirmPassword(e.target.value);

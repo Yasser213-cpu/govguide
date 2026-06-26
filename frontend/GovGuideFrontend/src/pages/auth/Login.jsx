@@ -10,7 +10,12 @@ import { FiLock, FiMail } from "react-icons/fi";
 export default function Login() {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { login, loading, error: authError, setError: setAuthError } = useAuth();
+  const {
+    login,
+    loading,
+    error: authError,
+    setError: setAuthError,
+  } = useAuth();
 
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState({});
@@ -31,6 +36,7 @@ export default function Login() {
     setAuthError(null);
 
     const newErrors = getValidationErrors(formData, fields);
+
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
@@ -38,27 +44,39 @@ export default function Login() {
 
     try {
       const result = await login(formData.email, formData.password);
-      const { next_step } = result;
+
+      const { role, next_step } = result;
+
+      console.log("Login Result:", result);
+
       if (next_step === "create_company") {
-        navigate("/company/create",{ replace: true });
-      } else if (next_step === "home") {
-        navigate("/dashboard",{ replace: true });
-      } else {
-        // "home" or any other value
-        // navigate("/dashboard");
+        navigate("/company/create", { replace: true });
+        return;
+      }
+
+      switch (role) {
+        case "company":
+          navigate("/company/dashboard", { replace: true });
+          break;
+
+        case "admin":
+          navigate("/admin/dashboard", { replace: true });
+          break;
+
+        default:
+          navigate("/user/dashboard", { replace: true });
+          break;
       }
     } catch (err) {
-  if (
-    err.message?.includes("verify your email")
-  ) {
-    navigate("/verify-otp", {
-      state: { email: formData.email },
-    });
-    return;
-  }
+      if (err.message?.includes("verify your email")) {
+        navigate("/verify-otp", {
+          state: { email: formData.email },
+        });
+        return;
+      }
 
-  setErrors({ submit: err.message });
-}
+      setErrors({ submit: err.message });
+    }
   };
 
   return (
@@ -70,20 +88,28 @@ export default function Login() {
         <div className="bg-gradient-to-b from-[var(--primary-light)] to-[var(--background-primary)] p-12 flex flex-col justify-between relative overflow-hidden">
           <div>
             <div className="flex items-center mb-12">
-              <img src="/logo-full.png" alt="GovConnect AI" className="h-[73px] w-auto object-contain" />
+              <img
+                src="/logo-full.png"
+                alt="GovConnect AI"
+                className="h-[73px] w-auto object-contain"
+              />
             </div>
-            <h1 className="text-4xl font-bold text-[var(--primary-dark)] mb-4">Welcome Back!</h1>
+            <h1 className="text-4xl font-bold text-[var(--primary-dark)] mb-4">
+              {t("auth.welcomeBack")}
+            </h1>{" "}
             <p className="text-[var(--text-secondary)] leading-relaxed max-w-[320px]">
-              Access government services securely and manage your account seamlessly.
+              {t("auth.loginDescription")}
             </p>
           </div>
           <div className="p-4 bg-[var(--background-primary)] rounded-xl border border-[var(--border)] relative z-10">
             <div className="flex items-center gap-3 mb-2">
               <FiLock className="text-[var(--primary-dark)]" size={20} />
-              <strong className="text-[var(--primary-dark)]">Secure Authentication</strong>
+              <strong className="text-[var(--primary-dark)]">
+                {t("auth.secureAuthentication")}
+              </strong>
             </div>
             <span className="text-sm text-[var(--text-secondary)]">
-              Your information is protected using enterprise-grade security.
+              {t("auth.securityDescription")}
             </span>
           </div>
         </div>
@@ -92,9 +118,13 @@ export default function Login() {
           <div className="w-full max-w-[450px]">
             <div className="flex items-center gap-3 mb-2">
               <FiMail className="text-[var(--primary)]" size={28} />
-              <h2 className="text-3xl font-bold text-[var(--text-primary)]">{t("auth.login")}</h2>
+              <h2 className="text-3xl font-bold text-[var(--text-primary)]">
+                {t("auth.login")}
+              </h2>
             </div>
-            <p className="text-[var(--text-secondary)] mb-8">Enter your credentials to access your account</p>
+            <p className="text-[var(--text-secondary)] mb-8">
+              {t("auth.enterCredentials")}
+            </p>
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-5">
               <Input
@@ -118,7 +148,10 @@ export default function Login() {
                 required
               />
               <div className="text-right">
-                <Link to="/forgot-password" className="text-[var(--primary)] font-medium text-sm hover:underline">
+                <Link
+                  to="/forgot-password"
+                  className="text-[var(--primary)] font-medium text-sm hover:underline"
+                >
                   {t("auth.forgotPassword")}
                 </Link>
               </div>
@@ -140,7 +173,10 @@ export default function Login() {
 
               <p className="text-center text-[var(--text-secondary)] mt-2">
                 {t("auth.noAccount")}{" "}
-                <Link to="/register" className="text-[var(--primary)] font-semibold hover:underline">
+                <Link
+                  to="/register"
+                  className="text-[var(--primary)] font-semibold hover:underline"
+                >
                   {t("auth.register")}
                 </Link>
               </p>
