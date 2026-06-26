@@ -11,5 +11,6 @@ urlpatterns = [
     path("verify" ,views.VerifyEmail.as_view()),
     path("resend-otp" , views.ResendOTP.as_view()),
     path("forget-password" , views.ForgetPassword.as_view()),
-    path("reset-password" , views.ResetPassword.as_view())
+    path("reset-password" , views.ResetPassword.as_view()),
+    path("me" , views.UserDataAPIView.as_view() )
 ]

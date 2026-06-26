@@ -8,12 +8,13 @@ from .serializers import (
     MyTokenObtainPairSerializer,
     EmailSerializer,
     verfiyEmailSerializer,
-    ResetPasswordSerializer
+    ResetPasswordSerializer,
+    UserDataSerializer,
 )
 from core.services import send_verification_email, send_reset_password_otp
 from ..models import OTP, User
 from django.utils import timezone
-
+from rest_framework.permissions import IsAuthenticated
 
 
 class RegisterAPIView(APIView):
@@ -159,8 +160,6 @@ class ResetPassword(APIView):
         password = serializer.validated_data["password"]
         otp = serializer.validated_data["otp"]
 
-
-
         try:
             user = User.objects.get(email=email)
             otp = OTP.objects.get(
@@ -185,3 +184,14 @@ class ResetPassword(APIView):
                 {"detail": "Invalid email or OTP."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+
+
+class UserDataAPIView(APIView):
+
+    def get_permissions(self):
+        return [IsAuthenticated()]
+
+    def get(self, request):
+        user = User.objects.get(pk=request.user.id)
+        serializer = UserDataSerializer(user)
+        return Response(serializer.data)
