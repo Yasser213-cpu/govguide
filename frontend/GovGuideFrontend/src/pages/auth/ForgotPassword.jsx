@@ -20,6 +20,7 @@ export default function ForgotPassword() {
     setError,
   } = useAuth();
 
+  // 3 steps: "email" → "otp" → "reset"
   const [step, setStep] = useState("email");
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
@@ -27,6 +28,7 @@ export default function ForgotPassword() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errors, setErrors] = useState({});
 
+  // Step 1 — send OTP to email
   const handleEmailSubmit = async (e) => {
     e.preventDefault();
     setErrors({});
