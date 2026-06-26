@@ -2,20 +2,20 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../../hooks/useAuth";
-import { Button, Input, PhoneInput } from "../../components/ui";
+import { Button, Input } from "../../components/ui";
 import LanguageSwitcher from "../../components/LanguageSwitcher";
 import { getValidationErrors } from "../../utils/validation";
 import { FiLock, FiUserPlus, FiUser, FiBriefcase } from "react-icons/fi";
-
-const roles = [
-  { value: "client", label: "Citizen", icon: FiUser },
-  { value: "company", label: "Company", icon: FiBriefcase },
-];
 
 export default function Register() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { register, loading, error: authError, setError } = useAuth();
+
+  const roles = [
+    { value: "client", label: t("auth.citizen"), icon: FiUser },
+    { value: "company", label: t("auth.company"), icon: FiBriefcase },
+  ];
 
   const [formData, setFormData] = useState({
     username: "",
@@ -55,12 +55,12 @@ export default function Register() {
     }
   };
 
-  const handlePhoneChange = (value) => {
-    setFormData((prev) => ({ ...prev, phone: value }));
-    if (errors.phone) {
-      setErrors((prev) => ({ ...prev, phone: "" }));
-    }
-  };
+  // const handlePhoneChange = (value) => {
+  //   setFormData((prev) => ({ ...prev, phone: value }));
+  //   if (errors.phone) {
+  //     setErrors((prev) => ({ ...prev, phone: "" }));
+  //   }
+  // };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -73,7 +73,12 @@ export default function Register() {
     }
 
     try {
-      await register(formData.username,formData.email,formData.role, formData.password);
+      await register(
+        formData.username,
+        formData.email,
+        formData.role,
+        formData.password,
+      );
       navigate("/verify-otp", { state: { email: formData.email } });
     } catch (err) {
       setErrors({ submit: err.message });
@@ -89,21 +94,29 @@ export default function Register() {
         <div className="bg-gradient-to-b from-[var(--primary-light)] to-[var(--background-primary)] p-12 flex flex-col justify-between relative overflow-hidden">
           <div>
             <div className="flex items-center mb-12">
-              <img src="/logo-full.png" alt="GovConnect AI" className="h-[73px] w-auto object-contain" />
+              <img
+                src="/logo-full.png"
+                alt="GovConnect AI"
+                className="h-[73px] w-auto object-contain"
+              />
             </div>
-            <h1 className="text-4xl font-bold text-[var(--primary-dark)] mb-4">Create Account</h1>
+            <h1 className="text-4xl font-bold text-[var(--primary-dark)] mb-4">
+              {t("auth.createAccountTitle")}
+            </h1>
             <p className="text-[var(--text-secondary)] leading-relaxed max-w-[320px]">
-              Join GovConnect AI and access government services quickly and securely.
+              {t("auth.registerDescription")}
             </p>
           </div>
 
           <div className="p-4 bg-[var(--background-primary)] rounded-xl border border-[var(--border)] relative z-10">
             <div className="flex items-center gap-3 mb-2">
               <FiLock className="text-[var(--primary-dark)]" size={20} />
-              <strong className="text-[var(--primary-dark)]">Secure Registration</strong>
+              <strong className="text-[var(--primary-dark)]">
+                {t("auth.secureRegistration")}
+              </strong>
             </div>
             <span className="text-sm text-[var(--text-secondary)]">
-              Your account is protected with enterprise-grade security.
+              {t("auth.registrationSecurityDescription")}
             </span>
           </div>
         </div>
@@ -112,16 +125,20 @@ export default function Register() {
           <div className="w-full max-w-[500px]">
             <div className="flex items-center gap-3 mb-2">
               <FiUserPlus className="text-[var(--primary)]" size={28} />
-              <h2 className="text-3xl font-bold text-[var(--text-primary)]">{t("auth.register")}</h2>
+              <h2 className="text-3xl font-bold text-[var(--text-primary)]">
+                {t("auth.register")}
+              </h2>
             </div>
-            <p className="text-[var(--text-secondary)] mb-8">{t("auth.createAccount")}</p>
+            <p className="text-[var(--text-secondary)] mb-8">
+              {t("auth.createAccount")}
+            </p>
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-5">
               <Input
                 label={t("auth.username")}
                 type="text"
                 name="username"
-                placeholder="name...."
+                placeholder={t("auth.usernamePlaceholder")}
                 value={formData.username}
                 onChange={handleChange}
                 error={errors.username}
@@ -142,7 +159,7 @@ export default function Register() {
               {/* Role Radio Selector */}
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-medium text-[var(--text-primary)]">
-                  {t("auth.role") || "Account type"}
+                  {t("auth.accountType")}
                 </label>
                 <div className="flex gap-3">
                   {roles.map((role) => {
@@ -165,10 +182,14 @@ export default function Register() {
                             ${isActive ? "border-[var(--primary)] bg-[var(--primary)]" : "border-[var(--border)]"}
                           `}
                         >
-                          {isActive && <span className="h-1.5 w-1.5 rounded-full bg-white" />}
+                          {isActive && (
+                            <span className="h-1.5 w-1.5 rounded-full bg-white" />
+                          )}
                         </span>
                         <Icon size={16} />
-                        <span className="text-sm font-medium">{role.label}</span>
+                        <span className="text-sm font-medium">
+                          {role.label}
+                        </span>
                       </div>
                     );
                   })}
@@ -217,7 +238,10 @@ export default function Register() {
 
               <p className="text-center text-[var(--text-secondary)] mt-2">
                 {t("auth.haveAccount")}{" "}
-                <Link to="/login" className="text-[var(--primary)] font-semibold hover:underline">
+                <Link
+                  to="/login"
+                  className="text-[var(--primary)] font-semibold hover:underline"
+                >
                   {t("auth.login")}
                 </Link>
               </p>

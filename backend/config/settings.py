@@ -39,6 +39,7 @@ THIRD_PARTY_APPS = [
     "rest_framework",
     "corsheaders",
     "django_filters",
+    "channels",
 ]
 
 LOCAL_APPS = [
@@ -86,6 +87,8 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "config.wsgi.application"
+
+ASGI_APPLICATION = "config.asgi.application"
 
 DATABASES = {
     "default": {
@@ -147,3 +150,11 @@ CELERY_RESULT_SERIALIZER = "json"
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("redis", 6379)],
+        },
+    },
+}

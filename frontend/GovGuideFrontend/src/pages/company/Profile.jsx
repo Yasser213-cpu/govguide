@@ -82,7 +82,23 @@ export default function CompanyProfile() {
             name="name"
             value={companyData.name}
             onChange={handleChange}
-            className="w-full rounded-lg border p-3"
+            className="
+            w-full
+            rounded-xl
+            border
+            border-[var(--border)]
+            bg-[var(--background-primary)]
+            px-4
+            py-3
+            text-[var(--text-primary)]
+            placeholder:text-[var(--text-secondary)]
+            transition-all
+            duration-200
+            focus:outline-none
+            focus:border-[var(--secondary)]
+            focus:ring-2
+            focus:ring-[var(--secondary-light)]
+            "
           />
         </div>
 
@@ -94,7 +110,23 @@ export default function CompanyProfile() {
             name="description"
             value={companyData.description}
             onChange={handleChange}
-            className="w-full rounded-lg border p-3"
+            className="
+            w-full
+            rounded-xl
+            border
+            border-[var(--border)]
+            bg-[var(--background-primary)]
+            px-4
+            py-3
+            text-[var(--text-primary)]
+            placeholder:text-[var(--text-secondary)]
+            transition-all
+            duration-200
+            focus:outline-none
+            focus:border-[var(--secondary)]
+            focus:ring-2
+            focus:ring-[var(--secondary-light)]
+            "
           />
         </div>
 
@@ -106,7 +138,23 @@ export default function CompanyProfile() {
             name="phone"
             value={companyData.phone}
             onChange={handleChange}
-            className="w-full rounded-lg border p-3"
+            className="
+            w-full
+            rounded-xl
+            border
+            border-[var(--border)]
+            bg-[var(--background-primary)]
+            px-4
+            py-3
+            text-[var(--text-primary)]
+            placeholder:text-[var(--text-secondary)]
+            transition-all
+            duration-200
+            focus:outline-none
+            focus:border-[var(--secondary)]
+            focus:ring-2
+            focus:ring-[var(--secondary-light)]
+            "
           />
         </div>
 
@@ -119,7 +167,23 @@ export default function CompanyProfile() {
               name="governorate"
               value={companyData.governorate}
               onChange={handleChange}
-              className="w-full rounded-lg border p-3"
+              className="
+            w-full
+            rounded-xl
+            border
+            border-[var(--border)]
+            bg-[var(--background-primary)]
+            px-4
+            py-3
+            text-[var(--text-primary)]
+            placeholder:text-[var(--text-secondary)]
+            transition-all
+            duration-200
+            focus:outline-none
+            focus:border-[var(--secondary)]
+            focus:ring-2
+            focus:ring-[var(--secondary-light)]
+            "
             />
           </div>
 
@@ -131,7 +195,23 @@ export default function CompanyProfile() {
               name="city"
               value={companyData.city}
               onChange={handleChange}
-              className="w-full rounded-lg border p-3"
+              className="
+            w-full
+            rounded-xl
+            border
+            border-[var(--border)]
+            bg-[var(--background-primary)]
+            px-4
+            py-3
+            text-[var(--text-primary)]
+            placeholder:text-[var(--text-secondary)]
+            transition-all
+            duration-200
+            focus:outline-none
+            focus:border-[var(--secondary)]
+            focus:ring-2
+            focus:ring-[var(--secondary-light)]
+            "
             />
           </div>
         </div>
@@ -144,14 +224,37 @@ export default function CompanyProfile() {
             name="street"
             value={companyData.street}
             onChange={handleChange}
-            className="w-full rounded-lg border p-3"
+            className="
+            w-full
+            rounded-xl
+            border
+            border-[var(--border)]
+            bg-[var(--background-primary)]
+            px-4
+            py-3
+            text-[var(--text-primary)]
+            placeholder:text-[var(--text-secondary)]
+            transition-all
+            duration-200
+            focus:outline-none
+            focus:border-[var(--secondary)]
+            focus:ring-2
+            focus:ring-[var(--secondary-light)]
+            "
           />
         </div>
 
         <button
           type="submit"
           disabled={saving}
-          className="rounded-lg bg-blue-600 px-5 py-3 text-white disabled:opacity-50"
+          className="
+            rounded-lg
+            bg-blue-600
+            px-5
+            py-3
+            text-white
+            disabled:opacity-50
+          "
         >
           {saving ? "Saving..." : "Save Changes"}
         </button>

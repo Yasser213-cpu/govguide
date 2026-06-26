@@ -1,22 +1,46 @@
+import { FiUser } from "react-icons/fi";
+import { BsBank2 } from "react-icons/bs";
+
 const ChatMessage = ({ message }) => {
   const isUser = message.sender === "user";
 
   return (
     <div
-      className={`flex ${
+      className={`mb-6 flex items-end gap-3 ${
         isUser ? "justify-end" : "justify-start"
-      } mb-4`}
+      }`}
     >
+      {/* Assistant Avatar */}
+      {!isUser && (
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--primary-light)]">
+          <BsBank2 size={18} className="text-[var(--primary)]" />
+        </div>
+      )}
+
+      {/* Message */}
       <div
-        className={`max-w-[75%] rounded-xl px-4 py-3 whitespace-pre-line
-        ${
-          isUser
-            ? "bg-blue-600 text-white"
-            : "bg-gray-100 text-gray-800"
-        }`}
+        className={`max-w-[75%] rounded-2xl px-5 py-3 shadow-sm whitespace-pre-wrap break-words
+          ${
+            isUser
+              ? "rounded-br-md bg-[var(--primary)] text-white"
+              : "rounded-bl-md border border-[var(--border)] bg-[var(--background-secondary)] text-[var(--text-primary)]"
+          }`}
       >
-        {message.text}
+        {!isUser && (
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-[var(--primary)]">
+            GovGuide Assistant
+          </p>
+        )}
+
+        <p className="text-sm leading-7">{message.text}</p>
       </div>
+
+      {/* User Avatar */}
+      {isUser && (
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--primary)] text-white">
+          <FiUser size={18} />
+        </div>
+      )}
     </div>
   );
 };

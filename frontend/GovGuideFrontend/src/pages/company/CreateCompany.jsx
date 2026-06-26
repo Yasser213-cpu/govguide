@@ -75,7 +75,7 @@ export default function CreateCompany() {
     try {
       await createCompany(formData);
       markCompanyCreated(); // update context so CompanyRoute unlocks
-      navigate("/dashboard");
+      navigate("/company/dashboard", { replace: true });
     } catch (err) {
       const data = err.response?.data;
       if (data && typeof data === "object" && !data.detail) {

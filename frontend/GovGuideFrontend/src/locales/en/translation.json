@@ -42,7 +42,7 @@
     "adminReports": "Reports"
   },
   "pages": {
-    "dashboard": {
+    "userDashboard": {
       "title": "Welcome back, Ahmed!",
       "subtitle": "Here's an overview of your government services",
       "placeholder": "Dashboard content will appear here."
@@ -50,7 +50,9 @@
     "aiAssistant": {
       "title": "AI Assistant",
       "subtitle": "Get help with government services and paperwork",
-      "placeholder": "AI chat interface will appear here."
+      "placeholder": "AI chat interface will appear here.",
+      "historyEmpty": "No previous chats yet. Start a conversation.",
+      "historyTyping": "Assistant is typing..."
     },
     "companies": {
       "title": "Companies",
@@ -164,15 +166,42 @@
     "loginSuccess": "Logged in successfully",
     "registerError": "Failed to create account",
     "loginError": "Failed to log in",
-    "username":"User Name",
-    "role":"Role",
-    "company":"Company",
-    "client":"Citizen"
+    "username": "User Name",
+    "role": "Role",
+    "company": "Company",
+    "client": "Citizen",
+    "welcomeBack": "Welcome Back!",
+    "loginDescription": "Access government services securely and manage your account seamlessly.",
+    "secureAuthentication": "Secure Authentication",
+    "securityDescription": "Your information is protected using enterprise-grade security.",
+    "enterCredentials": "Enter your credentials to access your account",
+    "createAccountTitle": "Create Account",
+    "registerDescription": "Join GovConnect AI and access government services quickly and securely.",
+    "secureRegistration": "Secure Registration",
+    "registrationSecurityDescription": "Your account is protected with enterprise-grade security.",
+
+    "accountType": "Account Type",
+    "citizen": "Citizen",
+
+    "usernamePlaceholder": "name....",
+    "resetPasswordDescription": "Enter your email to receive a password reset code",
+    "sendResetCode": "Send Reset Code",
+    "backToLogin": "Back to Login",
+    "enterOtpMessage": "Enter the 6-digit code sent to {{email}}",
+    "verifyCode": "Verify Code",
+    "useDifferentEmail": "Use a different email",
+    "otpPlaceholder": "000000",
+    "emailPlaceholder": "user@example.com",
+    "passwordPlaceholder": "••••••••"
   },
   "validation": {
     "required": "This field is required",
     "email": "Please enter a valid email",
     "minLength": "Minimum length is {{count}} characters",
-    "maxLength": "Maximum length is {{count}} characters"
+    "maxLength": "Maximum length is {{count}} characters",
+    "invalidEmail": "Please enter a valid email",
+    "invalidOtp": "OTP must be 6 digits",
+    "passwordRequirements": "Password must be at least 8 characters and include uppercase, lowercase, a number, and a special character",
+    "passwordsDoNotMatch": "Passwords do not match"
   }
 }

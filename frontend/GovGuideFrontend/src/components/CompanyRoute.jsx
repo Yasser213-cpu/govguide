@@ -23,12 +23,12 @@ export default function CompanyRoute({ children }) {
   }
 
   if (user?.role !== "company") {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/company/dashboard" replace />;
   }
 
   // Company already created — skip setup
   if (user?.next_step && user.next_step !== "create_company") {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/company/dashboard" replace />;
   }
 
   return children;
