@@ -13,6 +13,7 @@ from rest_framework.views import APIView
 from rest_framework.exceptions import NotFound
 from core.permissions import IsClient, IsCompany, isCompanyOwner
 from rest_framework.permissions import IsAuthenticated
+from ai_agents.tasks import run_ocr_on_document
 
 
 class ClientOrdersAPIView(APIView):
@@ -46,8 +47,6 @@ class ClientOrdersAPIView(APIView):
             return Response(serializer.data, status.HTTP_201_CREATED)
         return Response(serializer.errors, status.HTTP_400_BAD_REQUEST)
 
-        pass
-
 
 class CompanyOrdersAPIView(APIView):
 
@@ -80,7 +79,6 @@ class UploadOrderDocument(APIView):
         return [IsAuthenticated(), IsClient()]
 
     def post(self, request, id):
-        print(id)
         try:
             order = Order.objects.get(pk=id)
         except Order.DoesNotExist:
@@ -103,7 +101,8 @@ class UploadOrderDocument(APIView):
             data=request.data, context={"order_id": id}
         )
         if serializer.is_valid():
-            serializer.save(order=order)
+            document = serializer.save(order=order)
+            run_ocr_on_document.delay(document.id)
             return Response(serializer.data, status.HTTP_201_CREATED)
         return Response(serializer.errors, status.HTTP_400_BAD_REQUEST)
 
