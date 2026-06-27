@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { sendMessage } from "../api/aiChatApi";
+import { getProcedureById } from "../api/Procedureapi";
+import { recommendCompanies } from "../api/Recommendationapi";
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -31,6 +33,35 @@ export const useAiChat = () => {
     }
   };
 
+  // Attach the checklist/fees + ranked companies to an already-rendered
+  // assistant message once both calls resolve. Failures here are silent —
+  // the chat answer itself already rendered, so we don't want a checklist
+  // or recommendation error to look like the whole reply failed.
+  const attachProcedureExtras = async (messageId, procedureId) => {
+    try {
+      const procedure = await getProcedureById(procedureId);
+
+      setMessages((prev) =>
+        prev.map((message) =>
+          message.id === messageId ? { ...message, procedure } : message,
+        ),
+      );
+
+      const recommendations = await recommendCompanies(procedureId);
+
+      setMessages((prev) =>
+        prev.map((message) =>
+          message.id === messageId
+            ? { ...message, companies: recommendations.results }
+            : message,
+        ),
+      );
+    } catch (error) {
+      // Checklist/recommendation fetch failed — leave the plain text answer
+      // as-is rather than surfacing a second error bubble.
+    }
+  };
+
   const sendUserMessage = async (text) => {
     if (!text.trim()) return;
 
@@ -58,6 +89,13 @@ export const useAiChat = () => {
 
       setMessages((prev) => [...prev, aiMessage]);
       await typeAssistantReply(aiMessage.id, data.answer);
+
+      // Backend will eventually include `procedure_id` on procedure_query
+      // responses. Only fetch the checklist/companies when it's present —
+      // degrade to plain text otherwise.
+      if (data.intent === "procedure_query" && data.procedure_id) {
+        attachProcedureExtras(aiMessage.id, data.procedure_id);
+      }
     } catch (error) {
       const errorMessage = {
         id: Date.now() + 2,
