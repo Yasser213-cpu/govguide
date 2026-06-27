@@ -85,3 +85,9 @@ class Document(models.Model):
     needs_review = models.BooleanField(default=False)
     verification_flags = models.JSONField(default=list, blank=True)
 
+
+
+class OrderStatusHistory(models.Model):
+    status = models.CharField(choices=Order.STATUS_CHOICES)
+    order = models.ForeignKey(Order , on_delete=models.CASCADE , related_name="history")
+    changed_at = models.DateTimeField(auto_now_add=True)

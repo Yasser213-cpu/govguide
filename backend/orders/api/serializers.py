@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from ..models import Order, Document
+from ..models import Order, Document, OrderStatusHistory
 from procedures.models import Procedure, Requirement
 from companies.api.serializers import CompanyServicesSerializer
 
@@ -12,6 +12,11 @@ class OrderCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = ["notes", "service"]
+
+    def create(self, validated_data):
+        order = Order.objects.create(**validated_data)
+        OrderStatusHistory.objects.create(order=order, status=Order.PENDING_STATUS)
+        return order
 
 
 class DocumentUploadSerializer(serializers.ModelSerializer):
@@ -109,4 +114,14 @@ class OrderStatusSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 f"cannot change status from {old_status} to {new_status}"
             )
+
+        OrderStatusHistory.objects.create(
+            order=self.context["order"], status=new_status
+        )
         return value
+
+
+class OrderStatusHistorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OrderStatusHistory
+        fields = ["status", "changed_at"]
