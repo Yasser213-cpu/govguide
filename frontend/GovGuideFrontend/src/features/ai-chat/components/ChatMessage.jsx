@@ -1,5 +1,7 @@
 import { FiUser } from "react-icons/fi";
 import { BsBank2 } from "react-icons/bs";
+import ProcedureChecklist from "./ProcedureChecklist";
+import CompanyRecommendations from "./CompanyRecommendations";
 
 const ChatMessage = ({ message }) => {
   const isUser = message.sender === "user";
@@ -33,6 +35,16 @@ const ChatMessage = ({ message }) => {
         )}
 
         <p className="text-sm leading-7">{message.text}</p>
+
+        {/* Checklist + fees (only present once GET /procedures/<id> resolves) */}
+        {!isUser && message.procedure && (
+          <ProcedureChecklist procedure={message.procedure} />
+        )}
+
+        {/* Ranked companies (only present once recommend-companies resolves) */}
+        {!isUser && message.companies && (
+          <CompanyRecommendations results={message.companies} />
+        )}
       </div>
 
       {/* User Avatar */}
