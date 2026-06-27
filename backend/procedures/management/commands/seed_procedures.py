@@ -81,7 +81,8 @@ class Command(BaseCommand):
                 defaults={**item, "is_active": True},
             )
             for title in requirements:
-                Requirement.objects.get_or_create(procedure=procedure, title=title)
+                req, _ = Requirement.objects.get_or_create(title=title)
+                procedure.requirements.add(req)
 
             status = "Created" if created else "Exists"
             self.stdout.write(

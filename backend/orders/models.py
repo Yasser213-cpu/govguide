@@ -68,8 +68,20 @@ class Document(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="documents")
     requirement = models.ForeignKey(Requirement, on_delete=models.SET_NULL, null=True)
 
-    file = models.FileField(upload_to="orders/documents/" ,null=False , blank=False)
+    file = models.FileField(upload_to="orders/documents/", null=False, blank=False)
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
-    class Meta:
-        ordering = ["requirement"]
+    extracted_text = models.TextField(blank=True)
+    ocr_confidence = models.FloatField(null=True, blank=True)
+    ocr_status = models.CharField(
+        max_length=20,
+        choices=[
+            ("pending", "Pending"),
+            ("done", "Done"),
+            ("failed", "Failed"),
+        ],
+        default="pending",
+    )
+    needs_review = models.BooleanField(default=False)
+    verification_flags = models.JSONField(default=list, blank=True)
+
