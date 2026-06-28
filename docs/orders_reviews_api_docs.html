@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GovConnect AI — Orders & Reviews API</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Inter:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #1c2330;
+    --border: #30363d;
+    --text: #e6edf3;
+    --muted: #7d8590;
+    --accent: #388bfd;
+    --accent-dim: #1f3a6e;
+    --green: #3fb950;
+    --green-dim: #1a3728;
+    --orange: #e3b341;
+    --orange-dim: #3d2e0f;
+    --red: #f85149;
+    --red-dim: #3d1a1a;
+    --purple: #a371f7;
+    --purple-dim: #2d1f54;
+    --teal: #39c5cf;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'Inter', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.6;
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ── Sidebar ── */
+  nav {
+    width: 240px;
+    min-width: 240px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 24px 0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+
+  .nav-logo {
+    padding: 0 20px 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 16px;
+  }
+
+  .nav-logo .app-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: .02em;
+  }
+
+  .nav-logo .version {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: var(--mono);
+    margin-top: 2px;
+  }
+
+  nav h3 {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: var(--muted);
+    padding: 8px 20px 4px;
+  }
+
+  nav a {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 20px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 13px;
+    transition: color .15s, background .15s;
+    border-left: 2px solid transparent;
+  }
+
+  nav a:hover { color: var(--text); background: var(--surface2); }
+  nav a.active { color: var(--accent); border-left-color: var(--accent); background: var(--accent-dim); }
+
+  .method-badge {
+    font-family: var(--mono);
+    font-size: 9px;
+    font-weight: 600;
+    padding: 1px 5px;
+    border-radius: 3px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+  }
+  .GET  { background: var(--green-dim);  color: var(--green); }
+  .POST { background: var(--accent-dim); color: var(--accent); }
+  .PATCH { background: var(--orange-dim); color: var(--orange); }
+  .DELETE { background: var(--red-dim); color: var(--red); }
+
+  /* ── Main content ── */
+  main {
+    flex: 1;
+    padding: 48px 56px;
+    max-width: 900px;
+  }
+
+  .page-header {
+    margin-bottom: 48px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .page-header h1 {
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    letter-spacing: -.02em;
+  }
+
+  .page-header p {
+    color: var(--muted);
+    font-size: 14px;
+    max-width: 580px;
+  }
+
+  /* ── Section ── */
+  .section {
+    margin-bottom: 64px;
+  }
+
+  .section-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 24px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-icon {
+    width: 28px;
+    height: 28px;
+    background: var(--surface2);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+  }
+
+  /* ── Endpoint card ── */
+  .endpoint {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+
+  .endpoint-header {
+    padding: 16px 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .endpoint-header:hover { background: var(--surface2); }
+
+  .endpoint-title {
+    flex: 1;
+  }
+
+  .endpoint-name {
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 2px;
+  }
+
+  .endpoint-url {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .chevron {
+    color: var(--muted);
+    font-size: 12px;
+    margin-top: 4px;
+    transition: transform .2s;
+  }
+
+  .endpoint.open .chevron { transform: rotate(90deg); }
+
+  .endpoint-body {
+    display: none;
+    padding: 0 20px 20px;
+    border-top: 1px solid var(--border);
+  }
+
+  .endpoint.open .endpoint-body { display: block; }
+
+  /* ── Info blocks ── */
+  .info-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 14px;
+    flex-wrap: wrap;
+  }
+
+  .tag {
+    font-size: 11px;
+    font-family: var(--mono);
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+
+  .tag.auth-required { border-color: var(--orange); color: var(--orange); background: var(--orange-dim); }
+  .tag.auth-public   { border-color: var(--green);  color: var(--green);  background: var(--green-dim);  }
+  .tag.role-client   { border-color: var(--purple); color: var(--purple); background: var(--purple-dim); }
+  .tag.role-company  { border-color: var(--teal);   color: var(--teal);   background: rgba(57,197,207,.12); }
+
+  .subsection {
+    margin-top: 20px;
+  }
+
+  .subsection-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+
+  /* ── Code block ── */
+  pre {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px 16px;
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.7;
+    overflow-x: auto;
+    color: #c9d1d9;
+  }
+
+  .str  { color: #a5d6ff; }
+  .num  { color: #79c0ff; }
+  .key  { color: #ffa657; }
+  .bool { color: #ff7b72; }
+  .cmnt { color: #8b949e; font-style: italic; }
+  .url-highlight { color: var(--teal); }
+
+  /* ── Response table ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin-top: 8px;
+  }
+
+  th {
+    text-align: left;
+    padding: 8px 12px;
+    background: var(--surface2);
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+  }
+
+  th:first-child { border-radius: 6px 0 0 0; }
+  th:last-child  { border-radius: 0 6px 0 0; }
+
+  td {
+    padding: 8px 12px;
+    border-top: 1px solid var(--border);
+    vertical-align: top;
+  }
+
+  td:first-child { font-family: var(--mono); font-size: 12px; color: var(--accent); }
+  td:nth-child(2) { color: var(--purple); font-size: 12px; font-family: var(--mono); }
+  td:last-child { color: var(--muted); }
+
+  /* ── Status codes ── */
+  .status-list { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+
+  .status-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+  }
+
+  .status-code {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 1px 7px;
+    border-radius: 4px;
+    min-width: 40px;
+    text-align: center;
+  }
+
+  .s2xx { background: var(--green-dim);  color: var(--green); }
+  .s4xx { background: var(--red-dim);    color: var(--red);   }
+
+  /* ── Flow diagram ── */
+  .flow {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    margin-top: 8px;
+  }
+
+  .flow-steps {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .flow-step {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .flow-step.active { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+  .flow-step.terminal { border-color: var(--green); color: var(--green); background: var(--green-dim); }
+  .flow-step.dead { border-color: var(--red); color: var(--red); background: var(--red-dim); }
+
+  .flow-arrow {
+    color: var(--muted);
+    font-size: 14px;
+    padding: 0 2px;
+  }
+
+  /* ── Notice ── */
+  .notice {
+    background: var(--accent-dim);
+    border: 1px solid var(--accent);
+    border-radius: 6px;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #a5c8ff;
+    margin-top: 14px;
+    line-height: 1.5;
+  }
+
+  .notice.warn {
+    background: var(--orange-dim);
+    border-color: var(--orange);
+    color: #f5d491;
+  }
+
+  .notice strong { font-weight: 600; }
+
+  /* ── Breadcrumb ── */
+  .breadcrumb {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+
+  .breadcrumb span { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<nav>
+  <div class="nav-logo">
+    <div class="app-name">GovConnect AI</div>
+    <div class="version">Orders & Reviews API · v1</div>
+  </div>
+
+  <h3>Client Endpoints</h3>
+  <a href="#client-orders"><span class="method-badge GET">GET</span> List Orders</a>
+  <a href="#client-order-detail"><span class="method-badge GET">GET</span> Order Detail</a>
+  <a href="#create-order"><span class="method-badge POST">POST</span> Create Order</a>
+  <a href="#upload-doc"><span class="method-badge POST">POST</span> Upload Document</a>
+  <a href="#pay-order"><span class="method-badge POST">POST</span> Pay Order</a>
+  <a href="#order-timeline"><span class="method-badge GET">GET</span> Order Timeline</a>
+
+  <h3>Company Endpoints</h3>
+  <a href="#company-orders"><span class="method-badge GET">GET</span> List Orders</a>
+  <a href="#company-order-detail"><span class="method-badge GET">GET</span> Order Detail</a>
+  <a href="#update-status"><span class="method-badge PATCH">PATCH</span> Update Status</a>
+
+  <h3>Reviews</h3>
+  <a href="#get-review"><span class="method-badge GET">GET</span> Get Review</a>
+  <a href="#post-review"><span class="method-badge POST">POST</span> Submit Review</a>
+  <a href="#patch-review"><span class="method-badge PATCH">PATCH</span> Edit Review</a>
+  <a href="#delete-review"><span class="method-badge DELETE">DELETE</span> Delete Review</a>
+  <a href="#company-reviews"><span class="method-badge GET">GET</span> Company Reviews</a>
+
+  <h3>Reference</h3>
+  <a href="#status-flow">Status Flow</a>
+  <a href="#auth">Auth</a>
+</nav>
+
+<!-- Main -->
+<main>
+  <div class="page-header">
+    <h1>Orders & Reviews API</h1>
+    <p>Reference for frontend developers consuming the Orders and Reviews modules of GovConnect AI. Base URL: <code style="font-family:var(--mono);color:var(--teal)">https://api.govconnect.ai/api/v1</code></p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════ CLIENT ORDERS ══ -->
+  <div class="section" id="client-orders-section">
+    <div class="section-title">
+      <div class="section-icon">👤</div>
+      Client Endpoints
+    </div>
+
+    <!-- List Orders -->
+    <div class="endpoint" id="client-orders">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge GET">GET</span>
+        <div class="endpoint-title">
+          <div class="endpoint-name">List My Orders</div>
+          <div class="endpoint-url">/orders/</div>
+        </div>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="info-row">
+          <span class="tag auth-required">🔑 Auth Required</span>
+          <span class="tag role-client">Client only</span>
+        </div>
+        <p style="margin-top:12px;color:var(--muted)">Returns all orders belonging to the authenticated client, newest first.</p>
+
+        <div class="subsection">
+          <div class="subsection-label">Response 200</div>
+          <pre>[
+  {
+    <span class="key">"id"</span>: <span class="num">42</span>,
+    <span class="key">"company"</span>: <span class="str">"Al Ahram Consultancy"</span>,
+    <span class="key">"procedure"</span>: <span class="str">"Commercial Register Renewal"</span>,
+    <span class="key">"status"</span>: <span class="str">"pending"</span>,
+    <span class="key">"notes"</span>: <span class="str">"Urgent"</span>,
+    <span class="key">"rejection_reason"</span>: <span class="str">""</span>,
+    <span class="key">"documents"</span>: [],
+    <span class="key">"created_at"</span>: <span class="str">"2025-06-01T10:30:00Z"</span>
+  }
+]</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- Order Detail -->
+    <div class="endpoint" id="client-order-detail">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge GET">GET</span>
+        <div class="endpoint-title">
+          <div class="endpoint-name">Order Detail</div>
+          <div class="endpoint-url">/orders/{id}</div>
+        </div>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="info-row">
+          <span class="tag auth-required">🔑 Auth Required</span>
+          <span class="tag role-client">Client only</span>
+        </div>
+        <p style="margin-top:12px;color:var(--muted)">Returns the full detail for a single order. Documents are embedded in the response.</p>
+
+        <div class="subsection">
+          <div class="subsection-label">URL Parameters</div>
+          <table>
+            <tr><th>Param</th><th>Type</th><th>Description</th></tr>
+            <tr><td>id</td><td>integer</td><td>Order primary key</td></tr>
+          </table>
+        </div>
+
+        <div class="subsection">
+          <div class="subsection-label">Response 200</div>
+          <pre>{
+  <span class="key">"id"</span>: <span class="num">42</span>,
+  <span class="key">"company"</span>: <span class="str">"Al Ahram Consultancy"</span>,
+  <span class="key">"procedure"</span>: <span class="str">"Commercial Register Renewal"</span>,
+  <span class="key">"status"</span>: <span class="str">"pending"</span>,
+  <span class="key">"notes"</span>: <span class="str">"Urgent"</span>,
+  <span class="key">"rejection_reason"</span>: <span class="str">""</span>,
+  <span class="key">"documents"</span>: [
+    {
+      <span class="key">"requirement"</span>: <span class="num">3</span>,
+      <span class="key">"file"</span>: <span class="str">"http://..."</span>
+    }
+  ],
+  <span class="key">"created_at"</span>: <span class="str">"2025-06-01T10:30:00Z"</span>
+}</pre>
+        </div>
+
+        <div class="status-list">
+          <div class="status-item"><span class="status-code s2xx">200</span> Order found and returned</div>
+          <div class="status-item"><span class="status-code s4xx">404</span> No order matches this id</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Create Order -->
+    <div class="endpoint" id="create-order">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge POST">POST</span>
+        <div class="endpoint-title">
+          <div class="endpoint-name">Create Order</div>
+          <div class="endpoint-url">/orders/</div>
+        </div>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="info-row">
+          <span class="tag auth-required">🔑 Auth Required</span>
+          <span class="tag role-client">Client only</span>
+        </div>
+        <p style="margin-top:12px;color:var(--muted)">Creates a new order for a company service. The order starts in <code style="color:var(--orange)">pending</code> status.</p>
+
+        <div class="subsection">
+          <div class="subsection-label">Request Body</div>
+          <pre>{
+  <span class="key">"service"</span>: <span class="num">7</span>,        <span class="cmnt">// required — CompanyService ID</span>
+  <span class="key">"notes"</span>: <span class="str">"Urgent"</span>  <span class="cmnt">// optional — free text</span>
+}</pre>
+        </div>
+
+        <div class="subsection">
+          <div class="subsection-label">Response 201</div>
+          <pre>{
+  <span class="key">"service"</span>: <span class="num">7</span>,
+  <span class="key">"notes"</span>: <span class="str">"Urgent"</span>
+}</pre>
+        </div>
+
+        <div class="status-list">
+          <div class="status-item"><span class="status-code s2xx">201</span> Order created</div>
+          <div class="status-item"><span class="status-code s4xx">400</span> Validation error — check errors object</div>
+        </div>
+
+        <div class="notice">
+          <strong>Next step:</strong> After creating an order, upload required documents via <code>POST /orders/{id}/documents</code>. Documents can only be uploaded while status is <code>pending</code>.
+        </div>
+      </div>
+    </div>
+
+    <!-- Upload Document -->
+    <div class="endpoint" id="upload-doc">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge POST">POST</span>
+        <div class="endpoint-title">
+          <div class="endpoint-name">Upload Document</div>
+          <div class="endpoint-url">/orders/{id}/documents</div>
+        </div>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="info-row">
+          <span class="tag auth-required">🔑 Auth Required</span>
+          <span class="tag role-client">Client only</span>
+        </div>
+        <p style="margin-top:12px;color:var(--muted)">Uploads a document file for a specific requirement on this order. Only one document per requirement is allowed. OCR processing starts automatically in the background.</p>
+
+        <div class="subsection">
+          <div class="subsection-label">URL Parameters</div>
+          <table>
+            <tr><th>Param</th><th>Type</th><th>Description</th></tr>
+            <tr><td>id</td><td>integer</td><td>Order primary key</td></tr>
+          </table>
+        </div>
+
+        <div class="subsection">
+          <div class="subsection-label">Request — multipart/form-data</div>
+          <table>
+            <tr><th>Field</th><th>Type</th><th>Description</th></tr>
+            <tr><td>requirement</td><td>integer</td><td>Requirement ID (must belong to this order's procedure)</td></tr>
+            <tr><td>file</td><td>file</td><td>The document file</td></tr>
+          </table>
+          <pre style="margin-top:10px"><span class="cmnt">// JS fetch example</span>
+const form = new FormData();
+form.append(<span class="str">'requirement'</span>, <span class="num">3</span>);
+form.append(<span class="str">'file'</span>, fileInput.files[<span class="num">0</span>]);
+
+fetch(<span class="str">'/api/v1/orders/42/documents'</span>, {
+  method: <span class="str">'POST'</span>,
+  headers: { <span class="str">'Authorization'</span>: <span class="str">`Bearer ${token}`</span> },
+  body: form,
+});</pre>
+        </div>
+
+        <div class="subsection">
+          <div class="subsection-label">Response 201</div>
+          <pre>{
+  <span class="key">"requirement"</span>: <span class="num">3</span>,
+  <span class="key">"file"</span>: <span class="str">"https://storage.govconnect.ai/orders/documents/abc.pdf"</span>
+}</pre>
+        </div>
+
+        <div class="status-list">
+          <div class="status-item"><span class="status-code s2xx">201</span> Document uploaded and OCR queued</div>
+          <div class="status-item"><span class="status-code s4xx">400</span> Order not pending, duplicate requirement, or wrong requirement for this procedure</div>
+          <div class="status-item"><span class="status-code s4xx">404</span> Order not found</div>
+        </div>
+
+        <div class="notice warn">
+          <strong>Constraint:</strong> Document upload is blocked when order status is not <code>pending</code>. Show the upload UI only while <code>status === "pending"</code>.
+        </div>
+      </div>
+    </div>
+
+    <!-- Pay Order -->
+    <div class="endpoint" id="pay-order">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge POST">POST</span>
+        <div class="endpoint-title">
+          <div class="endpoint-name">Pay Order</div>
+          <div class="endpoint-url">/orders/{id}/pay</div>
+        </div>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="info-row">
+          <span class="tag auth-required">🔑 Auth Required</span>
+          <span class="tag role-client">Client only</span>
+        </div>
+        <p style="margin-top:12px;color:var(--muted)">Marks an accepted order as paid. This transitions the order from <code style="color:var(--green)">accepted</code> → <code style="color:var(--teal)">paid</code>. No request body needed.</p>
+
+        <div class="subsection">
+          <div class="subsection-label">Response 200</div>
+          <pre>{
+  <span class="key">"message"</span>: <span class="str">"Payment completed successfully."</span>,
+  <span class="key">"status"</span>: <span class="str">"paid"</span>
+}</pre>
+        </div>
+
+        <div class="status-list">
+          <div class="status-item"><span class="status-code s2xx">200</span> Payment recorded, status is now <code>paid</code></div>
+          <div class="status-item"><span class="status-code s4xx">400</span> Order not in <code>accepted</code> state, or already paid</div>
+          <div class="status-item"><span class="status-code s4xx">404</span> Order not found</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Order Timeline -->
+    <div class="endpoint" id="order-timeline">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge GET">GET</span>
+        <div class="endpoint-title">
+          <div class="endpoint-name">Order Status Timeline</div>
+          <div class="endpoint-url">/orders/{id}/timeline</div>
+        </div>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="info-row">
+          <span class="tag auth-required">🔑 Auth Required</span>
+          <span class="tag role-client">Client only</span>
+        </div>
+        <p style="margin-top:12px;color:var(--muted)">Returns the full status change history for an order, from creation to current state. Useful for building a progress timeline UI.</p>
+
+        <div class="subsection">
+          <div class="subsection-label">Response 200</div>
+          <pre>[
+  { <span class="key">"status"</span>: <span class="str">"pending"</span>,     <span class="key">"changed_at"</span>: <span class="str">"2025-06-01T10:30:00Z"</span> },
+  { <span class="key">"status"</span>: <span class="str">"accepted"</span>,    <span class="key">"changed_at"</span>: <span class="str">"2025-06-02T09:15:00Z"</span> },
+  { <span class="key">"status"</span>: <span class="str">"paid"</span>,        <span class="key">"changed_at"</span>: <span class="str">"2025-06-03T11:00:00Z"</span> },
+  { <span class="key">"status"</span>: <span class="str">"in_progress"</span>, <span class="key">"changed_at"</span>: <span class="str">"2025-06-04T08:00:00Z"</span> }
+]</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════ COMPANY ORDERS ══ -->
+  <div class="section" id="company-orders-section">
+    <div class="section-title">
+      <div class="section-icon">🏢</div>
+      Company Endpoints
+      <div style="font-size:11px;font-weight:400;color:var(--muted);margin-left:4px">Base: /company/orders/</div>
+    </div>
+
+    <!-- Company List -->
+    <div class="endpoint" id="company-orders">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge GET">GET</span>
+        <div class="endpoint-title">
+          <div class="endpoint-name">List All Company Orders</div>
+          <div class="endpoint-url">/company/orders/</div>
+        </div>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="info-row">
+          <span class="tag auth-required">🔑 Auth Required</span>
+          <span class="tag role-company">Company owner only</span>
+        </div>
+        <p style="margin-top:12px;color:var(--muted)">Returns all orders placed for any service belonging to the authenticated company owner's company.</p>
+
+        <div class="subsection">
+          <div class="subsection-label">Response 200</div>
+          <pre>[
+  {
+    <span class="key">"id"</span>: <span class="num">42</span>,
+    <span class="key">"client"</span>: <span class="str">"ahmed@example.com"</span>,
+    <span class="key">"procedure"</span>: <span class="str">"Commercial Register Renewal"</span>,
+    <span class="key">"status"</span>: <span class="str">"pending"</span>,
+    <span class="key">"notes"</span>: <span class="str">"Urgent"</span>,
+    <span class="key">"documents"</span>: [],
+    <span class="key">"created_at"</span>: <span class="str">"2025-06-01T10:30:00Z"</span>
+  }
+]</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- Company Order Detail -->
+    <div class="endpoint" id="company-order-detail">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge GET">GET</span>
+        <div class="endpoint-title">
+          <div class="endpoint-name">Company Order Detail</div>
+          <div class="endpoint-url">/company/orders/{id}/</div>
+        </div>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="info-row">
+          <span class="tag auth-required">🔑 Auth Required</span>
+          <span class="tag role-company">Company owner only</span>
+        </div>
+        <p style="margin-top:12px;color:var(--muted)">Returns full detail for a single order including all uploaded client documents and their file URLs.</p>
+
+        <div class="subsection">
+          <div class="subsection-label">Response 200</div>
+          <pre>{
+  <span class="key">"id"</span>: <span class="num">42</span>,
+  <span class="key">"client"</span>: <span class="str">"ahmed@example.com"</span>,
+  <span class="key">"procedure"</span>: <span class="str">"Commercial Register Renewal"</span>,
+  <span class="key">"status"</span>: <span class="str">"pending"</span>,
+  <span class="key">"notes"</span>: <span class="str">"Urgent"</span>,
+  <span class="key">"documents"</span>: [
+    {
+      <span class="key">"id"</span>: <span class="num">5</span>,
+      <span class="key">"requirement"</span>: <span class="str">"National ID Copy"</span>,
+      <span class="key">"file"</span>: <span class="str">"https://storage.govconnect.ai/orders/documents/id.pdf"</span>,
+      <span class="key">"uploaded_at"</span>: <span class="str">"2025-06-01T11:00:00Z"</span>
+    }
+  ],
+  <span class="key">"created_at"</span>: <span class="str">"2025-06-01T10:30:00Z"</span>
+}</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- Update Status -->
+    <div class="endpoint" id="update-status">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge PATCH">PATCH</span>
+        <div class="endpoint-title">
+          <div class="endpoint-name">Update Order Status</div>
+          <div class="endpoint-url">/orders/{pk}/status/</div>
+        </div>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="info-row">
+          <span class="tag auth-required">🔑 Auth Required</span>
+          <span class="tag role-company">Company owner only</span>
+        </div>
+        <p style="margin-top:12px;color:var(--muted)">Transitions an order to a new status. Only valid transitions are accepted — see the status flow below. Automatically sends a notification to the client on status change.</p>
+
+        <div class="subsection">
+          <div class="subsection-label">Request Body</div>
+          <pre>{
+  <span class="key">"status"</span>: <span class="str">"accepted"</span>  <span class="cmnt">// see allowed transitions below</span>
+}</pre>
+        </div>
+
+        <div class="subsection">
+          <div class="subsection-label">Allowed Transitions</div>
+          <table>
+            <tr><th>From</th><th>To</th></tr>
+            <tr><td>pending</td><td>accepted, rejected</td></tr>
+            <tr><td>paid</td><td>in_progress</td></tr>
+            <tr><td>in_progress</td><td>completed</td></tr>
+            <tr><td>accepted, completed, rejected</td><td>— (terminal)</td></tr>
+          </table>
+        </div>
+
+        <div class="subsection">
+          <div class="subsection-label">Response 200</div>
+          <pre>{ <span class="key">"status"</span>: <span class="str">"accepted"</span> }</pre>
+        </div>
+
+        <div class="status-list">
+          <div class="status-item"><span class="status-code s2xx">200</span> Status updated</div>
+          <div class="status-item"><span class="status-code s4xx">400</span> Invalid transition — <code>cannot change status from X to Y</code></div>
+          <div class="status-item"><span class="status-code s4xx">404</span> Order not found</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════ REVIEWS ══ -->
+  <div class="section" id="reviews-section">
+    <div class="section-title">
+      <div class="section-icon">⭐</div>
+      Reviews
+    </div>
+
+    <div class="notice" style="margin-bottom:20px">
+      All review endpoints are scoped to an order: <code>/orders/{id}/review</code>. A review can only be created or modified once the order status is <code>completed</code>. Each order can have at most one review.
+    </div>
+
+    <!-- Get Review -->
+    <div class="endpoint" id="get-review">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge GET">GET</span>
+        <div class="endpoint-title">
+          <div class="endpoint-name">Get Order Review</div>
+          <div class="endpoint-url">/orders/{id}/review</div>
+        </div>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="info-row">
+          <span class="tag auth-public">🌐 Public</span>
+        </div>
+        <p style="margin-top:12px;color:var(--muted)">Returns the review for a specific order. No authentication needed.</p>
+
+        <div class="subsection">
+          <div class="subsection-label">Response 200</div>
+          <pre>{
+  <span class="key">"comment"</span>: <span class="str">"Excellent service, very professional."</span>,
+  <span class="key">"rating"</span>: <span class="num">5</span>
+}</pre>
+        </div>
+
+        <div class="status-list">
+          <div class="status-item"><span class="status-code s2xx">200</span> Review returned</div>
+          <div class="status-item"><span class="status-code s4xx">400</span> Order has no review yet</div>
+          <div class="status-item"><span class="status-code s4xx">404</span> Order not found</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Post Review -->
+    <div class="endpoint" id="post-review">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge POST">POST</span>
+        <div class="endpoint-title">
+          <div class="endpoint-name">Submit Review</div>
+          <div class="endpoint-url">/orders/{id}/review</div>
+        </div>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="info-row">
+          <span class="tag auth-required">🔑 Auth Required</span>
+          <span class="tag role-client">Client only</span>
+        </div>
+        <p style="margin-top:12px;color:var(--muted)">Creates a review for a completed order. Each order can only be reviewed once.</p>
+
+        <div class="subsection">
+          <div class="subsection-label">Request Body</div>
+          <pre>{
+  <span class="key">"rating"</span>: <span class="num">5</span>,                                  <span class="cmnt">// required — integer 1–5</span>
+  <span class="key">"comment"</span>: <span class="str">"Excellent service, very professional."</span>  <span class="cmnt">// optional, max 200 chars</span>
+}</pre>
+        </div>
+
+        <div class="subsection">
+          <div class="subsection-label">Response 200</div>
+          <pre>{
+  <span class="key">"comment"</span>: <span class="str">"Excellent service, very professional."</span>,
+  <span class="key">"rating"</span>: <span class="num">5</span>
+}</pre>
+        </div>
+
+        <div class="status-list">
+          <div class="status-item"><span class="status-code s2xx">200</span> Review created</div>
+          <div class="status-item"><span class="status-code s4xx">400</span> Order not <code>completed</code>, or already reviewed</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit Review -->
+    <div class="endpoint" id="patch-review">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge PATCH">PATCH</span>
+        <div class="endpoint-title">
+          <div class="endpoint-name">Edit Review</div>
+          <div class="endpoint-url">/orders/{id}/review</div>
+        </div>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="info-row">
+          <span class="tag auth-required">🔑 Auth Required</span>
+          <span class="tag role-client">Client only</span>
+        </div>
+        <p style="margin-top:12px;color:var(--muted)">Partially updates an existing review. Send only the fields you want to change.</p>
+
+        <div class="subsection">
+          <div class="subsection-label">Request Body (partial)</div>
+          <pre>{
+  <span class="key">"comment"</span>: <span class="str">"Updated comment."</span>  <span class="cmnt">// or "rating", or both</span>
+}</pre>
+        </div>
+
+        <div class="status-list">
+          <div class="status-item"><span class="status-code s2xx">200</span> Review updated</div>
+          <div class="status-item"><span class="status-code s4xx">400</span> No review exists for this order</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delete Review -->
+    <div class="endpoint" id="delete-review">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge DELETE">DELETE</span>
+        <div class="endpoint-title">
+          <div class="endpoint-name">Delete Review</div>
+          <div class="endpoint-url">/orders/{id}/review</div>
+        </div>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="info-row">
+          <span class="tag auth-required">🔑 Auth Required</span>
+          <span class="tag role-client">Client only</span>
+        </div>
+        <p style="margin-top:12px;color:var(--muted)">Permanently deletes the review for this order. Returns 204 No Content on success.</p>
+
+        <div class="status-list">
+          <div class="status-item"><span class="status-code s2xx">204</span> Review deleted</div>
+          <div class="status-item"><span class="status-code s4xx">400</span> No review exists for this order</div>
+          <div class="status-item"><span class="status-code s4xx">404</span> Order not found</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Company Reviews -->
+    <div class="endpoint" id="company-reviews">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge GET">GET</span>
+        <div class="endpoint-title">
+          <div class="endpoint-name">All Reviews for a Company</div>
+          <div class="endpoint-url">/company/{id}/reviews</div>
+        </div>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="info-row">
+          <span class="tag auth-public">🌐 Public</span>
+        </div>
+        <p style="margin-top:12px;color:var(--muted)">Returns every review submitted for all orders belonging to a specific company. Use this on company profile pages to show the overall rating feed.</p>
+
+        <div class="subsection">
+          <div class="subsection-label">URL Parameters</div>
+          <table>
+            <tr><th>Param</th><th>Type</th><th>Description</th></tr>
+            <tr><td>id</td><td>integer</td><td>Company primary key</td></tr>
+          </table>
+        </div>
+
+        <div class="subsection">
+          <div class="subsection-label">Response 200</div>
+          <pre>[
+  { <span class="key">"comment"</span>: <span class="str">"Fast and reliable."</span>,   <span class="key">"rating"</span>: <span class="num">4</span> },
+  { <span class="key">"comment"</span>: <span class="str">"Good communication."</span>, <span class="key">"rating"</span>: <span class="num">5</span> }
+]</pre>
+        </div>
+
+        <div class="status-list">
+          <div class="status-item"><span class="status-code s2xx">200</span> Reviews array (may be empty)</div>
+          <div class="status-item"><span class="status-code s4xx">404</span> No company matches this id</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════ STATUS FLOW ══ -->
+  <div class="section" id="status-flow">
+    <div class="section-title">
+      <div class="section-icon">🔄</div>
+      Order Status Flow
+    </div>
+
+    <div class="flow">
+      <p style="font-size:12px;color:var(--muted);margin-bottom:16px">Full lifecycle — <span style="color:var(--teal)">teal</span> = company action, <span style="color:var(--purple)">purple</span> = client action</p>
+
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+          <div class="flow-step active">pending</div>
+          <span class="flow-arrow" style="color:var(--teal)">→ company</span>
+          <div class="flow-step" style="border-color:var(--green);color:var(--green);background:var(--green-dim)">accepted</div>
+          <span class="flow-arrow" style="color:var(--purple)">→ client pays</span>
+          <div class="flow-step" style="border-color:var(--teal);color:var(--teal);background:rgba(57,197,207,.12)">paid</div>
+          <span class="flow-arrow" style="color:var(--teal)">→ company</span>
+          <div class="flow-step" style="border-color:var(--orange);color:var(--orange);background:var(--orange-dim)">in_progress</div>
+          <span class="flow-arrow" style="color:var(--teal)">→ company</span>
+          <div class="flow-step terminal">completed</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <div class="flow-step active">pending</div>
+          <span class="flow-arrow" style="color:var(--teal)">→ company rejects</span>
+          <div class="flow-step dead">rejected</div>
+        </div>
+      </div>
+
+      <p style="font-size:12px;color:var(--muted);margin-top:16px">After <code style="color:var(--green)">completed</code>, the client can submit a review via <code>/orders/{id}/review</code>.</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════ AUTH ══ -->
+  <div class="section" id="auth">
+    <div class="section-title">
+      <div class="section-icon">🔐</div>
+      Authentication
+    </div>
+
+    <p style="color:var(--muted);margin-bottom:14px">All protected endpoints require a JWT Bearer token in the Authorization header.</p>
+
+    <pre><span class="cmnt">// Include in every authenticated request</span>
+Authorization: Bearer &lt;access_token&gt;</pre>
+
+    <div style="margin-top:20px">
+      <div class="subsection-label" style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:10px">Role Matrix</div>
+      <table>
+        <tr><th>Endpoint group</th><th>Required role</th></tr>
+        <tr><td>/orders/ (write)</td><td style="color:var(--purple);font-family:var(--mono);font-size:12px">IsClient</td></tr>
+        <tr><td>/orders/ (read)</td><td style="color:var(--purple);font-family:var(--mono);font-size:12px">IsClient</td></tr>
+        <tr><td>/company/orders/</td><td style="color:var(--teal);font-family:var(--mono);font-size:12px">isCompanyOwner</td></tr>
+        <tr><td>/orders/{pk}/status/</td><td style="color:var(--teal);font-family:var(--mono);font-size:12px">isCompanyOwner</td></tr>
+        <tr><td>/orders/{id}/review (write)</td><td style="color:var(--purple);font-family:var(--mono);font-size:12px">IsClient</td></tr>
+        <tr><td>/orders/{id}/review (GET)</td><td style="color:var(--green);font-family:var(--mono);font-size:12px">Public</td></tr>
+        <tr><td>/company/{id}/reviews</td><td style="color:var(--green);font-family:var(--mono);font-size:12px">Public</td></tr>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+<script>
+function toggle(header) {
+  const endpoint = header.closest('.endpoint');
+  endpoint.classList.toggle('open');
+}
+
+// Expand all on first load for convenience
+document.querySelectorAll('.endpoint').forEach(e => e.classList.add('open'));
+
+// Highlight active nav link on scroll
+const sections = document.querySelectorAll('.endpoint, .section');
+const navLinks = document.querySelectorAll('nav a');
+
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(s => {
+    if (window.scrollY >= s.offsetTop - 80) current = s.id;
+  });
+  navLinks.forEach(a => {
+    a.classList.remove('active');
+    if (a.getAttribute('href') === '#' + current) a.classList.add('active');
+  });
+});
+</script>
+</body>
+</html>
