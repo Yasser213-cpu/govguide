@@ -43,6 +43,7 @@ class CompanySerializer(serializers.ModelSerializer):
         read_only=True,
         many=True,
     )
+    rating = serializers.FloatField(read_only=True)
 
     class Meta:
         model = Company
@@ -55,4 +56,5 @@ class CompanySerializer(serializers.ModelSerializer):
             "city",
             "street",
             "company_services",
+            "rating",
         ]

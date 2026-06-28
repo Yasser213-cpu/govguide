@@ -30,7 +30,6 @@ urlpatterns = [
     path("api/v1/available-slots/", include("bookings.api.slots_urls")),
     path("api/v1/orders/", include("orders.api.urls")),
     path("api/v1/company/", include("orders.api.url_company_orders")),
-    
 ]
 
 if settings.DEBUG:

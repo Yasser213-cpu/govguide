@@ -8,6 +8,10 @@ from .serializers import CompanySerializer, CompanyServicesSerializer
 from core.permissions import IsCompany, isCompanyOwner
 from ..filters import CompanyFilter, CompanyServicesFilter
 from rest_framework.pagination import PageNumberPagination
+from reviews.models import Review
+from reviews.api.serializer import ReviewSerializer
+from django.db.models.functions import Coalesce
+from django.db.models import Avg, Value
 
 
 class CompanyAPIView(APIView):
@@ -19,8 +23,12 @@ class CompanyAPIView(APIView):
 
     def get_object(self, id):
         try:
-            company = Company.objects.get(pk=id)
-            return company
+            return Company.objects.annotate(
+                rating=Coalesce(
+                    Avg("services__orders__order_review__rating"),
+                    Value(0.0),
+                )
+            ).get(pk=id)
         except Company.DoesNotExist:
             raise NotFound({"detail": "there is no company matches this id"})
 
@@ -28,29 +36,34 @@ class CompanyAPIView(APIView):
         if id:
             company = self.get_object(id)
             serializer = CompanySerializer(company)
-            return Response(serializer.data, status.HTTP_200_OK)
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
-        companies = Company.objects.all()
+        companies = Company.objects.annotate(
+            rating=Coalesce(
+                Avg("services__orders__order_review__rating"),
+                Value(0.0),
+            )
+        )
+
         company_filter = CompanyFilter(request.GET, queryset=companies)
         paginator = PageNumberPagination()
         result_page = paginator.paginate_queryset(company_filter.qs, request)
 
         serializer = CompanySerializer(result_page, many=True)
-
         return paginator.get_paginated_response(serializer.data)
 
     def post(self, request):
         serializer = CompanySerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(owner=request.user)
-            return Response(serializer.data, status.HTTP_201_CREATED)
-        return Response(serializer.errors, status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, id):
         company = self.get_object(id)
         self.check_object_permissions(request, company)
         company.delete()
-        return Response(status.HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     def patch(self, request, id):
         company = self.get_object(id)
@@ -62,19 +75,19 @@ class CompanyAPIView(APIView):
             serializer.save()
             return Response(serializer.data)
 
-        return Response(serializer.errors, status=400)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def put(self, request, id):
         company = self.get_object(id)
         self.check_object_permissions(request, company)
 
-        serializer = CompanySerializer(company, data=request.data, partial=True)
+        serializer = CompanySerializer(company, data=request.data)
 
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
 
-        return Response(serializer.errors, status=400)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class CompanyServices(APIView):
@@ -144,13 +157,29 @@ class CompanyServices(APIView):
         service.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-class CompanyServiceDetails(APIView):
-        def get(self, request, id):
-            try:
-                company = Company.objects.get(pk=id)
-            except Company.DoesNotExist:
-                raise NotFound({"detail": "there is no company matches this id"})
 
-            services = CompanyService.objects.filter(company=company)
-            serializer = CompanyServicesSerializer(services, many=True)
-            return Response(serializer.data)
+class CompanyServiceDetails(APIView):
+    def get(self, request, id):
+        try:
+            company = Company.objects.get(pk=id)
+        except Company.DoesNotExist:
+            raise NotFound({"detail": "there is no company matches this id"})
+
+        services = CompanyService.objects.filter(company=company)
+        serializer = CompanyServicesSerializer(services, many=True)
+        return Response(serializer.data)
+
+
+class CompanyReviewsAPIView(APIView):
+    def get_object(self, id):
+        try:
+            company = Company.objects.get(pk=id)
+            return company
+        except Company.DoesNotExist:
+            raise NotFound({"detail": "there is no company matches this id"})
+
+    def get(self, request, id):
+        company = self.get_object(id)
+        reviews = Review.objects.filter(order__service__company=company)
+        serializer = ReviewSerializer(reviews, many=True)
+        return Response(serializer.data)
