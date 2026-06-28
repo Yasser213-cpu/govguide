@@ -14,6 +14,7 @@ from rest_framework.exceptions import NotFound
 from core.permissions import IsClient, IsCompany, isCompanyOwner
 from rest_framework.permissions import IsAuthenticated
 from ai_agents.tasks import run_ocr_on_document
+from notifications.tasks import send_order_notification
 
 
 class ClientOrdersAPIView(APIView):
@@ -122,8 +123,18 @@ class OrderStatusAPIView(APIView):
         self.check_object_permissions(request, order.service)
 
         serializer = OrderStatusSerializer(order, data=request.data, partial=True)
-
         serializer.is_valid(raise_exception=True)
         serializer.save()
+
+        # Trigger a notification based on the new status
+        new_status = serializer.validated_data.get("status")
+        messages = {
+            "accepted": f"تم قبول طلبك رقم #{order.id}",
+            "rejected": f"تم رفض طلبك رقم #{order.id}",
+            "paid": f"تم تأكيد الدفع لطلبك رقم #{order.id}",
+            "completed": f"تم إكمال طلبك رقم #{order.id}",
+        }
+        if new_status in messages:
+            send_order_notification.delay(order.id, new_status, messages[new_status])
 
         return Response(serializer.data)
