@@ -5,10 +5,11 @@ from .serializers import (
     ClientOrderDetailSerializer,
     CompanyOrderDetailSerializer,
     OrderStatusSerializer,
+    OrderStatusHistorySerializer,
 )
 from rest_framework.response import Response
 from rest_framework import status
-from ..models import Order
+from ..models import Order, OrderStatusHistory
 from rest_framework.views import APIView
 from rest_framework.exceptions import NotFound
 from core.permissions import IsClient, IsCompany, isCompanyOwner
@@ -138,3 +139,61 @@ class OrderStatusAPIView(APIView):
             send_order_notification.delay(order.id, new_status, messages[new_status])
 
         return Response(serializer.data)
+        serializer = OrderStatusSerializer(
+            order, data=request.data, partial=True, context={"order": order}
+        )
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data)
+
+
+class PayOrderAPIView(APIView):
+    def get_permissions(self):
+        return [IsAuthenticated(), IsClient()]
+
+    def post(self, request, id):
+        try:
+
+            order = Order.objects.get(pk=id)
+            self.check_object_permissions(request, order)
+
+            if order.status == Order.PAID_STATUS:
+                return Response(
+                    {"detail": "This order has already been paid."},
+                    status.HTTP_400_BAD_REQUEST,
+                )
+            elif order.status != Order.ACCEPTED_STATUS:
+                return Response(
+                    {"error": "Only accepted orders can be paid."},
+                    status.HTTP_400_BAD_REQUEST,
+                )
+
+            order.status = Order.PAID_STATUS
+            order.save()
+
+            OrderStatusHistory.objects.create(order=order, status=Order.PAID_STATUS)
+
+            return Response(
+                {"message": "Payment completed successfully.", "status": "paid"}
+            )
+
+        except Order.DoesNotExist:
+            raise NotFound("There is no order matches this id")
+
+
+class OrderStatusHistoryAPIView(APIView):
+    def get_permissions(self):
+        return [IsAuthenticated(), IsClient()]
+
+    def get(self, request, id):
+
+        try:
+            order = Order.objects.get(pk=id)
+            self.check_object_permissions(request, order)
+            orders = OrderStatusHistory.objects.filter(order=order)
+            serializer = OrderStatusHistorySerializer(orders, many=True)
+            return Response(serializer.data)
+        except Order.DoesNotExist:
+            raise NotFound("There is no order matches this id")
