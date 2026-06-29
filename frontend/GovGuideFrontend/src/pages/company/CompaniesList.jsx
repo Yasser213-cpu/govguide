@@ -2,15 +2,42 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { getCompanies } from "../../api/companyApi";
 import {
-  FiSearch, FiMapPin, FiPhone, FiChevronLeft, FiChevronRight,
-  FiFilter, FiX, FiClock, FiHeart,
+  FiSearch,
+  FiMapPin,
+  FiPhone,
+  FiChevronLeft,
+  FiChevronRight,
+  FiFilter,
+  FiX,
+  FiClock,
+  FiHeart,
 } from "react-icons/fi";
 
 const GOVERNORATES = [
-  "All Areas", "Cairo", "Giza", "Alexandria", "Dakahlia", "Red Sea",
-  "Beheira", "Fayoum", "Gharbiya", "Ismailia", "Menofia", "Minya",
-  "Qaliubiya", "Port Said", "Luxor", "Qena", "Sohag", "Suez",
-  "Aswan", "Assiut", "Beni Suef", "Kafr El Sheikh", "Sharqia", "Damietta",
+  "All Areas",
+  "Cairo",
+  "Giza",
+  "Alexandria",
+  "Dakahlia",
+  "Red Sea",
+  "Beheira",
+  "Fayoum",
+  "Gharbiya",
+  "Ismailia",
+  "Menofia",
+  "Minya",
+  "Qaliubiya",
+  "Port Said",
+  "Luxor",
+  "Qena",
+  "Sohag",
+  "Suez",
+  "Aswan",
+  "Assiut",
+  "Beni Suef",
+  "Kafr El Sheikh",
+  "Sharqia",
+  "Damietta",
 ];
 
 function CompanyCard({ company, onViewDetails }) {
@@ -28,7 +55,7 @@ function CompanyCard({ company, onViewDetails }) {
       services
         .filter((s) => s.is_available && s.company_offerings?.name)
         .map((s) => s.company_offerings.name)
-        .slice(0, 3)
+        .slice(0, 3),
     ),
   ];
 
@@ -49,7 +76,10 @@ function CompanyCard({ company, onViewDetails }) {
             </h3>
             <div className="flex items-center gap-1 text-xs text-[var(--text-secondary)] mt-0.5">
               <FiMapPin size={11} />
-              <span>{company.governorate}{company.city ? `, ${company.city}` : ""}</span>
+              <span>
+                {company.governorate}
+                {company.city ? `, ${company.city}` : ""}
+              </span>
             </div>
           </div>
         </div>
@@ -125,7 +155,8 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
         let i = Math.max(2, currentPage - 1);
         i <= Math.min(totalPages - 1, currentPage + 1);
         i++
-      ) pages.push(i);
+      )
+        pages.push(i);
       if (currentPage < totalPages - 2) pages.push("...");
       pages.push(totalPages);
     }
@@ -144,7 +175,10 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
 
       {getPages().map((page, idx) =>
         page === "..." ? (
-          <span key={`ellipsis-${idx}`} className="px-1 text-[var(--text-secondary)] text-sm">
+          <span
+            key={`ellipsis-${idx}`}
+            className="px-1 text-[var(--text-secondary)] text-sm"
+          >
             ...
           </span>
         ) : (
@@ -152,14 +186,15 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
             key={page}
             onClick={() => onPageChange(page)}
             className={`flex h-9 w-9 items-center justify-center rounded-lg text-sm font-medium transition-colors
-              ${currentPage === page
-                ? "bg-[var(--primary)] text-white border border-[var(--primary)]"
-                : "border border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--primary)] hover:text-[var(--primary)]"
+              ${
+                currentPage === page
+                  ? "bg-[var(--primary)] text-white border border-[var(--primary)]"
+                  : "border border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--primary)] hover:text-[var(--primary)]"
               }`}
           >
             {page}
           </button>
-        )
+        ),
       )}
 
       <button
@@ -184,9 +219,13 @@ export default function CompaniesList() {
 
   // Filters derived from URL params
   const [nameSearch, setNameSearch] = useState(searchParams.get("name") || "");
-  const [governorate, setGovernorate] = useState(searchParams.get("governorate") || "");
+  const [governorate, setGovernorate] = useState(
+    searchParams.get("governorate") || "",
+  );
   const [city, setCity] = useState(searchParams.get("city") || "");
-  const [currentPage, setCurrentPage] = useState(Number(searchParams.get("page")) || 1);
+  const [currentPage, setCurrentPage] = useState(
+    Number(searchParams.get("page")) || 1,
+  );
   const [showFilters, setShowFilters] = useState(false);
 
   const PAGE_SIZE = 10;
@@ -196,11 +235,12 @@ export default function CompaniesList() {
     (page = currentPage) => {
       const params = { page };
       if (nameSearch.trim()) params.name = nameSearch.trim();
-      if (governorate && governorate !== "All Areas") params.governorate = governorate;
+      if (governorate && governorate !== "All Areas")
+        params.governorate = governorate;
       if (city.trim()) params.city = city.trim();
       return params;
     },
-    [nameSearch, governorate, city, currentPage]
+    [nameSearch, governorate, city, currentPage],
   );
 
   const fetchCompanies = useCallback(
@@ -226,7 +266,7 @@ export default function CompaniesList() {
         setLoading(false);
       }
     },
-    [buildParams, currentPage, setSearchParams]
+    [buildParams, currentPage, setSearchParams],
   );
 
   // Initial load
@@ -264,20 +304,26 @@ export default function CompaniesList() {
       .finally(() => setLoading(false));
   };
 
-  const hasActiveFilters = nameSearch || (governorate && governorate !== "All Areas") || city;
+  const hasActiveFilters =
+    nameSearch || (governorate && governorate !== "All Areas") || city;
 
   return (
     <div className="min-h-screen bg-[var(--background-secondary)]">
       {/* ── Header ── */}
       <div className="bg-[var(--background-primary)] border-b border-[var(--border)] px-6 py-8">
         <div className="max-w-6xl mx-auto">
-          <h1 className="text-2xl font-bold text-[var(--text-primary)] mb-1">Companies</h1>
+          <h1 className="text-2xl font-bold text-[var(--text-primary)] mb-1">
+            Companies
+          </h1>
           <p className="text-sm text-[var(--text-secondary)]">
             Find and compare trusted service providers
           </p>
 
           {/* Search + filter bar */}
-          <form onSubmit={handleSearch} className="mt-5 flex flex-col sm:flex-row gap-3">
+          <form
+            onSubmit={handleSearch}
+            className="mt-5 flex flex-col sm:flex-row gap-3"
+          >
             <div className="relative flex-1">
               <FiSearch
                 className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]"
@@ -310,9 +356,10 @@ export default function CompaniesList() {
               type="button"
               onClick={() => setShowFilters((v) => !v)}
               className={`flex items-center gap-2 h-10 px-4 rounded-lg border text-sm font-medium transition-colors
-                ${showFilters
-                  ? "border-[var(--primary)] bg-[var(--primary-light)] text-[var(--primary)]"
-                  : "border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--primary)] hover:text-[var(--primary)]"
+                ${
+                  showFilters
+                    ? "border-[var(--primary)] bg-[var(--primary-light)] text-[var(--primary)]"
+                    : "border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--primary)] hover:text-[var(--primary)]"
                 }`}
             >
               <FiFilter size={14} />
@@ -331,7 +378,9 @@ export default function CompaniesList() {
           {showFilters && (
             <div className="mt-3 flex flex-wrap gap-3 items-end">
               <div className="flex flex-col gap-1">
-                <label className="text-xs text-[var(--text-secondary)]">City</label>
+                <label className="text-xs text-[var(--text-secondary)]">
+                  City
+                </label>
                 <input
                   type="text"
                   placeholder="e.g. Nasr City"
@@ -349,7 +398,10 @@ export default function CompaniesList() {
               {nameSearch && (
                 <span className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-[var(--primary-light)] text-[var(--primary)]">
                   Name: {nameSearch}
-                  <button onClick={() => setNameSearch("")} className="hover:opacity-70">
+                  <button
+                    onClick={() => setNameSearch("")}
+                    className="hover:opacity-70"
+                  >
                     <FiX size={11} />
                   </button>
                 </span>
@@ -357,7 +409,10 @@ export default function CompaniesList() {
               {governorate && governorate !== "All Areas" && (
                 <span className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-[var(--primary-light)] text-[var(--primary)]">
                   {governorate}
-                  <button onClick={() => setGovernorate("")} className="hover:opacity-70">
+                  <button
+                    onClick={() => setGovernorate("")}
+                    className="hover:opacity-70"
+                  >
                     <FiX size={11} />
                   </button>
                 </span>
@@ -365,7 +420,10 @@ export default function CompaniesList() {
               {city && (
                 <span className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-[var(--primary-light)] text-[var(--primary)]">
                   {city}
-                  <button onClick={() => setCity("")} className="hover:opacity-70">
+                  <button
+                    onClick={() => setCity("")}
+                    className="hover:opacity-70"
+                  >
                     <FiX size={11} />
                   </button>
                 </span>
@@ -434,7 +492,8 @@ export default function CompaniesList() {
               No companies found
             </h3>
             <p className="text-sm text-[var(--text-secondary)] max-w-xs">
-              Try adjusting your search or clearing the filters to see more results.
+              Try adjusting your search or clearing the filters to see more
+              results.
             </p>
             {hasActiveFilters && (
               <button

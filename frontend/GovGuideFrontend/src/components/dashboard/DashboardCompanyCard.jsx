@@ -1,0 +1,108 @@
+import { Link } from "react-router-dom";
+import {
+  FiStar,
+  FiArrowRight,
+  FiMapPin,
+  FiClock,
+  FiDollarSign,
+} from "react-icons/fi";
+
+export default function DashboardCompanyCard({ company }) {
+  const services = company.company_services || [];
+
+  const minFee = services.length
+    ? Math.min(...services.map((s) => parseFloat(s.company_service_fee || 0)))
+    : null;
+
+  const minDays = services.length
+    ? Math.min(...services.map((s) => s.estimated_completion_days || 0))
+    : null;
+
+  const tags = [
+    ...new Set(
+      services
+        .filter((s) => s.is_available && s.company_offerings?.name)
+        .map((s) => s.company_offerings.name)
+        .slice(0, 2),
+    ),
+  ];
+
+  return (
+    <div className="group relative rounded-2xl border border-[var(--border)] bg-[var(--background-primary)] p-5 transition-all duration-300 hover:border-[var(--primary)] hover:shadow-lg">
+      {/* Logo */}
+      <div className="flex justify-center">
+        <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-[var(--primary-light)]">
+          <span className="text-xl font-bold text-[var(--primary)]">
+            {company.name?.[0]}
+          </span>
+        </div>
+      </div>
+
+      {/* Name */}
+      <h3 className="mt-4 line-clamp-1 text-center font-semibold">
+        {company.name}
+      </h3>
+
+      {/* Rating */}
+      <div className="mt-2 flex items-center justify-center gap-1 text-yellow-500">
+        <FiStar className="fill-current" />
+        <span className="font-medium">
+          {company.average_rating?.toFixed(1) || "0.0"}
+        </span>
+        <span className="text-xs text-[var(--text-secondary)]">
+          ({company.reviews_count || 0})
+        </span>
+      </div>
+
+      {/* Location */}
+      {company.city && (
+        <div className="mt-2 flex items-center justify-center gap-1 text-sm text-[var(--text-secondary)]">
+          <FiMapPin size={14} />
+          {company.city}
+        </div>
+      )}
+
+      {/* Extra Info Row */}
+      <div className="mt-4 flex items-center justify-between text-xs text-[var(--text-secondary)]">
+        {/* Price */}
+        <div className="flex items-center gap-1">
+          <FiDollarSign size={14} />
+          <span>
+            {minFee !== null
+              ? `From EGP ${minFee.toLocaleString()}`
+              : "No price"}
+          </span>
+        </div>
+
+        {/* Time */}
+        <div className="flex items-center gap-1">
+          <FiClock size={14} />
+          <span>
+            {minDays !== null ? `${minDays}-${minDays + 2} days` : "N/A"}
+          </span>
+        </div>
+      </div>
+
+      {/* Tags */}
+      <div className="mt-3 flex flex-wrap justify-center gap-2">
+        {tags.map((tag, i) => (
+          <span
+            key={i}
+            className="rounded-full bg-[var(--primary-light)] px-2 py-1 text-xs text-[var(--primary)]"
+          >
+            {tag}
+          </span>
+        ))}
+      </div>
+
+      {/* CTA */}
+      <Link
+        to={`/user/companies/${company.id}`}
+        className="mt-5 flex items-center justify-center gap-2 rounded-xl bg-[var(--primary)] py-2 text-sm font-medium text-white transition hover:opacity-90"
+      >
+        View Profile
+        <FiArrowRight />
+      </Link>
+    </div>
+  );
+}

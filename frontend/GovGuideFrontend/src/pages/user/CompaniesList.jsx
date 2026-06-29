@@ -9,7 +9,7 @@ import {
   FiFilter,
   FiX,
   FiClock,
-  FiHeart,
+  FiStar,
 } from "react-icons/fi";
 import PageHeader from "../../components/layout/PageHeader";
 
@@ -49,6 +49,8 @@ function CompanyCard({ company, onViewDetails }) {
     ? Math.min(...services.map((s) => s.estimated_completion_days))
     : null;
 
+  const rating = company.average_rating;
+
   // Unique procedure names as tags
   const tags = [
     ...new Set(
@@ -60,82 +62,88 @@ function CompanyCard({ company, onViewDetails }) {
   ];
 
   return (
-    <div className="bg-[var(--background-primary)] border border-[var(--border)] rounded-xl p-5 flex flex-col gap-4 hover:shadow-md hover:border-[var(--primary)] transition-all group">
-      {/* Header */}
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex items-center gap-3">
-          {/* Avatar placeholder */}
-          <div className="h-12 w-12 rounded-xl bg-[var(--primary-light)] flex items-center justify-center shrink-0">
-            <span className="text-[var(--primary)] font-bold text-lg uppercase">
+    <div className="bg-[var(--background-primary)] border border-[var(--border)] rounded-xl p-5 hover:shadow-md hover:border-[var(--primary)] transition-all">
+      <div className="flex items-center justify-between gap-6">
+        {/* Left */}
+        <div className="flex items-center gap-4 flex-1">
+          <div className="h-16 w-16 rounded-xl bg-[var(--primary-light)] flex items-center justify-center shrink-0">
+            <span className="text-xl font-bold text-[var(--primary)] uppercase">
               {company.name?.[0] || "C"}
             </span>
           </div>
-          <div>
-            <h3 className="font-semibold text-[var(--text-primary)] text-sm leading-tight line-clamp-1">
+
+          <div className="flex-1">
+            <h3 className="text-lg font-semibold text-[var(--text-primary)]">
               {company.name}
             </h3>
-            <div className="flex items-center gap-1 text-xs text-[var(--text-secondary)] mt-0.5">
-              <FiMapPin size={11} />
+
+            <div className="flex items-center gap-1 text-sm text-[var(--text-secondary)] mt-1">
+              <FiMapPin size={14} />
               <span>
                 {company.governorate}
                 {company.city ? `, ${company.city}` : ""}
               </span>
             </div>
+
+            <p className="text-sm text-[var(--text-secondary)] mt-3 line-clamp-2">
+              {company.description || "No description provided."}
+            </p>
+
+            {tags.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-3">
+                {tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="text-xs px-2 py-1 rounded-full bg-[var(--primary-light)] text-[var(--primary)]"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
         </div>
-        {/* <button
-          className="text-[var(--text-secondary)] hover:text-[var(--danger)] transition-colors shrink-0"
-          aria-label="Save company"
-        >
-          <FiHeart size={18} />
-        </button> */}
-      </div>
 
-      {/* Description */}
-      <p className="text-xs text-[var(--text-secondary)] line-clamp-2 leading-relaxed">
-        {company.description || "No description provided."}
-      </p>
+        {/* Right */}
+        <div className="flex flex-col items-end gap-3 shrink-0">
+          <div className="flex items-center gap-1">
+            <FiStar
+              size={16}
+              className={`${
+                rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
+              }`}
+            />
 
-      {/* Service tags */}
-      {tags.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">
-          {tags.map((tag) => (
-            <span
-              key={tag}
-              className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-[var(--primary-light)] text-[var(--primary)]"
-            >
-              {tag}
+            <span className="text-sm font-semibold text-[var(--text-primary)]">
+              {rating ? Number(rating).toFixed(1) : "N/A"}
             </span>
-          ))}
-          {services.length > 3 && (
-            <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-[var(--background-secondary)] text-[var(--text-secondary)]">
-              +{services.length - 3} more
-            </span>
-          )}
-        </div>
-      )}
-
-      {/* Footer */}
-      <div className="flex items-center justify-between pt-2 border-t border-[var(--border)] mt-auto">
-        <div className="flex flex-col gap-0.5">
+          </div>
           {minFee !== null && (
-            <span className="text-xs font-semibold text-[var(--text-primary)]">
-              From EGP {minFee.toLocaleString()}
-            </span>
+            <div className="text-right">
+              <p className="text-xs text-[var(--text-secondary)]">
+                Starting From
+              </p>
+
+              <p className="font-bold text-lg text-[var(--text-primary)]">
+                EGP {minFee.toLocaleString()}
+              </p>
+            </div>
           )}
+
           {minDays !== null && (
-            <span className="flex items-center gap-1 text-[10px] text-[var(--text-secondary)]">
-              <FiClock size={10} />
-              {minDays}–{minDays + 2} days
-            </span>
+            <div className="flex items-center gap-1 text-sm text-[var(--text-secondary)]">
+              <FiClock size={14} />
+              {minDays}-{minDays + 2} days
+            </div>
           )}
+
+          <button
+            onClick={() => onViewDetails(company.id)}
+            className="px-5 py-2 rounded-lg bg-[var(--primary)] text-white hover:opacity-90"
+          >
+            View Details
+          </button>
         </div>
-        <button
-          onClick={() => onViewDetails(company.id)}
-          className="text-xs font-semibold px-4 py-2 rounded-lg bg-[var(--primary)] text-white hover:opacity-90 transition-opacity"
-        >
-          View Details
-        </button>
       </div>
     </div>
   );
@@ -223,24 +231,31 @@ export default function CompaniesList() {
     searchParams.get("governorate") || "",
   );
   const [city, setCity] = useState(searchParams.get("city") || "");
+  const [sortBy, setSortBy] = useState("");
   const [currentPage, setCurrentPage] = useState(
     Number(searchParams.get("page")) || 1,
   );
   const [showFilters, setShowFilters] = useState(false);
 
-  const PAGE_SIZE = 10;
+  const PAGE_SIZE = 5;
   const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
   const buildParams = useCallback(
     (page = currentPage) => {
-      const params = { page };
+      const params = { page, page_size: PAGE_SIZE };
+
       if (nameSearch.trim()) params.name = nameSearch.trim();
+
       if (governorate && governorate !== "All Areas")
         params.governorate = governorate;
+
       if (city.trim()) params.city = city.trim();
+
+      if (sortBy) params.ordering = sortBy;
+
       return params;
     },
-    [nameSearch, governorate, city, currentPage],
+    [nameSearch, governorate, city, sortBy, currentPage],
   );
 
   const fetchCompanies = useCallback(
@@ -386,6 +401,21 @@ export default function CompaniesList() {
                   className="h-9 px-3 rounded-lg border border-[var(--border)] bg-[var(--background-secondary)] text-sm text-[var(--text-primary)] outline-none focus:border-[var(--primary)] transition-colors w-48"
                 />
               </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-xs text-[var(--text-secondary)]">
+                  Sort By
+                </label>
+
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="h-9 px-3 rounded-lg border border-[var(--border)] bg-[var(--background-secondary)] text-sm text-[var(--text-primary)] outline-none focus:border-[var(--primary)] transition-colors w-48"
+                >
+                  <option value="">Default</option>
+                  <option value="-average_rating">Highest Rating</option>
+                  <option value="average_rating">Lowest Rating</option>
+                </select>
+              </div>
             </div>
           )}
 
@@ -456,11 +486,11 @@ export default function CompaniesList() {
 
         {/* Loading skeleton */}
         {loading && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="flex flex-col gap-4">
             {Array.from({ length: 8 }).map((_, i) => (
               <div
                 key={i}
-                className="h-52 rounded-xl bg-[var(--background-primary)] border border-[var(--border)] animate-pulse"
+                className="h-40 rounded-xl bg-[var(--background-primary)] border border-[var(--border)] animate-pulse"
               />
             ))}
           </div>
@@ -468,12 +498,12 @@ export default function CompaniesList() {
 
         {/* Company grid */}
         {!loading && !error && companies.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="flex flex-col gap-4">
             {companies.map((company) => (
               <CompanyCard
                 key={company.id}
                 company={company}
-                onViewDetails={(id) => navigate(`/companies/${id}`)}
+                onViewDetails={(id) => navigate(`/user/companies/${id}`)}
               />
             ))}
           </div>

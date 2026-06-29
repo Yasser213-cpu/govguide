@@ -12,8 +12,7 @@ export const getCompanies = (params = {}) =>
 /**
  * GET api/v1/companies/:id/  — public
  */
-export const getCompany = (id) =>
-  axiosClient.get(`/api/v1/companies/${id}/`);
+export const getCompany = (id) => axiosClient.get(`/api/v1/companies/${id}`);
 
 /**
  * POST api/v1/companies/  — company role required
