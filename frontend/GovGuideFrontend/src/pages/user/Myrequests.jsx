@@ -10,8 +10,10 @@ import {
   FiAlertCircle,
   FiInbox,
   FiPlusCircle,
+  FiCreditCard,
+  FiLoader,
 } from "react-icons/fi";
-import { getMyOrders } from "../../features/orders/api/Ordersapi";
+import { getMyOrders, payOrder } from "../../features/orders/api/Ordersapi";
 import PageHeader from "../../components/layout/PageHeader";
 
 // ─── Status config ────────────────────────────────────────────────────────────
@@ -129,12 +131,12 @@ function ProgressBar({ status }) {
 
 function getStepsForStatus(status) {
   const map = {
-    pending: { completed: 1, total: 5 },
-    accepted: { completed: 2, total: 5 },
-    paid: { completed: 3, total: 5 },
+    pending:     { completed: 1, total: 5 },
+    accepted:    { completed: 2, total: 5 },
+    paid:        { completed: 3, total: 5 },
     in_progress: { completed: 4, total: 5 },
-    completed: { completed: 5, total: 5 },
-    rejected: { completed: 1, total: 5 },
+    completed:   { completed: 5, total: 5 },
+    rejected:    { completed: 1, total: 5 },
   };
   return map[status] ?? { completed: 1, total: 5 };
 }
@@ -151,65 +153,140 @@ function StatusIcon({ status }) {
     return <FiRefreshCw {...iconProps} className="text-[var(--primary)]" />;
   if (status === "pending")
     return <FiClock {...iconProps} className="text-amber-500" />;
+  if (status === "accepted")
+    return <FiCreditCard {...iconProps} className="text-blue-500" />;
   return <FiFileText {...iconProps} className="text-[var(--text-secondary)]" />;
+}
+
+// ─── Pay Confirmation Modal ───────────────────────────────────────────────────
+
+function PayModal({ order, onConfirm, onCancel, paying, error }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+      <div className="w-full max-w-sm rounded-2xl bg-[var(--background-primary)] border border-[var(--border)] p-6">
+        <div className="flex items-center justify-center h-14 w-14 rounded-full bg-blue-50 mx-auto mb-4">
+          <FiCreditCard size={26} className="text-blue-600" />
+        </div>
+
+        <h3 className="text-lg font-bold text-[var(--text-primary)] text-center mb-1">
+          Confirm Payment
+        </h3>
+        <p className="text-sm text-[var(--text-secondary)] text-center mb-5">
+          You're about to pay for{" "}
+          <span className="font-semibold text-[var(--text-primary)]">
+            {order.procedure}
+          </span>{" "}
+          with{" "}
+          <span className="font-semibold text-[var(--text-primary)]">
+            {order.company}
+          </span>
+          . This action cannot be undone.
+        </p>
+
+        {error && (
+          <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 text-red-600 px-4 py-3 text-sm">
+            <FiAlertCircle size={15} />
+            {error}
+          </div>
+        )}
+
+        <div className="flex gap-3">
+          <button
+            onClick={onCancel}
+            disabled={paying}
+            className="flex-1 px-4 py-2.5 rounded-xl border border-[var(--border)] text-sm font-semibold text-[var(--text-primary)] disabled:opacity-40 hover:bg-[var(--background-secondary)] transition"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onConfirm}
+            disabled={paying}
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 disabled:opacity-60 transition"
+          >
+            {paying && <FiLoader size={14} className="animate-spin" />}
+            {paying ? "Processing…" : "Pay Now"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 // ─── Request Card ─────────────────────────────────────────────────────────────
 
-function RequestCard({ order, onClick }) {
-  const cfg = STATUS_CONFIG[order.status];
-  const date = new Date(order.created_at);
-  const timeAgo = formatTimeAgo(date);
+function RequestCard({ order, onClick, onPayClick }) {
+  const timeAgo = formatTimeAgo(new Date(order.created_at));
 
   return (
-    <button
-      onClick={onClick}
-      className="w-full text-left bg-[var(--background-primary)] border border-[var(--border)] rounded-xl px-5 py-4 hover:border-[var(--primary)] hover:shadow-sm transition-all group"
-    >
-      <div className="flex items-start gap-4">
-        {/* Icon */}
-        <div className="mt-0.5 h-9 w-9 rounded-lg bg-[var(--background-secondary)] flex items-center justify-center shrink-0">
-          <StatusIcon status={order.status} />
-        </div>
-
-        {/* Body */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2.5 flex-wrap">
-              <p className="font-semibold text-[var(--text-primary)] truncate">
-                {order.procedure}
-              </p>
-              <StatusBadge status={order.status} />
-            </div>
-            <FiChevronRight
-              size={16}
-              className="text-[var(--text-secondary)] group-hover:text-[var(--primary)] shrink-0 transition-colors"
-            />
+    // outer div so the pay button click doesn't bubble up to navigate
+    <div className="bg-[var(--background-primary)] border border-[var(--border)] rounded-xl px-5 py-4 hover:border-[var(--primary)] hover:shadow-sm transition-all group">
+      {/* Clickable area — everything except the pay button */}
+      <button onClick={onClick} className="w-full text-left">
+        <div className="flex items-start gap-4">
+          {/* Icon */}
+          <div className="mt-0.5 h-9 w-9 rounded-lg bg-[var(--background-secondary)] flex items-center justify-center shrink-0">
+            <StatusIcon status={order.status} />
           </div>
 
-          <p className="text-sm text-[var(--text-secondary)] mt-0.5">
-            {order.company}
-          </p>
+          {/* Body */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5 flex-wrap">
+                <p className="font-semibold text-[var(--text-primary)] truncate">
+                  {order.procedure}
+                </p>
+                <StatusBadge status={order.status} />
+              </div>
+              <FiChevronRight
+                size={16}
+                className="text-[var(--text-secondary)] group-hover:text-[var(--primary)] shrink-0 transition-colors"
+              />
+            </div>
 
-          {order.rejection_reason && (
-            <p className="mt-1.5 text-xs text-red-500 flex items-center gap-1">
-              <FiAlertCircle size={12} />
-              {order.rejection_reason}
+            <p className="text-sm text-[var(--text-secondary)] mt-0.5">
+              {order.company}
             </p>
-          )}
 
-          <ProgressBar status={order.status} />
+            {order.rejection_reason && (
+              <p className="mt-1.5 text-xs text-red-500 flex items-center gap-1">
+                <FiAlertCircle size={12} />
+                {order.rejection_reason}
+              </p>
+            )}
 
-          <p className="text-xs text-[var(--text-secondary)] mt-2">
-            {order.status === "completed"
-              ? `Completed ${timeAgo}`
-              : order.status === "rejected"
-              ? `Cancelled ${timeAgo}`
-              : `Updated ${timeAgo}`}
-          </p>
+            <ProgressBar status={order.status} />
+
+            <p className="text-xs text-[var(--text-secondary)] mt-2">
+              {order.status === "completed"
+                ? `Completed ${timeAgo}`
+                : order.status === "rejected"
+                ? `Cancelled ${timeAgo}`
+                : `Updated ${timeAgo}`}
+            </p>
+          </div>
         </div>
-      </div>
-    </button>
+      </button>
+
+      {/* Pay Now CTA — only when accepted */}
+      {order.status === "accepted" && (
+        <div className="mt-4 pt-4 border-t border-[var(--border)] flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2 text-sm text-blue-600">
+            <FiCreditCard size={15} />
+            <span className="font-medium">Payment required to proceed</span>
+          </div>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onPayClick(order);
+            }}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition shrink-0"
+          >
+            <FiCreditCard size={14} />
+            Pay Now
+          </button>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -217,26 +294,11 @@ function RequestCard({ order, onClick }) {
 
 function EmptyState({ tab, onNewRequest }) {
   const messages = {
-    all: {
-      title: "No requests yet",
-      body: "Start by contacting a company to submit your first request.",
-    },
-    in_progress: {
-      title: "Nothing in progress",
-      body: "Requests that are active will appear here.",
-    },
-    pending: {
-      title: "No pending requests",
-      body: "Requests waiting for company review will appear here.",
-    },
-    completed: {
-      title: "No completed requests",
-      body: "Finished requests will show up here.",
-    },
-    cancelled: {
-      title: "No cancelled requests",
-      body: "Requests that were rejected will appear here.",
-    },
+    all:         { title: "No requests yet",          body: "Start by contacting a company to submit your first request." },
+    in_progress: { title: "Nothing in progress",      body: "Requests that are active will appear here." },
+    pending:     { title: "No pending requests",      body: "Requests waiting for company review will appear here." },
+    completed:   { title: "No completed requests",    body: "Finished requests will show up here." },
+    cancelled:   { title: "No cancelled requests",    body: "Requests that were rejected will appear here." },
   };
   const { title, body } = messages[tab] ?? messages.all;
 
@@ -245,9 +307,7 @@ function EmptyState({ tab, onNewRequest }) {
       <div className="h-16 w-16 rounded-full bg-[var(--primary-light)] flex items-center justify-center mb-4">
         <FiInbox size={28} className="text-[var(--primary)]" />
       </div>
-      <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-1">
-        {title}
-      </h3>
+      <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-1">{title}</h3>
       <p className="text-sm text-[var(--text-secondary)] max-w-xs">{body}</p>
       {tab === "all" && (
         <button
@@ -293,22 +353,15 @@ function formatTimeAgo(date) {
 
 function getTabCount(orders, tab) {
   if (tab === "all") return orders.length;
-  if (tab === "cancelled")
-    return orders.filter((o) => o.status === "rejected").length;
-  if (tab === "in_progress")
-    return orders.filter((o) =>
-      ["accepted", "paid", "in_progress"].includes(o.status)
-    ).length;
+  if (tab === "cancelled") return orders.filter((o) => o.status === "rejected").length;
+  if (tab === "in_progress") return orders.filter((o) => ["accepted", "paid", "in_progress"].includes(o.status)).length;
   return orders.filter((o) => o.status === tab).length;
 }
 
 function filterByTab(orders, tab) {
   if (tab === "all") return orders;
   if (tab === "cancelled") return orders.filter((o) => o.status === "rejected");
-  if (tab === "in_progress")
-    return orders.filter((o) =>
-      ["accepted", "paid", "in_progress"].includes(o.status)
-    );
+  if (tab === "in_progress") return orders.filter((o) => ["accepted", "paid", "in_progress"].includes(o.status));
   return orders.filter((o) => o.status === tab);
 }
 
@@ -316,16 +369,21 @@ function filterByTab(orders, tab) {
 
 export default function MyRequests() {
   const navigate = useNavigate();
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+
+  const [orders, setOrders]       = useState([]);
+  const [loading, setLoading]     = useState(true);
+  const [error, setError]         = useState("");
   const [activeTab, setActiveTab] = useState("all");
+
+  // Pay modal state
+  const [payTarget, setPayTarget]   = useState(null); // order being paid
+  const [paying, setPaying]         = useState(false);
+  const [payError, setPayError]     = useState("");
 
   useEffect(() => {
     async function load() {
       try {
         const data = await getMyOrders();
-        // API returns array directly per the docs
         setOrders(Array.isArray(data) ? data : data.results ?? []);
       } catch {
         setError("Failed to load your requests. Please try again.");
@@ -336,10 +394,42 @@ export default function MyRequests() {
     load();
   }, []);
 
-  const filtered = useMemo(
-    () => filterByTab(orders, activeTab),
-    [orders, activeTab]
-  );
+  const filtered = useMemo(() => filterByTab(orders, activeTab), [orders, activeTab]);
+
+  // ── Pay handlers ─────────────────────────────────────────────────────────
+
+  const handlePayClick = (order) => {
+    setPayTarget(order);
+    setPayError("");
+  };
+
+  const handlePayCancel = () => {
+    if (paying) return;
+    setPayTarget(null);
+    setPayError("");
+  };
+
+  const handlePayConfirm = async () => {
+    if (!payTarget) return;
+    setPaying(true);
+    setPayError("");
+    try {
+      await payOrder(payTarget.id);
+      // Optimistically update status in local state → no need for a refetch
+      setOrders((prev) =>
+        prev.map((o) => (o.id === payTarget.id ? { ...o, status: "paid" } : o))
+      );
+      setPayTarget(null);
+    } catch (err) {
+      const msg =
+        err?.response?.data?.detail ||
+        err?.response?.data?.message ||
+        "Payment failed. Please try again.";
+      setPayError(msg);
+    } finally {
+      setPaying(false);
+    }
+  };
 
   return (
     <>
@@ -391,10 +481,7 @@ export default function MyRequests() {
       )}
 
       {!loading && !error && filtered.length === 0 && (
-        <EmptyState
-          tab={activeTab}
-          onNewRequest={() => navigate("/user/companies")}
-        />
+        <EmptyState tab={activeTab} onNewRequest={() => navigate("/user/companies")} />
       )}
 
       {!loading && !error && filtered.length > 0 && (
@@ -403,10 +490,22 @@ export default function MyRequests() {
             <RequestCard
               key={order.id}
               order={order}
-            //   onClick={() => navigate(`/user/requests/${order.id}`)}
+              onClick={() => navigate(`/user/requests/${order.id}`)}
+              onPayClick={handlePayClick}
             />
           ))}
         </div>
+      )}
+
+      {/* Pay confirmation modal */}
+      {payTarget && (
+        <PayModal
+          order={payTarget}
+          onConfirm={handlePayConfirm}
+          onCancel={handlePayCancel}
+          paying={paying}
+          error={payError}
+        />
       )}
     </>
   );
