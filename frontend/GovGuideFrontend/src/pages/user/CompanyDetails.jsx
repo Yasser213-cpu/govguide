@@ -14,14 +14,17 @@ import {
 } from "react-icons/fi";
 
 import PageHeader from "../../components/layout/PageHeader";
+import ContactCompanyModal from "./Contactcompanymodal";
 
 export default function CompanyDetails() {
-  const { id } = useParams();
+  const { id, procedureId } = useParams();
   const navigate = useNavigate();
 
   const [company, setCompany] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [isContactOpen, setIsContactOpen] = useState(false);
+  const [submittedOrder, setSubmittedOrder] = useState(null);
 
   useEffect(() => {
     async function fetchCompany() {
@@ -42,33 +45,40 @@ export default function CompanyDetails() {
 
   const minFee = useMemo(() => {
     if (!services.length) return null;
-
     return Math.min(...services.map((s) => Number(s.company_service_fee || 0)));
   }, [services]);
 
   const minDays = useMemo(() => {
     if (!services.length) return null;
-
     return Math.min(
-      ...services.map((s) => Number(s.estimated_completion_days || 0)),
+      ...services.map((s) => Number(s.estimated_completion_days || 0))
     );
   }, [services]);
 
   const availableServices = services.filter((s) => s.is_available);
 
+  const matchedService = useMemo(() => {
+    if (!procedureId || !services.length) return null;
+    return (
+      services.find((s) => String(s.procedure_id) === String(procedureId)) ||
+      null
+    );
+  }, [procedureId, services]);
+
+  // If we have a procedureId, we pre-match the service.
+  // If not, the modal handles service selection itself.
+  const canContact = availableServices.length > 0;
+
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto px-6 py-8 animate-pulse">
         <div className="h-10 w-40 bg-gray-200 rounded mb-6"></div>
-
         <div className="h-44 rounded-xl bg-white border"></div>
-
         <div className="grid grid-cols-4 gap-4 mt-6">
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="h-28 rounded-xl bg-white border" />
           ))}
         </div>
-
         <div className="h-72 rounded-xl bg-white border mt-6"></div>
       </div>
     );
@@ -96,11 +106,9 @@ export default function CompanyDetails() {
 
       <div>
         {/* Header */}
-
         <div className="bg-[var(--background-primary)] rounded-xl border border-[var(--border)] p-6">
           <div className="flex flex-col lg:flex-row justify-between gap-8">
             {/* Left */}
-
             <div className="flex gap-6">
               <div className="h-28 w-28 rounded-xl bg-[var(--primary-light)] flex items-center justify-center">
                 <span className="text-5xl font-bold text-[var(--primary)]">
@@ -122,7 +130,6 @@ export default function CompanyDetails() {
                         : "text-gray-300"
                     }`}
                   />
-
                   <span className="font-semibold text-[var(--text-primary)]">
                     {company.average_rating
                       ? Number(company.average_rating).toFixed(1)
@@ -132,7 +139,6 @@ export default function CompanyDetails() {
 
                 <div className="flex items-center gap-2 mt-3 text-[var(--text-secondary)]">
                   <FiMapPin />
-
                   {company.governorate}
                   {company.city && `, ${company.city}`}
                 </div>
@@ -144,9 +150,17 @@ export default function CompanyDetails() {
             </div>
 
             {/* Right */}
-
             <div className="flex flex-col gap-4">
-              <button className="px-6 py-3 rounded-xl bg-[var(--primary)] text-white font-semibold hover:opacity-90">
+              <button
+                onClick={() => setIsContactOpen(true)}
+                disabled={!canContact}
+                title={
+                  canContact
+                    ? undefined
+                    : "This company has no available services."
+                }
+                className="px-6 py-3 rounded-xl bg-[var(--primary)] text-white font-semibold hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:opacity-40"
+              >
                 Contact Company
               </button>
 
@@ -160,24 +174,25 @@ export default function CompanyDetails() {
           </div>
         </div>
 
-        {/* Stats */}
+        {submittedOrder && (
+          <div className="mt-6 flex items-center gap-2 rounded-xl bg-green-50 text-green-700 px-5 py-4 text-sm">
+            <FiCheckCircle />
+            Your request has been submitted (Order #{submittedOrder.id}). The
+            company will review it shortly.
+          </div>
+        )}
 
+        {/* Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 mt-6">
           <div className="bg-[var(--background-primary)] rounded-xl border border-[var(--border)] p-6">
             <FiBriefcase size={22} className="text-[var(--primary)] mb-3" />
-
             <p className="text-sm text-[var(--text-secondary)]">Services</p>
-
             <h2 className="text-3xl font-bold mt-2">{services.length}</h2>
           </div>
 
           <div className="bg-[var(--background-primary)] rounded-xl border border-[var(--border)] p-6">
             <FiDollarSign size={22} className="text-[var(--primary)] mb-3" />
-
-            <p className="text-sm text-[var(--text-secondary)]">
-              Starting From
-            </p>
-
+            <p className="text-sm text-[var(--text-secondary)]">Starting From</p>
             <h2 className="text-3xl font-bold mt-2">
               {minFee ? `${minFee} EGP` : "--"}
             </h2>
@@ -185,11 +200,7 @@ export default function CompanyDetails() {
 
           <div className="bg-[var(--background-primary)] rounded-xl border border-[var(--border)] p-6">
             <FiClock size={22} className="text-[var(--primary)] mb-3" />
-
-            <p className="text-sm text-[var(--text-secondary)]">
-              Fastest Service
-            </p>
-
+            <p className="text-sm text-[var(--text-secondary)]">Fastest Service</p>
             <h2 className="text-3xl font-bold mt-2">
               {minDays ? `${minDays} Days` : "--"}
             </h2>
@@ -197,49 +208,37 @@ export default function CompanyDetails() {
 
           <div className="bg-[var(--background-primary)] rounded-xl border border-[var(--border)] p-6">
             <FiCheckCircle size={22} className="text-green-500 mb-3" />
-
             <p className="text-sm text-[var(--text-secondary)]">Available</p>
-
             <h2 className="text-3xl font-bold mt-2">
               {availableServices.length}
             </h2>
           </div>
         </div>
+
         {/* About & Contact */}
-
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
-          {/* About */}
-
           <div className="lg:col-span-2 bg-[var(--background-primary)] rounded-xl border border-[var(--border)] p-6">
             <h2 className="text-xl font-bold text-[var(--text-primary)] mb-4">
               About Company
             </h2>
-
             <p className="leading-8 text-[var(--text-secondary)]">
               {company.description ||
                 "No company description has been provided yet."}
             </p>
           </div>
 
-          {/* Contact */}
-
           <div className="bg-[var(--background-primary)] rounded-xl border border-[var(--border)] p-6">
             <h2 className="text-xl font-bold text-[var(--text-primary)] mb-5">
               Contact Information
             </h2>
-
             <div className="space-y-5">
               <div className="flex items-start gap-3">
                 <FiMapPin className="text-[var(--primary)] mt-1" size={18} />
-
                 <div>
                   <p className="font-medium">Location</p>
-
                   <p className="text-sm text-[var(--text-secondary)]">
                     {company.governorate}
-
                     {company.city && `, ${company.city}`}
-
                     {company.street && `, ${company.street}`}
                   </p>
                 </div>
@@ -247,10 +246,8 @@ export default function CompanyDetails() {
 
               <div className="flex items-start gap-3">
                 <FiPhone className="text-[var(--primary)] mt-1" size={18} />
-
                 <div>
                   <p className="font-medium">Phone</p>
-
                   <p className="text-sm text-[var(--text-secondary)]">
                     {company.phone || "Not Available"}
                   </p>
@@ -261,11 +258,9 @@ export default function CompanyDetails() {
         </div>
 
         {/* Services */}
-
         <div className="mt-6">
           <div className="flex items-center justify-between mb-5">
             <h2 className="text-lg font-semibold">Services</h2>
-
             <span className="text-sm text-[var(--text-secondary)]">
               {services.length} Services
             </span>
@@ -277,9 +272,7 @@ export default function CompanyDetails() {
                 size={40}
                 className="mx-auto mb-4 text-[var(--text-secondary)]"
               />
-
               <h3 className="text-lg font-semibold mb-2">No Services Yet</h3>
-
               <p className="text-[var(--text-secondary)]">
                 This company hasn't added any services.
               </p>
@@ -294,16 +287,13 @@ export default function CompanyDetails() {
                   <div className="flex justify-between items-start">
                     <div>
                       <h3 className="font-bold text-lg">
-                        {service.company_offerings?.name ||
-                          "Government Service"}
+                        {service.company_offerings?.name || "Government Service"}
                       </h3>
-
                       <p className="text-sm text-[var(--text-secondary)] mt-1">
                         {service.company_offerings?.description ||
                           "Professional government paperwork service."}
                       </p>
                     </div>
-
                     <span
                       className={`px-3 py-1 rounded-full text-xs font-semibold ${
                         service.is_available
@@ -320,67 +310,59 @@ export default function CompanyDetails() {
                       <p className="text-xs text-[var(--text-secondary)]">
                         Service Fee
                       </p>
-
                       <p className="font-bold text-lg">
                         {service.company_service_fee} EGP
                       </p>
                     </div>
-
                     <div>
                       <p className="text-xs text-[var(--text-secondary)]">
                         Estimated Time
                       </p>
-
                       <p className="font-bold text-lg">
                         {service.estimated_completion_days} Days
                       </p>
                     </div>
                   </div>
+
+                  {service.is_available && (
+                    <button
+                      onClick={() => {
+                        setIsContactOpen(true);
+                      }}
+                      className="mt-4 w-full py-2 rounded-lg border border-[var(--primary)] text-[var(--primary)] text-sm font-medium hover:bg-[var(--primary-light)] transition"
+                    >
+                      Request This Service
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
           )}
         </div>
-        {/* Bottom Summary */}
 
+        {/* Bottom Summary */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <div className="bg-[var(--background-primary)] rounded-xl border border-[var(--border)] p-6">
             <h2 className="text-xl font-bold mb-4">Summary</h2>
-
             <div className="space-y-4">
               <div className="flex justify-between">
-                <span className="text-[var(--text-secondary)]">
-                  Total Services
-                </span>
-
+                <span className="text-[var(--text-secondary)]">Total Services</span>
                 <span className="font-semibold">{services.length}</span>
               </div>
-
               <div className="flex justify-between">
-                <span className="text-[var(--text-secondary)]">
-                  Available Services
-                </span>
-
+                <span className="text-[var(--text-secondary)]">Available Services</span>
                 <span className="font-semibold text-green-600">
                   {availableServices.length}
                 </span>
               </div>
-
               <div className="flex justify-between">
-                <span className="text-[var(--text-secondary)]">
-                  Starting Price
-                </span>
-
+                <span className="text-[var(--text-secondary)]">Starting Price</span>
                 <span className="font-semibold">
                   {minFee ? `${minFee} EGP` : "--"}
                 </span>
               </div>
-
               <div className="flex justify-between">
-                <span className="text-[var(--text-secondary)]">
-                  Fastest Completion
-                </span>
-
+                <span className="text-[var(--text-secondary)]">Fastest Completion</span>
                 <span className="font-semibold">
                   {minDays ? `${minDays} Days` : "--"}
                 </span>
@@ -390,13 +372,10 @@ export default function CompanyDetails() {
 
           <div className="bg-[var(--background-primary)] rounded-xl border border-[var(--border)] p-6 flex flex-col justify-center">
             <h2 className="text-xl font-bold mb-3">Need a Service?</h2>
-
             <p className="text-[var(--text-secondary)] leading-7 mb-6">
               Browse the available services above and choose the one that best
-              fits your needs. More features such as online booking and AI
-              recommendations will be available soon.
+              fits your needs. Click "Contact Company" to start a request.
             </p>
-
             <button
               onClick={() => navigate("/user/companies")}
               className="w-fit px-6 py-3 rounded-xl bg-[var(--primary)] text-white font-semibold hover:opacity-90 transition"
@@ -406,6 +385,19 @@ export default function CompanyDetails() {
           </div>
         </div>
       </div>
+
+      <ContactCompanyModal
+        open={isContactOpen}
+        onClose={() => setIsContactOpen(false)}
+        // If we have a pre-matched service (came from procedure route), pass it directly.
+        // Otherwise pass null and let the modal show the service picker.
+        preSelectedService={matchedService ?? null}
+        availableServices={availableServices}
+        onSuccess={(order) => {
+          setSubmittedOrder(order);
+          setIsContactOpen(false);
+        }}
+      />
     </>
   );
 }
