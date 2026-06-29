@@ -1,11 +1,14 @@
 from companies.models import CompanyService
+from django.db.models import Avg, Value
+from django.db.models.functions import Coalesce
 
 
 
 WEIGHTS = {
-    "price": 0.4,
-    "location": 0.3,
-    "speed": 0.3,
+    "price": 0.30,
+    "location": 0.25,
+    "speed": 0.20,
+    "rating": 0.25,
 }
 
 
@@ -25,11 +28,15 @@ def score_service(service, user_governorate, min_price, max_price, min_days, max
         location_score = 1.0
     else:
         location_score = 0.0
+        
+    rating = getattr(service, "company_rating", 0.0) or 0.0
+    rating_score = float(rating) / 5.0
 
     total = (
         price_score * WEIGHTS["price"]
         + location_score * WEIGHTS["location"]
         + speed_score * WEIGHTS["speed"]
+        + rating_score * WEIGHTS["rating"]
     )
     return total
 
@@ -43,7 +50,14 @@ def recommend_companies(procedure_id, user_governorate=None):
             procedure_id=procedure_id,
             is_available=True,
             company__is_verified=True,
-        ).select_related("company")
+        )
+        .select_related("company")
+        .annotate(
+            company_rating=Coalesce(
+                Avg("company__services__orders__order_review__rating"),
+                Value(0.0),
+            )
+        )
     )
 
     if not services:
