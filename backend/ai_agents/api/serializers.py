@@ -23,3 +23,4 @@ class RecommendedCompanySerializer(serializers.Serializer):
     price = serializers.DecimalField(source="company_service_fee", max_digits=10, decimal_places=2)
     estimated_days = serializers.IntegerField(source="estimated_completion_days")
     score = serializers.FloatField()
+    logo = serializers.ImageField(source="company.logo", read_only=True)
