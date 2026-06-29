@@ -43,7 +43,7 @@
   },
   "pages": {
     "userDashboard": {
-      "title": "Welcome back, Ahmed!",
+      "title": "Welcome back, {{name}}!",
       "subtitle": "Here's an overview of your government services",
       "placeholder": "Dashboard content will appear here."
     },
@@ -148,6 +148,10 @@
     "phone": "Phone Number",
     "password": "Password",
     "confirmPassword": "Confirm Password",
+    "firstName": "First Name",
+    "firstNamePlaceholder": "Enter your first name",
+    "lastName": "Last Name",
+    "lastNamePlaceholder": "Enter your last name",
     "otp": "One-Time Password",
     "enterOtp": "Enter the OTP sent to your phone",
     "resendOtp": "Resend OTP",

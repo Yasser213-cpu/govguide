@@ -10,6 +10,8 @@ import {
   FiUser,
   FiLogOut,
 } from "react-icons/fi";
+import { BsBank2 } from "react-icons/bs";
+import { useCompany } from "../../context/CompanyContext";
 
 const companyNavItems = [
   { path: "/company/dashboard", icon: FiGrid, key: "companyDashboard" },
@@ -29,6 +31,7 @@ const CompanySidebar = () => {
   const isRTL = i18n.dir() === "rtl";
   const navigate = useNavigate();
   const { logout } = useAuth();
+  const { company, loading } = useCompany();
 
   const handleLogout = () => {
     logout();
@@ -84,12 +87,26 @@ const CompanySidebar = () => {
       </nav>
       <div className="px-4 py-5 border-t border-[var(--border)]">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-full bg-[var(--secondary-light)] flex items-center justify-center text-[var(--secondary)] font-semibold text-sm shrink-0">
-            CO
+          <div
+            className="
+            flex
+            h-10
+            w-10
+            shrink-0
+            items-center
+            justify-center
+            rounded-full
+            bg-[var(--secondary-light)]
+            text-[var(--secondary)]
+          "
+          >
+            <BsBank2 size={20} />
           </div>
           <div className="min-w-0">
             <p className="text-sm font-semibold text-[var(--text-primary)] truncate">
-              {t("sidebar.companyName")}
+              {loading
+                ? "Loading..."
+                : company?.name || t("sidebar.companyName")}
             </p>
             <p className="text-xs text-[var(--text-secondary)]">
               {t("sidebar.companyRole")}

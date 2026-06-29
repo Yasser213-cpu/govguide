@@ -18,6 +18,8 @@ export default function Register() {
   ];
 
   const [formData, setFormData] = useState({
+    first_name: "",
+    last_name: "",
     username: "",
     email: "",
     role: "",
@@ -28,6 +30,8 @@ export default function Register() {
   const [errors, setErrors] = useState({});
 
   const fields = [
+    { name: "first_name", type: "text", required: true },
+    { name: "last_name", type: "text", required: true },
     { name: "email", type: "email", required: true },
     { name: "username", type: "text", required: true },
     { name: "role", type: "text", required: true },
@@ -74,6 +78,8 @@ export default function Register() {
 
     try {
       await register(
+        formData.first_name,
+        formData.last_name,
         formData.username,
         formData.email,
         formData.role,
@@ -134,6 +140,26 @@ export default function Register() {
             </p>
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+              <Input
+                label={t("auth.firstName")}
+                type="text"
+                name="first_name"
+                placeholder={t("auth.firstNamePlaceholder")}
+                value={formData.first_name}
+                onChange={handleChange}
+                error={errors.first_name}
+                required
+              />
+              <Input
+                label={t("auth.lastName")}
+                type="text"
+                name="last_name"
+                placeholder={t("auth.lastNamePlaceholder")}
+                value={formData.last_name}
+                onChange={handleChange}
+                error={errors.last_name}
+                required
+              />
               <Input
                 label={t("auth.username")}
                 type="text"

@@ -5,6 +5,8 @@ import {
   Navigate,
 } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
+import { CompanyProvider } from "./context/CompanyContext";
+import { UserProvider } from "./context/UserContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import GuestRoute from "./components/GuestRoute";
 import CompanyRoute from "./components/CompanyRoute";
@@ -23,6 +25,7 @@ import AppLayout from "./components/layout/AppLayout";
 import PlaceholderPage from "./pages/app/PlaceholderPage";
 import { navItems } from "./components/layout/navConfig";
 import Dashboard from "./pages/user/Dashboard";
+import CompanyDetails from "./pages/user/CompanyDetails";
 
 // Company Imports
 import CompanyAppLayout from "./components/layout/CompanyAppLayout";
@@ -44,117 +47,139 @@ export default function AppRoutes() {
   return (
     <Router>
       <AuthProvider>
-        <Routes>
-          {/* Public */}
-          <Route path="/" element={<Home />} />
-          <Route
-            path="/register"
-            element={
-              <GuestRoute>
-                <Register />
-              </GuestRoute>
-            }
-          />
-          <Route
-            path="/login"
-            element={
-              <GuestRoute>
-                <Login />
-              </GuestRoute>
-            }
-          />
-          <Route
-            path="/verify-otp"
-            element={
-              <GuestRoute>
-                <VerifyOtp />
-              </GuestRoute>
-            }
-          />
-          <Route
-            path="/forgot-password"
-            element={
-              <GuestRoute>
-                <ForgotPassword />
-              </GuestRoute>
-            }
-          />
-
-          <Route
-            path="/ai-chat"
-            element={<Navigate to="/user/ai-assistant" replace />}
-          />
-
-          {/* Public company browsing redirects to authenticated user view */}
-          <Route
-            path="/companies"
-            element={<Navigate to="/user/companies" replace />}
-          />
-
-          {/* Company setup — only for company role with no company yet */}
-          <Route
-            path="/company/create"
-            element={
-              <CompanyRoute>
-                <CreateCompany />
-              </CompanyRoute>
-            }
-          />
-
-          <Route
-            element={
-              <ProtectedRoute>
-                <AppLayout />
-              </ProtectedRoute>
-            }
-          >
-            <Route path="/user/dashboard" element={<Dashboard />} />
-            <Route path="/user/ai-assistant" element={<AiChat />} />
-            <Route path="/user/companies" element={<CompaniesList />} />
-            {navItems
-              .filter(
-                (item) =>
-                  ![
-                    "/user/dashboard",
-                    "/user/ai-assistant",
-                    "/user/companies",
-                  ].includes(item.path),
-              )
-              .map((item) => (
-                <Route
-                  key={item.path}
-                  path={item.path}
-                  element={<PlaceholderPage pageKey={item.key} />}
-                />
-              ))}
-          </Route>
-
-          <Route element={<CompanyProtectedRoute />}>
-            <Route element={<CompanyAppLayout />}>
-              <Route path="/company/dashboard" element={<CompanyDashboard />} />
-              <Route path="/company/services" element={<CompanyServices />} />
-              <Route path="/company/bookings" element={<CompanyBookings />} />
-              <Route path="/company/profile" element={<CompanyProfile />} />
-              <Route path="/company/settings" element={<CompanySettings />} />
+        <UserProvider>
+          <CompanyProvider>
+            <Routes>
+              {/* Public */}
+              <Route path="/" element={<Home />} />
               <Route
-                path="/company/notifications"
-                element={<CompanyNotifications />}
+                path="/register"
+                element={
+                  <GuestRoute>
+                    <Register />
+                  </GuestRoute>
+                }
               />
-            </Route>
-          </Route>
+              <Route
+                path="/login"
+                element={
+                  <GuestRoute>
+                    <Login />
+                  </GuestRoute>
+                }
+              />
+              <Route
+                path="/verify-otp"
+                element={
+                  <GuestRoute>
+                    <VerifyOtp />
+                  </GuestRoute>
+                }
+              />
+              <Route
+                path="/forgot-password"
+                element={
+                  <GuestRoute>
+                    <ForgotPassword />
+                  </GuestRoute>
+                }
+              />
 
-          {/* Admin Routes - Public for Testing */}
-          <Route element={<AdminProtectedRoute />}>
-            <Route element={<AdminAppLayout />}>
-              <Route path="/admin/dashboard" element={<AdminDashboard />} />
-              <Route path="/admin/users" element={<AdminUsers />} />
-              <Route path="/admin/companies" element={<AdminCompanies />} />
-              <Route path="/admin/reports" element={<AdminReports />} />
-            </Route>
-          </Route>
+              <Route
+                path="/ai-chat"
+                element={<Navigate to="/user/ai-assistant" replace />}
+              />
 
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+              {/* Public company browsing redirects to authenticated user view */}
+              <Route
+                path="/companies"
+                element={<Navigate to="/user/companies" replace />}
+              />
+
+              {/* Company setup — only for company role with no company yet */}
+              <Route
+                path="/company/create"
+                element={
+                  <CompanyRoute>
+                    <CreateCompany />
+                  </CompanyRoute>
+                }
+              />
+
+              <Route
+                element={
+                  <ProtectedRoute>
+                    <AppLayout />
+                  </ProtectedRoute>
+                }
+              >
+                <Route path="/user/dashboard" element={<Dashboard />} />
+                <Route path="/user/ai-assistant" element={<AiChat />} />
+                <Route path="/user/companies" element={<CompaniesList />} />
+
+                <Route
+                  path="/user/companies/:id"
+                  element={<CompanyDetails />}
+                />
+
+                {navItems
+                  .filter(
+                    (item) =>
+                      ![
+                        "/user/dashboard",
+                        "/user/ai-assistant",
+                        "/user/companies",
+                      ].includes(item.path),
+                  )
+                  .map((item) => (
+                    <Route
+                      key={item.path}
+                      path={item.path}
+                      element={<PlaceholderPage pageKey={item.key} />}
+                    />
+                  ))}
+              </Route>
+
+              <Route element={<CompanyProtectedRoute />}>
+                <Route element={<CompanyAppLayout />}>
+                  <Route
+                    path="/company/dashboard"
+                    element={<CompanyDashboard />}
+                  />
+                  <Route
+                    path="/company/services"
+                    element={<CompanyServices />}
+                  />
+                  <Route
+                    path="/company/bookings"
+                    element={<CompanyBookings />}
+                  />
+                  <Route path="/company/profile" element={<CompanyProfile />} />
+                  <Route
+                    path="/company/settings"
+                    element={<CompanySettings />}
+                  />
+                  <Route
+                    path="/company/notifications"
+                    element={<CompanyNotifications />}
+                  />
+                </Route>
+              </Route>
+
+              {/* Admin Routes - Public for Testing */}
+              <Route element={<AdminProtectedRoute />}>
+                <Route element={<AdminAppLayout />}>
+                  <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                  <Route path="/admin/users" element={<AdminUsers />} />
+                  <Route path="/admin/companies" element={<AdminCompanies />} />
+                  <Route path="/admin/reports" element={<AdminReports />} />
+                </Route>
+              </Route>
+
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </CompanyProvider>
+        </UserProvider>
       </AuthProvider>
     </Router>
   );

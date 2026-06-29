@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import PageHeader from "../../components/layout/PageHeader";
+import Toast from "../../components/ui/Toast";
+import { useCompany } from "../../context/CompanyContext";
 import axiosClient from "../../api/axiosClient";
 
 export default function CompanyProfile() {
   const { t } = useTranslation();
+  const { company, loading, refreshCompany } = useCompany();
 
   const [companyData, setCompanyData] = useState({
     name: "",
@@ -15,25 +18,26 @@ export default function CompanyProfile() {
     street: "",
   });
 
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
+  const [toast, setToast] = useState({
+    show: false,
+    message: "",
+    type: "success",
+  });
+
   useEffect(() => {
-    fetchCompany();
-  }, []);
-
-  // TODO: Replace hardcoded company id with authenticated company id
-  const fetchCompany = async () => {
-    try {
-      const response = await axiosClient.get("/v1/companies/1");
-
-      setCompanyData(response.data);
-    } catch (error) {
-      console.error("Failed to load company:", error);
-    } finally {
-      setLoading(false);
+    if (company) {
+      setCompanyData({
+        name: company.name || "",
+        description: company.description || "",
+        phone: company.phone || "",
+        governorate: company.governorate || "",
+        city: company.city || "",
+        street: company.street || "",
+      });
     }
-  };
+  }, [company]);
 
   const handleChange = (e) => {
     setCompanyData((prev) => ({
@@ -42,12 +46,35 @@ export default function CompanyProfile() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    console.log(companyData);
+    setSaving(true);
 
-    alert("Profile update will be enabled when auth is ready");
+    try {
+      if (!company) {
+        throw new Error("Company not found");
+      }
+
+      await axiosClient.put(`/api/v1/companies/${company.id}`, companyData);
+
+      await refreshCompany();
+
+      setToast({
+        show: true,
+        message: "Profile updated successfully!",
+        type: "success",
+      });
+    } catch (error) {
+      console.error("Failed to update company:", error);
+      setToast({
+        show: true,
+        message: "Failed to update profile!",
+        type: "error",
+      });
+    } finally {
+      setSaving(false);
+    }
   };
 
   if (loading) {
@@ -259,6 +286,17 @@ export default function CompanyProfile() {
           {saving ? "Saving..." : "Save Changes"}
         </button>
       </form>
+      <Toast
+        show={toast.show}
+        message={toast.message}
+        type={toast.type}
+        onClose={() =>
+          setToast((prev) => ({
+            ...prev,
+            show: false,
+          }))
+        }
+      />
     </>
   );
 }

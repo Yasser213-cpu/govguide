@@ -1,5 +1,10 @@
 import { useNavigate } from "react-router-dom";
-import { FiMapPin, FiClock, FiDollarSign, FiChevronRight } from "react-icons/fi";
+import {
+  FiMapPin,
+  FiClock,
+  FiDollarSign,
+  FiChevronRight,
+} from "react-icons/fi";
 
 /**
  * Renders the ranked company list returned by POST /ai/recommend-companies/.
@@ -62,7 +67,10 @@ const CompanyRecommendations = ({ results = [] }) => {
             <span className="rounded-full bg-[var(--primary-light)] px-2 py-1 text-xs font-semibold text-[var(--primary)]">
               {Math.round(company.score * 100)}%
             </span>
-            <FiChevronRight className="text-[var(--text-secondary)]" size={16} />
+            <FiChevronRight
+              className="text-[var(--text-secondary)]"
+              size={16}
+            />
           </div>
         </button>
       ))}
