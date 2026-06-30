@@ -39,3 +39,10 @@ export const payOrder = async (orderId) => {
   const response = await axiosClient.post(`/api/v1/orders/${orderId}/pay`);
   return response.data;
 };
+
+export const getOrderById = async (orderId) => {
+  const response = await axiosClient.get(`/api/v1/orders/${orderId}`);
+  return response.data;
+};
+
+
