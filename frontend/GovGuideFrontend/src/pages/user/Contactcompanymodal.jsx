@@ -35,9 +35,12 @@ import {
  * Props:
  * @param {boolean} open
  * @param {() => void} onClose
- * @param {{ id: number, company_offerings?: { name, description }, company_service_fee, estimated_completion_days } | null} preSelectedService
+ * @param {{ id: number, procedure?: number, company_offerings?: { name, description }, company_service_fee, estimated_completion_days } | null} preSelectedService
  * @param {Array} availableServices  — used for the picker when preSelectedService is null
- * @param {Array<{id: number, name: string}>} [requirements]  — requirement list for the procedure
+ * @param {Array<{id: number, name: string}>} [requirements]  — requirement list for the procedure (parent maps API's `title` -> `name`)
+ * @param {boolean} [requirementsLoading]  — true while the parent is fetching requirements for the selected service
+ * @param {string} [requirementsError]  — error message if the requirements fetch failed
+ * @param {(service: object) => void} [onServiceSelected]  — called when the user picks a service in Step 1, so the parent can fetch its requirements
  * @param {(order: object) => void} [onSuccess]
  */
 export default function ContactCompanyModal({
@@ -46,6 +49,9 @@ export default function ContactCompanyModal({
   preSelectedService,
   availableServices = [],
   requirements,
+  requirementsLoading = false,
+  requirementsError = "",
+  onServiceSelected,
   onSuccess,
 }) {
   // Step: "pick" | "form"
@@ -92,6 +98,7 @@ export default function ContactCompanyModal({
   const handlePickService = (service) => {
     setSelectedService(service);
     setStep("form");
+    onServiceSelected?.(service);
   };
 
   const handleBack = () => {
@@ -210,22 +217,20 @@ export default function ContactCompanyModal({
         {!preSelectedService && (
           <div className="flex items-center gap-2 mb-5">
             <div
-              className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1 rounded-full ${
-                step === "pick"
+              className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1 rounded-full ${step === "pick"
                   ? "bg-[var(--primary)] text-white"
                   : "bg-[var(--primary-light)] text-[var(--primary)]"
-              }`}
+                }`}
             >
               <span>1</span>
               <span>Select Service</span>
             </div>
             <FiChevronRight size={14} className="text-[var(--text-secondary)]" />
             <div
-              className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1 rounded-full ${
-                step === "form"
+              className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1 rounded-full ${step === "form"
                   ? "bg-[var(--primary)] text-white"
                   : "bg-[var(--border)] text-[var(--text-secondary)]"
-              }`}
+                }`}
             >
               <span>2</span>
               <span>Upload &amp; Submit</span>
@@ -338,57 +343,75 @@ export default function ContactCompanyModal({
                   Required Documents
                 </label>
 
-                {(!requirements || requirements.length === 0) && (
-                  <p className="mb-3 text-xs text-amber-600 flex items-center gap-1">
+                {requirementsLoading && (
+                  <div className="mb-3 flex items-center gap-2 text-xs text-[var(--text-secondary)]">
+                    <FiLoader size={13} className="animate-spin" />
+                    Loading required documents…
+                  </div>
+                )}
+
+                {!requirementsLoading && requirementsError && (
+                  <p className="mb-3 text-xs text-red-500 flex items-center gap-1">
                     <FiAlertCircle size={14} />
-                    Requirement list not available yet — using a generic upload.
+                    {requirementsError}
                   </p>
                 )}
 
-                <div className="space-y-3">
-                  {requirementList.map((req) => {
-                    const reqKey = req.id ?? "generic";
-                    return (
-                      <div
-                        key={reqKey}
-                        className="rounded-xl border border-[var(--border)] p-4"
-                      >
-                        <div className="flex items-center justify-between gap-3">
-                          <span className="text-sm font-medium text-[var(--text-primary)]">
-                            {req.name}
-                          </span>
-                          <label className="flex items-center gap-2 text-sm text-[var(--primary)] cursor-pointer hover:underline">
-                            <FiUpload size={16} />
-                            {files[reqKey] ? "Change file" : "Upload file"}
-                            <input
-                              type="file"
-                              className="hidden"
-                              onChange={(e) =>
-                                handleFileChange(
-                                  reqKey,
-                                  e.target.files?.[0] || null
-                                )
-                              }
-                            />
-                          </label>
+                {!requirementsLoading &&
+                  !requirementsError &&
+                  (!requirements || requirements.length === 0) && (
+                    <p className="mb-3 text-xs text-amber-600 flex items-center gap-1">
+                      <FiAlertCircle size={14} />
+                      Requirement list not available yet — using a generic upload.
+                    </p>
+                  )}
+
+                {!requirementsLoading && (
+                  <div className="space-y-3">
+                    {requirementList.map((req) => {
+                      const reqKey = req.id ?? "generic";
+                      return (
+                        <div
+                          key={reqKey}
+                          className="rounded-xl border border-[var(--border)] p-4"
+                        >
+                          <div className="flex items-center justify-between gap-3">
+                            <span className="text-sm font-medium text-[var(--text-primary)]">
+                              {req.name}
+                            </span>
+                            <label className="flex items-center gap-2 text-sm text-[var(--primary)] cursor-pointer hover:underline">
+                              <FiUpload size={16} />
+                              {files[reqKey] ? "Change file" : "Upload file"}
+                              <input
+                                type="file"
+                                className="hidden"
+                                onChange={(e) =>
+                                  handleFileChange(
+                                    reqKey,
+                                    e.target.files?.[0] || null
+                                  )
+                                }
+                              />
+                            </label>
+                          </div>
+
+                          {files[reqKey] && (
+                            <p className="mt-2 text-xs text-[var(--text-secondary)] truncate">
+                              {files[reqKey].name}
+                            </p>
+                          )}
+
+                          {fileErrors[reqKey] && (
+                            <p className="mt-2 text-xs text-red-500 flex items-center gap-1">
+                              <FiAlertCircle size={14} />
+                              {fileErrors[reqKey]}
+                            </p>
+                          )}
                         </div>
-
-                        {files[reqKey] && (
-                          <p className="mt-2 text-xs text-[var(--text-secondary)] truncate">
-                            {files[reqKey].name}
-                          </p>
-                        )}
-
-                        {fileErrors[reqKey] && (
-                          <p className="mt-2 text-xs text-red-500 flex items-center gap-1">
-                            <FiAlertCircle size={14} />
-                            {fileErrors[reqKey]}
-                          </p>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
 
               {error && (
@@ -409,7 +432,7 @@ export default function ContactCompanyModal({
                 </button>
                 <button
                   type="submit"
-                  disabled={submitting}
+                  disabled={submitting || requirementsLoading}
                   className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[var(--primary)] text-white font-semibold hover:opacity-90 disabled:opacity-60"
                 >
                   {submitting && <FiLoader className="animate-spin" />}

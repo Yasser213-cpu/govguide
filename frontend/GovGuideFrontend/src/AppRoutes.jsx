@@ -27,6 +27,7 @@ import { navItems } from "./components/layout/navConfig";
 import Dashboard from "./pages/user/Dashboard";
 import CompanyDetails from "./pages/user/CompanyDetails";
 import MyRequests from "./pages/user/Myrequests";
+import RequestDetails from "./pages/user/RequestDetails";
 
 // Company Imports
 import CompanyAppLayout from "./components/layout/CompanyAppLayout";
@@ -118,6 +119,7 @@ export default function AppRoutes() {
                 <Route path="/user/ai-assistant" element={<AiChat />} />
                 <Route path="/user/companies" element={<CompaniesList />} />
                 <Route path="/user/Myrequests" element={<MyRequests />} />
+                <Route path="/user/requests/:id" element={<RequestDetails />} />
 
                 <Route
                   path="/user/companies/:id"
