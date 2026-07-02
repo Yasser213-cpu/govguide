@@ -14,6 +14,10 @@ export default function GuestRoute({ children }) {
 
   if (isAuthenticated) {
     if (user?.role === "company") {
+      if (user?.next_step === "create_company") {
+        return <Navigate to="/company/create" replace />;
+      }
+
       return <Navigate to="/company/dashboard" replace />;
     }
     if (user?.role === "admin") {

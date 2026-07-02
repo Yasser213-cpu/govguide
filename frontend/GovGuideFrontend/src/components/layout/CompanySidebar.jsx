@@ -9,6 +9,7 @@ import {
   FiBell,
   FiUser,
   FiLogOut,
+  FiFileText,
 } from "react-icons/fi";
 import { BsBank2 } from "react-icons/bs";
 import { useCompany } from "../../context/CompanyContext";
@@ -17,6 +18,7 @@ const companyNavItems = [
   { path: "/company/dashboard", icon: FiGrid, key: "companyDashboard" },
   { path: "/company/profile", icon: FiUser, key: "companyProfile" },
   { path: "/company/services", icon: FiBriefcase, key: "companyServices" },
+  { path: "/company/orders", icon: FiFileText, key: "companyOrders" },
   { path: "/company/bookings", icon: FiCalendar, key: "companyBookings" },
   {
     path: "/company/notifications",

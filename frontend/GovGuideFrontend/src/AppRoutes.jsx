@@ -31,6 +31,8 @@ import MyRequests from "./pages/user/Myrequests";
 // Company Imports
 import CompanyAppLayout from "./components/layout/CompanyAppLayout";
 import CompanyDashboard from "./pages/company/Dashboard";
+import CompanyOrders from "./pages/company/CompanyOrders";
+import CompanyOrderDetail from "./pages/company/CompanyOrderDetail";
 import CompanyServices from "./pages/company/Services";
 import CompanyBookings from "./pages/company/Bookings";
 import CompanySettings from "./pages/company/Settings";
@@ -147,6 +149,11 @@ export default function AppRoutes() {
                   <Route
                     path="/company/dashboard"
                     element={<CompanyDashboard />}
+                  />
+                  <Route path="/company/orders" element={<CompanyOrders />} />
+                  <Route
+                    path="/company/orders/:id"
+                    element={<CompanyOrderDetail />}
                   />
                   <Route
                     path="/company/services"

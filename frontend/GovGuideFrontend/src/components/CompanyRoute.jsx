@@ -8,28 +8,32 @@ import { useAuth } from "../hooks/useAuth";
  * - If next_step is not "create_company" (already set up), redirect to dashboard
  */
 export default function CompanyRoute({ children }) {
-  const { isAuthenticated, initialized, user } = useAuth();
+  const auth = useAuth();
+
+  console.log("AUTH:", auth);
+
+  const { isAuthenticated, initialized, user } = auth;
 
   if (!initialized) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        Loading...
-      </div>
-    );
+    return <div>Loading...</div>;
   }
 
   if (!isAuthenticated) {
+    console.log("Redirect -> login");
     return <Navigate to="/login" replace />;
   }
 
   if (user?.role !== "company") {
+    console.log("Redirect -> company dashboard (role)", user);
     return <Navigate to="/company/dashboard" replace />;
   }
 
-  // Company already created — skip setup
   if (user?.next_step && user.next_step !== "create_company") {
+    console.log("Redirect -> company dashboard (next_step)", user.next_step);
     return <Navigate to="/company/dashboard" replace />;
   }
+
+  console.log("PASS");
 
   return children;
 }

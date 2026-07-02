@@ -51,7 +51,7 @@ export default function CompanyDetails() {
   const minDays = useMemo(() => {
     if (!services.length) return null;
     return Math.min(
-      ...services.map((s) => Number(s.estimated_completion_days || 0))
+      ...services.map((s) => Number(s.estimated_completion_days || 0)),
     );
   }, [services]);
 
@@ -88,6 +88,7 @@ export default function CompanyDetails() {
     return (
       <div className="text-center py-20 text-red-500 font-medium">{error}</div>
     );
+  const logoUrl = company.logo ? `http://127.0.0.1:8000${company.logo}` : null;
 
   return (
     <>
@@ -111,9 +112,17 @@ export default function CompanyDetails() {
             {/* Left */}
             <div className="flex gap-6">
               <div className="h-28 w-28 rounded-xl bg-[var(--primary-light)] flex items-center justify-center">
-                <span className="text-5xl font-bold text-[var(--primary)]">
-                  {company.name?.charAt(0)}
-                </span>
+                {logoUrl ? (
+                  <img
+                    src={logoUrl}
+                    alt={company.name}
+                    className="h-full w-full object-cover rounded-xl"
+                  />
+                ) : (
+                  <span className="text-xl font-bold text-[var(--primary)]">
+                    {company.name?.[0]}
+                  </span>
+                )}
               </div>
 
               <div>
@@ -192,7 +201,9 @@ export default function CompanyDetails() {
 
           <div className="bg-[var(--background-primary)] rounded-xl border border-[var(--border)] p-6">
             <FiDollarSign size={22} className="text-[var(--primary)] mb-3" />
-            <p className="text-sm text-[var(--text-secondary)]">Starting From</p>
+            <p className="text-sm text-[var(--text-secondary)]">
+              Starting From
+            </p>
             <h2 className="text-3xl font-bold mt-2">
               {minFee ? `${minFee} EGP` : "--"}
             </h2>
@@ -200,7 +211,9 @@ export default function CompanyDetails() {
 
           <div className="bg-[var(--background-primary)] rounded-xl border border-[var(--border)] p-6">
             <FiClock size={22} className="text-[var(--primary)] mb-3" />
-            <p className="text-sm text-[var(--text-secondary)]">Fastest Service</p>
+            <p className="text-sm text-[var(--text-secondary)]">
+              Fastest Service
+            </p>
             <h2 className="text-3xl font-bold mt-2">
               {minDays ? `${minDays} Days` : "--"}
             </h2>
@@ -287,7 +300,8 @@ export default function CompanyDetails() {
                   <div className="flex justify-between items-start">
                     <div>
                       <h3 className="font-bold text-lg">
-                        {service.company_offerings?.name || "Government Service"}
+                        {service.company_offerings?.name ||
+                          "Government Service"}
                       </h3>
                       <p className="text-sm text-[var(--text-secondary)] mt-1">
                         {service.company_offerings?.description ||
@@ -346,23 +360,31 @@ export default function CompanyDetails() {
             <h2 className="text-xl font-bold mb-4">Summary</h2>
             <div className="space-y-4">
               <div className="flex justify-between">
-                <span className="text-[var(--text-secondary)]">Total Services</span>
+                <span className="text-[var(--text-secondary)]">
+                  Total Services
+                </span>
                 <span className="font-semibold">{services.length}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[var(--text-secondary)]">Available Services</span>
+                <span className="text-[var(--text-secondary)]">
+                  Available Services
+                </span>
                 <span className="font-semibold text-green-600">
                   {availableServices.length}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[var(--text-secondary)]">Starting Price</span>
+                <span className="text-[var(--text-secondary)]">
+                  Starting Price
+                </span>
                 <span className="font-semibold">
                   {minFee ? `${minFee} EGP` : "--"}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[var(--text-secondary)]">Fastest Completion</span>
+                <span className="text-[var(--text-secondary)]">
+                  Fastest Completion
+                </span>
                 <span className="font-semibold">
                   {minDays ? `${minDays} Days` : "--"}
                 </span>

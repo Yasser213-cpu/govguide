@@ -4,13 +4,37 @@ import { useAuth } from "../../hooks/useAuth";
 import { createCompany } from "../../api/companyApi";
 import { Button, Input } from "../../components/ui";
 import { FiBriefcase, FiMapPin, FiPhone, FiFileText } from "react-icons/fi";
+import { useCompany } from "../../context/CompanyContext";
 
 const GOVERNORATES = [
-  "Cairo", "Giza", "Alexandria", "Dakahlia", "Red Sea", "Beheira",
-  "Fayoum", "Gharbiya", "Ismailia", "Menofia", "Minya", "Qaliubiya",
-  "New Valley", "North Sinai", "Port Said", "Qalyubia", "Luxor",
-  "Qena", "South Sinai", "Sohag", "Suez", "Aswan", "Assiut",
-  "Beni Suef", "Matruh", "Kafr El Sheikh", "Sharqia", "Damietta",
+  "Cairo",
+  "Giza",
+  "Alexandria",
+  "Dakahlia",
+  "Red Sea",
+  "Beheira",
+  "Fayoum",
+  "Gharbiya",
+  "Ismailia",
+  "Menofia",
+  "Minya",
+  "Qaliubiya",
+  "New Valley",
+  "North Sinai",
+  "Port Said",
+  "Qalyubia",
+  "Luxor",
+  "Qena",
+  "South Sinai",
+  "Sohag",
+  "Suez",
+  "Aswan",
+  "Assiut",
+  "Beni Suef",
+  "Matruh",
+  "Kafr El Sheikh",
+  "Sharqia",
+  "Damietta",
 ];
 
 const initialForm = {
@@ -23,8 +47,10 @@ const initialForm = {
 };
 
 export default function CreateCompany() {
+  console.log("CreateCompany mounted");
   const navigate = useNavigate();
-  const { markCompanyCreated } = useAuth();
+  const { markCompanyCreated, login } = useAuth();
+  const { setCompany } = useCompany();
 
   const [formData, setFormData] = useState(initialForm);
   const [errors, setErrors] = useState({});
@@ -44,7 +70,8 @@ export default function CreateCompany() {
     if (!formData.name.trim()) newErrors.name = "Company name is required";
     else if (formData.name.length > 100) newErrors.name = "Max 100 characters";
 
-    if (!formData.description.trim()) newErrors.description = "Description is required";
+    if (!formData.description.trim())
+      newErrors.description = "Description is required";
 
     if (!formData.phone.trim()) {
       newErrors.phone = "Phone is required";
@@ -52,11 +79,13 @@ export default function CreateCompany() {
       newErrors.phone = "Enter a valid phone number (e.g. +201001234567)";
     }
 
-    if (!formData.governorate) newErrors.governorate = "Governorate is required";
+    if (!formData.governorate)
+      newErrors.governorate = "Governorate is required";
     if (!formData.city.trim()) newErrors.city = "City is required";
     else if (formData.city.length > 100) newErrors.city = "Max 100 characters";
     if (!formData.street.trim()) newErrors.street = "Street is required";
-    else if (formData.street.length > 100) newErrors.street = "Max 100 characters";
+    else if (formData.street.length > 100)
+      newErrors.street = "Max 100 characters";
 
     return newErrors;
   };
@@ -73,8 +102,21 @@ export default function CreateCompany() {
 
     setLoading(true);
     try {
-      await createCompany(formData);
-      markCompanyCreated(); // update context so CompanyRoute unlocks
+      const response = await createCompany(formData);
+
+      setCompany(response.data);
+
+      // نجيب بيانات اللوجين القديمة
+      const email = sessionStorage.getItem("pendingEmail");
+      const password = sessionStorage.getItem("pendingPassword");
+
+      // Login مرة تانية عشان الـ JWT يتحدث
+      if (email && password) {
+        await login(email, password);
+      }
+
+      markCompanyCreated();
+
       navigate("/company/dashboard", { replace: true });
     } catch (err) {
       const data = err.response?.data;
@@ -86,7 +128,9 @@ export default function CreateCompany() {
         });
         setErrors(apiErrors);
       } else {
-        setSubmitError(data?.detail || err.message || "Failed to create company");
+        setSubmitError(
+          data?.detail || err.message || "Failed to create company",
+        );
       }
     } finally {
       setLoading(false);
@@ -96,19 +140,22 @@ export default function CreateCompany() {
   return (
     <div className="min-h-screen bg-[var(--background-secondary)] flex items-center justify-center p-6">
       <div className="w-full max-w-[1000px] bg-[var(--background-primary)] rounded-2xl shadow-xl overflow-hidden grid md:grid-cols-[38%_62%]">
-
         {/* ── Left panel ── */}
         <div className="bg-gradient-to-b from-[var(--primary-light)] to-[var(--background-primary)] p-10 flex flex-col justify-between">
           <div>
             <div className="mb-10">
-              <img src="/logo-full.png" alt="GovConnect AI" className="h-16 w-auto object-contain" />
+              <img
+                src="/logo-full.png"
+                alt="GovConnect AI"
+                className="h-16 w-auto object-contain"
+              />
             </div>
             <h1 className="text-3xl font-bold text-[var(--primary-dark)] mb-3 leading-tight">
               Set up your company profile
             </h1>
             <p className="text-[var(--text-secondary)] leading-relaxed text-sm">
-              This information will appear to clients browsing for service providers.
-              Make sure your details are accurate and up to date.
+              This information will appear to clients browsing for service
+              providers. Make sure your details are accurate and up to date.
             </p>
           </div>
 
@@ -119,7 +166,10 @@ export default function CreateCompany() {
               { icon: FiMapPin, label: "Location details", done: true },
               { icon: FiPhone, label: "Contact number", done: true },
             ].map(({ icon: Icon, label }) => (
-              <div key={label} className="flex items-center gap-3 text-sm text-[var(--text-secondary)]">
+              <div
+                key={label}
+                className="flex items-center gap-3 text-sm text-[var(--text-secondary)]"
+              >
                 <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--primary-light)] text-[var(--primary)]">
                   <Icon size={15} />
                 </span>
@@ -133,14 +183,15 @@ export default function CreateCompany() {
         <div className="p-10 overflow-y-auto">
           <div className="flex items-center gap-2 mb-1">
             <FiFileText className="text-[var(--primary)]" size={22} />
-            <h2 className="text-2xl font-bold text-[var(--text-primary)]">Company details</h2>
+            <h2 className="text-2xl font-bold text-[var(--text-primary)]">
+              Company details
+            </h2>
           </div>
           <p className="text-sm text-[var(--text-secondary)] mb-7">
             Fill in your company information to start receiving bookings.
           </p>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-
             {/* Name */}
             <Input
               label="Company name"
@@ -165,13 +216,16 @@ export default function CreateCompany() {
                 value={formData.description}
                 onChange={handleChange}
                 className={`w-full rounded-lg border px-4 py-3 text-sm bg-[var(--background-primary)] text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] resize-none outline-none transition-colors
-                  ${errors.description
-                    ? "border-[var(--danger)] focus:border-[var(--danger)]"
-                    : "border-[var(--border)] focus:border-[var(--primary)]"
+                  ${
+                    errors.description
+                      ? "border-[var(--danger)] focus:border-[var(--danger)]"
+                      : "border-[var(--border)] focus:border-[var(--primary)]"
                   }`}
               />
               {errors.description && (
-                <p className="text-xs text-[var(--danger)]">{errors.description}</p>
+                <p className="text-xs text-[var(--danger)]">
+                  {errors.description}
+                </p>
               )}
             </div>
 
@@ -197,18 +251,23 @@ export default function CreateCompany() {
                 value={formData.governorate}
                 onChange={handleChange}
                 className={`w-full rounded-lg border px-4 py-3 text-sm bg-[var(--background-primary)] text-[var(--text-primary)] outline-none transition-colors
-                  ${errors.governorate
-                    ? "border-[var(--danger)]"
-                    : "border-[var(--border)] focus:border-[var(--primary)]"
+                  ${
+                    errors.governorate
+                      ? "border-[var(--danger)]"
+                      : "border-[var(--border)] focus:border-[var(--primary)]"
                   }`}
               >
                 <option value="">Select governorate</option>
                 {GOVERNORATES.map((g) => (
-                  <option key={g} value={g}>{g}</option>
+                  <option key={g} value={g}>
+                    {g}
+                  </option>
                 ))}
               </select>
               {errors.governorate && (
-                <p className="text-xs text-[var(--danger)]">{errors.governorate}</p>
+                <p className="text-xs text-[var(--danger)]">
+                  {errors.governorate}
+                </p>
               )}
             </div>
 

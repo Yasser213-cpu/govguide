@@ -1,31 +1,44 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+} from "react";
 import axiosClient from "../api/axiosClient";
 
 const UserContext = createContext();
 
 export function UserProvider({ children }) {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const access = sessionStorage.getItem("access");
+  const refreshUser = useCallback(async () => {
+    try {
+      const access = sessionStorage.getItem("access");
 
-        if (!access) return;
-
-        const response = await axiosClient.get("/api/v1/auth/me");
-
-        setUser(response.data);
-      } catch (err) {
-        console.error("Failed to fetch user:", err);
+      if (!access) {
+        setUser(null);
+        return;
       }
-    };
 
-    fetchUser();
+      setLoading(true);
+      const response = await axiosClient.get("/api/v1/auth/me");
+      setUser(response.data);
+    } catch (err) {
+      console.error("Failed to fetch user:", err);
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
+  useEffect(() => {
+    refreshUser();
+  }, [refreshUser]);
+
   return (
-    <UserContext.Provider value={{ user, setUser }}>
+    <UserContext.Provider value={{ user, setUser, loading, refreshUser }}>
       {children}
     </UserContext.Provider>
   );

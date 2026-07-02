@@ -5,6 +5,23 @@ export const getMyOrders = async () => {
   return response.data;
 };
 
+export const getCompanyOrders = async () => {
+  const response = await axiosClient.get("/api/v1/company/orders/");
+  return response.data;
+};
+
+export const getCompanyOrder = async (orderId) => {
+  const response = await axiosClient.get(`/api/v1/company/orders/${orderId}/`);
+  return response.data;
+};
+
+export const updateOrderStatus = async (orderId, status) => {
+  const response = await axiosClient.patch(`/api/v1/orders/${orderId}/status/`, {
+    status,
+  });
+  return response.data;
+};
+
 export const createOrder = async ({ service, notes }) => {
   const response = await axiosClient.post("/api/v1/orders/", {
     service,

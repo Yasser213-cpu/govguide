@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState ,useRef} from "react";
 import { useTranslation } from "react-i18next";
 import PageHeader from "../../components/layout/PageHeader";
 import Toast from "../../components/ui/Toast";
@@ -8,6 +8,7 @@ import axiosClient from "../../api/axiosClient";
 export default function CompanyProfile() {
   const { t } = useTranslation();
   const { company, loading, refreshCompany } = useCompany();
+  const fileInputRef = useRef(null);
 
   const [companyData, setCompanyData] = useState({
     name: "",
@@ -16,7 +17,9 @@ export default function CompanyProfile() {
     governorate: "",
     city: "",
     street: "",
+    logo: null,
   });
+  const [previewLogo, setPreviewLogo] = useState("");
 
   const [saving, setSaving] = useState(false);
 
@@ -35,9 +38,29 @@ export default function CompanyProfile() {
         governorate: company.governorate || "",
         city: company.city || "",
         street: company.street || "",
+        logo: null,
       });
+  
+      const API_URL = "http://localhost:8000";
+
+setPreviewLogo(
+  company.logo ? `${API_URL}${company.logo}` : ""
+);
     }
   }, [company]);
+
+  const handleLogoChange = (e) => {
+    const file = e.target.files[0];
+  
+    if (!file) return;
+  
+    setCompanyData((prev) => ({
+      ...prev,
+      logo: file,
+    }));
+  
+    setPreviewLogo(URL.createObjectURL(file));
+  };
 
   const handleChange = (e) => {
     setCompanyData((prev) => ({
@@ -56,7 +79,28 @@ export default function CompanyProfile() {
         throw new Error("Company not found");
       }
 
-      await axiosClient.put(`/api/v1/companies/${company.id}`, companyData);
+      const formData = new FormData();
+
+formData.append("name", companyData.name);
+formData.append("description", companyData.description);
+formData.append("phone", companyData.phone);
+formData.append("governorate", companyData.governorate);
+formData.append("city", companyData.city);
+formData.append("street", companyData.street);
+
+if (companyData.logo) {
+  formData.append("logo", companyData.logo);
+}
+
+await axiosClient.put(
+  `/api/v1/companies/${company.id}`,
+  formData,
+  {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  }
+);
 
       await refreshCompany();
 
@@ -101,6 +145,45 @@ export default function CompanyProfile() {
         onSubmit={handleSubmit}
         className="space-y-6 rounded-xl border border-[var(--border)] bg-[var(--background-primary)] p-6"
       >
+
+<div>
+  <label className="mb-3 block font-medium">
+    Company Logo
+  </label>
+
+  <div className="flex items-center gap-5">
+  {previewLogo ? (
+  <img
+    src={previewLogo}
+    alt="Company Logo"
+    className="h-24 w-24 rounded-xl border object-cover"
+  />
+) : (
+  <div className="flex h-24 w-24 items-center justify-center rounded-xl border border-dashed text-sm text-gray-500">
+    No Logo
+  </div>
+)}
+
+    <div>
+      <button
+        type="button"
+        onClick={() => fileInputRef.current?.click()}
+        className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 transition"
+      >
+        {previewLogo ? "Change Logo" : "Add Logo"}
+      </button>
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleLogoChange}
+        className="hidden"
+      />
+    </div>
+  </div>
+</div>
+
         <div>
           <label className="mb-2 block font-medium">Company Name</label>
 

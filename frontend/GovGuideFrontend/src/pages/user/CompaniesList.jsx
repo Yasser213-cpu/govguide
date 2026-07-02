@@ -49,7 +49,7 @@ function CompanyCard({ company, onViewDetails }) {
     ? Math.min(...services.map((s) => s.estimated_completion_days))
     : null;
 
-  const rating = company.average_rating;
+  const rating = company.rating;
 
   // Unique procedure names as tags
   const tags = [
@@ -60,6 +60,7 @@ function CompanyCard({ company, onViewDetails }) {
         .slice(0, 3),
     ),
   ];
+  const logoUrl = company.logo ? `http://127.0.0.1:8000${company.logo}` : null;
 
   return (
     <div className="bg-[var(--background-primary)] border border-[var(--border)] rounded-xl p-5 hover:shadow-md hover:border-[var(--primary)] transition-all">
@@ -67,9 +68,17 @@ function CompanyCard({ company, onViewDetails }) {
         {/* Left */}
         <div className="flex items-center gap-4 flex-1">
           <div className="h-16 w-16 rounded-xl bg-[var(--primary-light)] flex items-center justify-center shrink-0">
-            <span className="text-xl font-bold text-[var(--primary)] uppercase">
-              {company.name?.[0] || "C"}
-            </span>
+            {logoUrl ? (
+              <img
+                src={logoUrl}
+                alt={company.name}
+                className="h-full w-full object-cover rounded-xl"
+              />
+            ) : (
+              <span className="text-xl font-bold text-[var(--primary)]">
+                {company.name?.[0]}
+              </span>
+            )}
           </div>
 
           <div className="flex-1">

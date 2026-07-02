@@ -31,6 +31,7 @@
     "notifications": "Notifications",
     "settings": "Settings",
     "companyDashboard": "Dashboard",
+    "companyOrders": "Orders",
     "companyServices": "Services",
     "companyBookings": "Bookings",
     "companySettings": "Settings",
@@ -93,6 +94,10 @@
       "title": "Company Dashboard",
       "subtitle": "Welcome to your company dashboard",
       "placeholder": "Dashboard content will appear here."
+    },
+    "companyOrders": {
+      "title": "Orders",
+      "subtitle": "Review and manage all incoming orders"
     },
     "companyServices": {
       "title": "Services",
