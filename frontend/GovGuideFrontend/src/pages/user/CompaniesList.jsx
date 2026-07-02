@@ -12,6 +12,7 @@ import {
   FiStar,
 } from "react-icons/fi";
 import PageHeader from "../../components/layout/PageHeader";
+import { usePageLoading } from "../../context/PageLoadingContext";
 
 const GOVERNORATES = [
   "All Areas",
@@ -231,8 +232,10 @@ export default function CompaniesList() {
 
   const [companies, setCompanies] = useState([]);
   const [totalCount, setTotalCount] = useState(0);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  usePageLoading(loading);
 
   // Filters derived from URL params
   const [nameSearch, setNameSearch] = useState(searchParams.get("name") || "");
@@ -478,7 +481,7 @@ export default function CompaniesList() {
       {/* ── Results ── */}
       <div>
         {/* Result count */}
-        {!loading && !error && (
+        {!error && (
           <p className="text-sm text-[var(--text-secondary)] mb-5 mt-5">
             {totalCount > 0
               ? `Showing ${companies.length} of ${totalCount} companies`
@@ -493,20 +496,8 @@ export default function CompaniesList() {
           </div>
         )}
 
-        {/* Loading skeleton */}
-        {loading && (
-          <div className="flex flex-col gap-4">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div
-                key={i}
-                className="h-40 rounded-xl bg-[var(--background-primary)] border border-[var(--border)] animate-pulse"
-              />
-            ))}
-          </div>
-        )}
-
         {/* Company grid */}
-        {!loading && !error && companies.length > 0 && (
+        {!error && companies.length > 0 && (
           <div className="flex flex-col gap-4">
             {companies.map((company) => (
               <CompanyCard
@@ -519,7 +510,7 @@ export default function CompaniesList() {
         )}
 
         {/* Empty state */}
-        {!loading && !error && companies.length === 0 && (
+        {!error && companies.length === 0 && (
           <div className="flex flex-col items-center justify-center py-24 text-center">
             <div className="h-16 w-16 rounded-full bg-[var(--primary-light)] flex items-center justify-center mb-4">
               <FiSearch size={28} className="text-[var(--primary)]" />

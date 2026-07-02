@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { FiArrowRight } from "react-icons/fi";
 import DashboardCompanyCard from "./DashboardCompanyCard";
 
 export default function RecommendedCompanies({ companies, loading }) {
@@ -26,8 +27,12 @@ export default function RecommendedCompanies({ companies, loading }) {
           </p>
         </div>
 
-        <Link to="/companies" className="font-medium text-[var(--primary)]">
-          View All →
+        <Link
+          to="/companies"
+          className="flex items-center gap-1 text-sm font-medium text-[var(--primary)] hover:underline"
+        >
+          View All
+          <FiArrowRight size={14} />
         </Link>
       </div>
 

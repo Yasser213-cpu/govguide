@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
 import {
   FiStar,
   FiArrowRight,
@@ -10,6 +11,34 @@ import {
 export default function DashboardCompanyCard({ company }) {
   const services = company.company_services || [];
   const logoUrl = company.logo ? `http://127.0.0.1:8000${company.logo}` : null;
+
+  const [reviewsCount, setReviewsCount] = useState(null);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function fetchReviewsCount() {
+      try {
+        const res = await fetch(
+          `http://127.0.0.1:8000/api/v1/companies/${company.id}/reviews`,
+        );
+        const data = await res.json();
+        // handles either a plain array or a paginated { count, results } shape
+        const count = Array.isArray(data)
+          ? data.length
+          : (data.count ?? data.results?.length ?? 0);
+        if (isMounted) setReviewsCount(count);
+      } catch {
+        if (isMounted) setReviewsCount(0);
+      }
+    }
+
+    if (company.id) fetchReviewsCount();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [company.id]);
 
   const minFee = services.length
     ? Math.min(...services.map((s) => parseFloat(s.company_service_fee || 0)))
@@ -59,7 +88,7 @@ export default function DashboardCompanyCard({ company }) {
           {company.rating?.toFixed(1) || "0.0"}
         </span>
         <span className="text-xs text-[var(--text-secondary)]">
-          ({company.reviews_count || 0})
+          ({reviewsCount ?? "…"})
         </span>
       </div>
 

@@ -16,6 +16,7 @@ import {
 
 import PageHeader from "../../components/layout/PageHeader";
 import ContactCompanyModal from "./Contactcompanymodal";
+import { usePageLoading } from "../../context/PageLoadingContext";
 
 export default function CompanyDetails() {
   const { id, procedureId } = useParams();
@@ -24,6 +25,7 @@ export default function CompanyDetails() {
   const [company, setCompany] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  usePageLoading(loading);
   const [isContactOpen, setIsContactOpen] = useState(false);
   const [submittedOrder, setSubmittedOrder] = useState(null);
 
@@ -70,7 +72,7 @@ export default function CompanyDetails() {
       services.find(
         (s) =>
           String(s.procedure) === String(procedureId) ||
-          String(s.company_offerings?.id) === String(procedureId)
+          String(s.company_offerings?.id) === String(procedureId),
       ) || null
     );
   }, [procedureId, services]);
@@ -103,7 +105,9 @@ export default function CompanyDetails() {
       }));
       setRequirements(mapped);
     } catch (err) {
-      setRequirementsError("Couldn't load required documents for this service.");
+      setRequirementsError(
+        "Couldn't load required documents for this service.",
+      );
       setRequirements([]);
     } finally {
       setRequirementsLoading(false);
@@ -113,7 +117,8 @@ export default function CompanyDetails() {
   // Called by the modal once the user picks a service in Step 1
   // (the no-procedureId flow), so we can fetch its requirements too.
   const handleServiceSelected = (service) => {
-    const procedureIdToFetch = service?.procedure || service?.company_offerings?.id;
+    const procedureIdToFetch =
+      service?.procedure || service?.company_offerings?.id;
     if (procedureIdToFetch) {
       fetchRequirements(procedureIdToFetch);
     } else {
@@ -125,25 +130,16 @@ export default function CompanyDetails() {
   // If not, the modal handles service selection itself.
   const canContact = availableServices.length > 0;
 
-  if (loading) {
-    return (
-      <div className="max-w-7xl mx-auto px-6 py-8 animate-pulse">
-        <div className="h-10 w-40 bg-gray-200 rounded mb-6"></div>
-        <div className="h-44 rounded-xl bg-white border"></div>
-        <div className="grid grid-cols-4 gap-4 mt-6">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="h-28 rounded-xl bg-white border" />
-          ))}
-        </div>
-        <div className="h-72 rounded-xl bg-white border mt-6"></div>
-      </div>
-    );
-  }
-
-  if (error)
+  if (error) {
     return (
       <div className="text-center py-20 text-red-500 font-medium">{error}</div>
     );
+  }
+
+  if (!company) {
+    return null;
+  }
+
   const logoUrl = company.logo ? `http://127.0.0.1:8000${company.logo}` : null;
 
   return (
@@ -189,15 +185,14 @@ export default function CompanyDetails() {
                 <div className="flex items-center gap-2 mt-2">
                   <FiStar
                     size={18}
-                    className={`${company.average_rating
+                    className={`${
+                      company.rating
                         ? "fill-yellow-400 text-yellow-400"
                         : "text-gray-300"
-                      }`}
+                    }`}
                   />
                   <span className="font-semibold text-[var(--text-primary)]">
-                    {company.average_rating
-                      ? Number(company.average_rating).toFixed(1)
-                      : "N/A"}
+                    {company.rating ? Number(company.rating).toFixed(1) : "N/A"}
                   </span>
                 </div>
 
@@ -364,10 +359,11 @@ export default function CompanyDetails() {
                       </p>
                     </div>
                     <span
-                      className={`px-3 py-1 rounded-full text-xs font-semibold ${service.is_available
+                      className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                        service.is_available
                           ? "bg-green-100 text-green-700"
                           : "bg-red-100 text-red-700"
-                        }`}
+                      }`}
                     >
                       {service.is_available ? "Available" : "Unavailable"}
                     </span>
