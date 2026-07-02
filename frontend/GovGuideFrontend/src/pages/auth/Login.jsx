@@ -6,6 +6,8 @@ import { Button, Input } from "../../components/ui";
 import LanguageSwitcher from "../../components/LanguageSwitcher";
 import { getValidationErrors } from "../../utils/validation";
 import { FiLock, FiMail } from "react-icons/fi";
+import { useCompany } from "../../context/CompanyContext";
+import { useUser } from "../../context/UserContext";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -16,6 +18,9 @@ export default function Login() {
     error: authError,
     setError: setAuthError,
   } = useAuth();
+  const { refreshUser } = useUser();
+
+  const { refreshCompany } = useCompany();
 
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState({});
@@ -45,12 +50,13 @@ export default function Login() {
     try {
       const result = await login(formData.email, formData.password);
 
+      await refreshCompany(true);
+      await refreshUser();
+
       const { role, next_step } = result;
 
-      console.log("Login Result:", result);
-
       if (next_step === "create_company") {
-        navigate("/company/create", { replace: true });
+        window.location.href = "/company/create";
         return;
       }
 

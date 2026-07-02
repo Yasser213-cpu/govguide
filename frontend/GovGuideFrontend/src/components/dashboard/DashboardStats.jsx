@@ -1,7 +1,7 @@
 import { FiClock, FiCheckCircle, FiFileText } from "react-icons/fi";
 
-export default function DashboardStats({ active, pending, completed }) {
-  const stats = [
+export default function DashboardStats({ active, pending, completed, items }) {
+  const stats = items ?? [
     {
       title: "Active Requests",
       value: active,

@@ -8,25 +8,29 @@ export function CompanyProvider({ children }) {
   const [company, setCompany] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchCompany = async () => {
+  const fetchCompany = async (force = false) => {
     try {
+      if (company && !force) return;
+  
       const companyId = getCompanyId();
-
+  
       if (!companyId) {
         setCompany(null);
         return;
       }
-
-      const { data } = await axiosClient.get(`/api/v1/companies/${companyId}`);
-
+  
+      setLoading(true);
+  
+      const { data } = await axiosClient.get(
+        `/api/v1/companies/${companyId}`
+      );
+  
       setCompany(data);
-    } catch (error) {
-      console.error("Failed to load company:", error);
     } finally {
       setLoading(false);
     }
   };
-
+  
   useEffect(() => {
     fetchCompany();
   }, []);

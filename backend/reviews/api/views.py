@@ -3,7 +3,7 @@ from orders.models import Order
 from rest_framework.exceptions import NotFound
 from ..models import Review
 from .serializer import ReviewSerializer
-from core.permissions import IsReviewOwner , IsClient
+from core.permissions import IsReviewOwner, IsClient
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import status
@@ -15,19 +15,18 @@ class ReviewAPIView(CrudAPIView):
     model = Review
     basic_serializer = ReviewSerializer
     permission_classes = [IsReviewOwner]
-    
 
 
 class CreateReviewAPIView(CrudAPIView):
-    permission_classes =[IsClient]
-    def post(self , request , id):
+    permission_classes = [IsClient]
+
+    def post(self, request, id):
         try:
             order = Order.objects.get(pk=id)
         except Order.DoesNotExist:
             raise NotFound("there is no order matches this id")
 
         self.check_object_permissions(request, order)
-
         serializer = ReviewSerializer(
             data=request.data, context={"order": order, "request": request}
         )
@@ -35,10 +34,6 @@ class CreateReviewAPIView(CrudAPIView):
             serializer.save(order=order)
             return Response(serializer.data)
         return Response(serializer.errors, status.HTTP_400_BAD_REQUEST)
-
-
-
-   
 
 
 # class ReviewAPIView(CrudAPIView):

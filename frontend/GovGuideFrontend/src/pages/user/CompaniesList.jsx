@@ -12,6 +12,7 @@ import {
   FiStar,
 } from "react-icons/fi";
 import PageHeader from "../../components/layout/PageHeader";
+import { usePageLoading } from "../../context/PageLoadingContext";
 
 const GOVERNORATES = [
   "All Areas",
@@ -49,7 +50,7 @@ function CompanyCard({ company, onViewDetails }) {
     ? Math.min(...services.map((s) => s.estimated_completion_days))
     : null;
 
-  const rating = company.average_rating;
+  const rating = company.rating;
 
   // Unique procedure names as tags
   const tags = [
@@ -60,6 +61,7 @@ function CompanyCard({ company, onViewDetails }) {
         .slice(0, 3),
     ),
   ];
+  const logoUrl = company.logo ? `http://127.0.0.1:8000${company.logo}` : null;
 
   return (
     <div className="bg-[var(--background-primary)] border border-[var(--border)] rounded-xl p-5 hover:shadow-md hover:border-[var(--primary)] transition-all">
@@ -67,9 +69,17 @@ function CompanyCard({ company, onViewDetails }) {
         {/* Left */}
         <div className="flex items-center gap-4 flex-1">
           <div className="h-16 w-16 rounded-xl bg-[var(--primary-light)] flex items-center justify-center shrink-0">
-            <span className="text-xl font-bold text-[var(--primary)] uppercase">
-              {company.name?.[0] || "C"}
-            </span>
+            {logoUrl ? (
+              <img
+                src={logoUrl}
+                alt={company.name}
+                className="h-full w-full object-cover rounded-xl"
+              />
+            ) : (
+              <span className="text-xl font-bold text-[var(--primary)]">
+                {company.name?.[0]}
+              </span>
+            )}
           </div>
 
           <div className="flex-1">
@@ -222,8 +232,10 @@ export default function CompaniesList() {
 
   const [companies, setCompanies] = useState([]);
   const [totalCount, setTotalCount] = useState(0);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  usePageLoading(loading);
 
   // Filters derived from URL params
   const [nameSearch, setNameSearch] = useState(searchParams.get("name") || "");
@@ -469,7 +481,7 @@ export default function CompaniesList() {
       {/* ── Results ── */}
       <div>
         {/* Result count */}
-        {!loading && !error && (
+        {!error && (
           <p className="text-sm text-[var(--text-secondary)] mb-5 mt-5">
             {totalCount > 0
               ? `Showing ${companies.length} of ${totalCount} companies`
@@ -484,20 +496,8 @@ export default function CompaniesList() {
           </div>
         )}
 
-        {/* Loading skeleton */}
-        {loading && (
-          <div className="flex flex-col gap-4">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div
-                key={i}
-                className="h-40 rounded-xl bg-[var(--background-primary)] border border-[var(--border)] animate-pulse"
-              />
-            ))}
-          </div>
-        )}
-
         {/* Company grid */}
-        {!loading && !error && companies.length > 0 && (
+        {!error && companies.length > 0 && (
           <div className="flex flex-col gap-4">
             {companies.map((company) => (
               <CompanyCard
@@ -510,7 +510,7 @@ export default function CompaniesList() {
         )}
 
         {/* Empty state */}
-        {!loading && !error && companies.length === 0 && (
+        {!error && companies.length === 0 && (
           <div className="flex flex-col items-center justify-center py-24 text-center">
             <div className="h-16 w-16 rounded-full bg-[var(--primary-light)] flex items-center justify-center mb-4">
               <FiSearch size={28} className="text-[var(--primary)]" />

@@ -11,6 +11,7 @@ const Sidebar = () => {
   const navigate = useNavigate();
   const { logout } = useAuth();
   const { user } = useUser();
+  const { refreshUser } = useUser();
 
   const capitalize = (text) =>
     text ? text.charAt(0).toUpperCase() + text.slice(1) : "";
@@ -27,6 +28,7 @@ const Sidebar = () => {
 
   const handleLogout = () => {
     logout();
+    refreshUser();
     navigate("/login", { replace: true });
   };
 

@@ -118,35 +118,39 @@ class OrderStatusAPIView(APIView):
             order = Order.objects.get(pk=pk)
         except Order.DoesNotExist:
             return Response(
-                {"error": "Order not found"}, status=status.HTTP_404_NOT_FOUND
+                {"error": "Order not found"},
+                status=status.HTTP_404_NOT_FOUND,
             )
+
         self.check_object_permissions(request, order.service)
 
-        serializer = OrderStatusSerializer(order, data=request.data, partial=True)
+        serializer = OrderStatusSerializer(
+            order,
+            data=request.data,
+            partial=True,
+            context={"order": order},  
+        )
+
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
-        # Trigger a notification based on the new status
         new_status = serializer.validated_data.get("status")
+
         messages = {
             "accepted": f"تم قبول طلبك رقم #{order.id}",
             "rejected": f"تم رفض طلبك رقم #{order.id}",
             "paid": f"تم تأكيد الدفع لطلبك رقم #{order.id}",
             "completed": f"تم إكمال طلبك رقم #{order.id}",
         }
+
         if new_status in messages:
-            send_order_notification.delay(order.id, new_status, messages[new_status])
+            send_order_notification.delay(
+                order.id,
+                new_status,
+                messages[new_status],
+            )
 
         return Response(serializer.data)
-        serializer = OrderStatusSerializer(
-            order, data=request.data, partial=True, context={"order": order}
-        )
-
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-
-        return Response(serializer.data)
-
 
 class PayOrderAPIView(APIView):
     def get_permissions(self):

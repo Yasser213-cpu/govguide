@@ -49,7 +49,7 @@ class CompanySerializer(serializers.ModelSerializer):
         many=True,
     )
     rating = serializers.FloatField(read_only=True)
-    logo = serializers.ImageField(read_only=True)
+    logo = serializers.ImageField(required=False)
 
     class Meta:
         model = Company

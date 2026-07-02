@@ -31,6 +31,7 @@
     "notifications": "الإشعارات",
     "settings": "الإعدادات",
     "companyDashboard": "لوحة التحكم",
+    "companyOrders": "الطلبات",
     "companyServices": "الخدمات",
     "companyBookings": "الحجوزات",
     "companySettings": "الإعدادات",
@@ -93,6 +94,10 @@
       "title": "لوحة تحكم الشركة",
       "subtitle": "مرحباً بك في لوحة تحكم الشركة",
       "placeholder": "سيظهر محتوى لوحة التحكم هنا."
+    },
+    "companyOrders": {
+      "title": "الطلبات",
+      "subtitle": "راجع وأدر جميع الطلبات الواردة"
     },
     "companyServices": {
       "title": "الخدمات",
