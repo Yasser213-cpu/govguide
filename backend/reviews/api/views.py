@@ -43,7 +43,7 @@ class ReviewAPIView(APIView):
 
         self.check_object_permissions(request, order)
 
-        serializer = ReviewSerializer(data=request.data, context={"order": order})
+        serializer = ReviewSerializer(data=request.data, context={"order": order , "request": request})
         if serializer.is_valid():
             serializer.save(order=order)
             return Response(serializer.data)
