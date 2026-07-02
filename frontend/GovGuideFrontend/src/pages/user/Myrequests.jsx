@@ -15,6 +15,7 @@ import {
 } from "react-icons/fi";
 import { getMyOrders, payOrder } from "../../features/orders/api/Ordersapi";
 import PageHeader from "../../components/layout/PageHeader";
+import { usePageLoading } from "../../context/PageLoadingContext";
 
 // ─── Status config ────────────────────────────────────────────────────────────
 
@@ -131,12 +132,12 @@ function ProgressBar({ status }) {
 
 function getStepsForStatus(status) {
   const map = {
-    pending:     { completed: 1, total: 5 },
-    accepted:    { completed: 2, total: 5 },
-    paid:        { completed: 3, total: 5 },
+    pending: { completed: 1, total: 5 },
+    accepted: { completed: 2, total: 5 },
+    paid: { completed: 3, total: 5 },
     in_progress: { completed: 4, total: 5 },
-    completed:   { completed: 5, total: 5 },
-    rejected:    { completed: 1, total: 5 },
+    completed: { completed: 5, total: 5 },
+    rejected: { completed: 1, total: 5 },
   };
   return map[status] ?? { completed: 1, total: 5 };
 }
@@ -260,8 +261,8 @@ function RequestCard({ order, onClick, onPayClick }) {
               {order.status === "completed"
                 ? `Completed ${timeAgo}`
                 : order.status === "rejected"
-                ? `Cancelled ${timeAgo}`
-                : `Updated ${timeAgo}`}
+                  ? `Cancelled ${timeAgo}`
+                  : `Updated ${timeAgo}`}
             </p>
           </div>
         </div>
@@ -294,11 +295,26 @@ function RequestCard({ order, onClick, onPayClick }) {
 
 function EmptyState({ tab, onNewRequest }) {
   const messages = {
-    all:         { title: "No requests yet",          body: "Start by contacting a company to submit your first request." },
-    in_progress: { title: "Nothing in progress",      body: "Requests that are active will appear here." },
-    pending:     { title: "No pending requests",      body: "Requests waiting for company review will appear here." },
-    completed:   { title: "No completed requests",    body: "Finished requests will show up here." },
-    cancelled:   { title: "No cancelled requests",    body: "Requests that were rejected will appear here." },
+    all: {
+      title: "No requests yet",
+      body: "Start by contacting a company to submit your first request.",
+    },
+    in_progress: {
+      title: "Nothing in progress",
+      body: "Requests that are active will appear here.",
+    },
+    pending: {
+      title: "No pending requests",
+      body: "Requests waiting for company review will appear here.",
+    },
+    completed: {
+      title: "No completed requests",
+      body: "Finished requests will show up here.",
+    },
+    cancelled: {
+      title: "No cancelled requests",
+      body: "Requests that were rejected will appear here.",
+    },
   };
   const { title, body } = messages[tab] ?? messages.all;
 
@@ -307,7 +323,9 @@ function EmptyState({ tab, onNewRequest }) {
       <div className="h-16 w-16 rounded-full bg-[var(--primary-light)] flex items-center justify-center mb-4">
         <FiInbox size={28} className="text-[var(--primary)]" />
       </div>
-      <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-1">{title}</h3>
+      <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-1">
+        {title}
+      </h3>
       <p className="text-sm text-[var(--text-secondary)] max-w-xs">{body}</p>
       {tab === "all" && (
         <button
@@ -353,15 +371,22 @@ function formatTimeAgo(date) {
 
 function getTabCount(orders, tab) {
   if (tab === "all") return orders.length;
-  if (tab === "cancelled") return orders.filter((o) => o.status === "rejected").length;
-  if (tab === "in_progress") return orders.filter((o) => ["accepted", "paid", "in_progress"].includes(o.status)).length;
+  if (tab === "cancelled")
+    return orders.filter((o) => o.status === "rejected").length;
+  if (tab === "in_progress")
+    return orders.filter((o) =>
+      ["accepted", "paid", "in_progress"].includes(o.status),
+    ).length;
   return orders.filter((o) => o.status === tab).length;
 }
 
 function filterByTab(orders, tab) {
   if (tab === "all") return orders;
   if (tab === "cancelled") return orders.filter((o) => o.status === "rejected");
-  if (tab === "in_progress") return orders.filter((o) => ["accepted", "paid", "in_progress"].includes(o.status));
+  if (tab === "in_progress")
+    return orders.filter((o) =>
+      ["accepted", "paid", "in_progress"].includes(o.status),
+    );
   return orders.filter((o) => o.status === tab);
 }
 
@@ -370,21 +395,23 @@ function filterByTab(orders, tab) {
 export default function MyRequests() {
   const navigate = useNavigate();
 
-  const [orders, setOrders]       = useState([]);
-  const [loading, setLoading]     = useState(true);
-  const [error, setError]         = useState("");
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState("all");
 
+  usePageLoading(loading);
+
   // Pay modal state
-  const [payTarget, setPayTarget]   = useState(null); // order being paid
-  const [paying, setPaying]         = useState(false);
-  const [payError, setPayError]     = useState("");
+  const [payTarget, setPayTarget] = useState(null); // order being paid
+  const [paying, setPaying] = useState(false);
+  const [payError, setPayError] = useState("");
 
   useEffect(() => {
     async function load() {
       try {
         const data = await getMyOrders();
-        setOrders(Array.isArray(data) ? data : data.results ?? []);
+        setOrders(Array.isArray(data) ? data : (data.results ?? []));
       } catch {
         setError("Failed to load your requests. Please try again.");
       } finally {
@@ -394,7 +421,10 @@ export default function MyRequests() {
     load();
   }, []);
 
-  const filtered = useMemo(() => filterByTab(orders, activeTab), [orders, activeTab]);
+  const filtered = useMemo(
+    () => filterByTab(orders, activeTab),
+    [orders, activeTab],
+  );
 
   // ── Pay handlers ─────────────────────────────────────────────────────────
 
@@ -417,7 +447,7 @@ export default function MyRequests() {
       await payOrder(payTarget.id);
       // Optimistically update status in local state → no need for a refetch
       setOrders((prev) =>
-        prev.map((o) => (o.id === payTarget.id ? { ...o, status: "paid" } : o))
+        prev.map((o) => (o.id === payTarget.id ? { ...o, status: "paid" } : o)),
       );
       setPayTarget(null);
     } catch (err) {
@@ -434,7 +464,7 @@ export default function MyRequests() {
   return (
     <>
       <PageHeader
-        title="My Requests"
+        title="My Orders"
         subtitle="Track and manage your paperwork requests"
       />
 
@@ -471,26 +501,28 @@ export default function MyRequests() {
       </div>
 
       {/* Content */}
-      {loading && <Skeleton />}
 
-      {error && !loading && (
+      {error && (
         <div className="flex items-center gap-2 rounded-xl bg-red-50 text-red-600 px-5 py-4 text-sm">
           <FiAlertCircle />
           {error}
         </div>
       )}
 
-      {!loading && !error && filtered.length === 0 && (
-        <EmptyState tab={activeTab} onNewRequest={() => navigate("/user/companies")} />
+      {!error && filtered.length === 0 && (
+        <EmptyState
+          tab={activeTab}
+          onNewRequest={() => navigate("/user/companies")}
+        />
       )}
 
-      {!loading && !error && filtered.length > 0 && (
+      {!error && filtered.length > 0 && (
         <div className="flex flex-col gap-3">
           {filtered.map((order) => (
             <RequestCard
               key={order.id}
               order={order}
-              onClick={() => navigate(`/user/requests/${order.id}`)}
+              onClick={() => navigate(`/user/my-requests/${order.id}`)}
               onPayClick={handlePayClick}
             />
           ))}

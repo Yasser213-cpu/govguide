@@ -112,6 +112,7 @@ export function AuthProvider({ children }) {
       setUser(userData);
       sessionStorage.setItem("user", JSON.stringify(userData));
       sessionStorage.setItem("pendingEmail", email);
+      sessionStorage.setItem("pendingPassword", password);
       return response.data;
     } catch (err) {
       const data = err.response?.data;
