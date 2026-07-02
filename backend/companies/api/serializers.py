@@ -26,15 +26,20 @@ class CompanyServicesSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         request = self.context.get("request")
-        if request.method == "POST":
+
+        if request and request.method == "POST":
             company = request.user.company
             procedure = attrs["procedure"]
-            if CompanyService.objects.filter(
-                company=company, procedure=procedure
-            ).exists():
-                raise ValidationError({"message": "this service already exist"})
 
-        return super().validate(attrs)
+            if CompanyService.objects.filter(
+                company=company,
+                procedure=procedure,
+            ).exists():
+                raise serializers.ValidationError(
+                    {"message": "This service already exists."}
+                )
+
+        return attrs
 
 
 class CompanySerializer(serializers.ModelSerializer):

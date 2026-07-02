@@ -27,10 +27,10 @@ urlpatterns = [
     path("api/v1/procedures/", include("procedures.api.urls")),
     path("api/v1/services/", include("companies.api.services_urls")),
     path("api/v1/ai/", include("ai_agents.api.urls")),
-    path("api/v1/available-slots/", include("bookings.api.slots_urls")),
     path("api/v1/orders/", include("orders.api.urls")),
     path("api/v1/company/", include("orders.api.url_company_orders")),
     path("api/v1/notifications/", include("notifications.api.urls")),
+    path("api/v1/reviews/", include("reviews.api.urls")),
 ]
 
 if settings.DEBUG:

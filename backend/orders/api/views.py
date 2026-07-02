@@ -1,4 +1,3 @@
-from core.services import CRUDAPIView
 from .serializers import (
     OrderCreateSerializer,
     DocumentUploadSerializer,

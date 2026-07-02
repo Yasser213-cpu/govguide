@@ -12,7 +12,7 @@ class Review(models.Model):
     )
     comment = models.CharField(max_length=200, blank=True, null=True)
     rating = models.PositiveSmallIntegerField(
-        validators=[MinValueValidator, MaxValueValidator]
+        validators=[MinValueValidator(0), MaxValueValidator(5)]
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
