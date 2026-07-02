@@ -13,7 +13,7 @@ class IsCompany(BasePermission):
 class IsClient(BasePermission):
     def has_permission(self, request, view):
         return request.user.role == User.CLIENT_ROLE
-    
+
     def has_object_permission(self, request, view, obj):
         return request.user == obj.user
 
@@ -26,3 +26,8 @@ class IsAdmin(BasePermission):
 class isCompanyOwner(IsCompany):
     def has_object_permission(self, request, view, obj):
         return hasattr(request.user, "company") and request.user.company == obj.company
+
+
+class IsReviewOwner(IsClient):
+    def has_object_permission(self, request, view, obj):
+        return obj.order.user == request.user
