@@ -11,13 +11,13 @@ client
 class OrderCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
-        fields = ["notes", "service"]
+        fields = ["id", "notes", "service"]
+        read_only_fields = ["id"]
 
     def create(self, validated_data):
         order = Order.objects.create(**validated_data)
         OrderStatusHistory.objects.create(order=order, status=Order.PENDING_STATUS)
         return order
-
 
 class DocumentUploadSerializer(serializers.ModelSerializer):
     class Meta:

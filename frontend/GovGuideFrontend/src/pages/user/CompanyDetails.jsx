@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getCompany } from "../../api/companyApi";
+import { getProcedureById } from "../../features/ai-chat/api/Procedureapi";
 import {
   FiArrowLeft,
   FiMapPin,
@@ -25,6 +26,12 @@ export default function CompanyDetails() {
   const [error, setError] = useState("");
   const [isContactOpen, setIsContactOpen] = useState(false);
   const [submittedOrder, setSubmittedOrder] = useState(null);
+
+  // Requirements for the currently-selected service's procedure.
+  // Fetched lazily (only once a service is known) from GET /procedures/{id}.
+  const [requirements, setRequirements] = useState([]);
+  const [requirementsLoading, setRequirementsLoading] = useState(false);
+  const [requirementsError, setRequirementsError] = useState("");
 
   useEffect(() => {
     async function fetchCompany() {
@@ -60,10 +67,59 @@ export default function CompanyDetails() {
   const matchedService = useMemo(() => {
     if (!procedureId || !services.length) return null;
     return (
-      services.find((s) => String(s.procedure_id) === String(procedureId)) ||
-      null
+      services.find(
+        (s) =>
+          String(s.procedure) === String(procedureId) ||
+          String(s.company_offerings?.id) === String(procedureId)
+      ) || null
     );
   }, [procedureId, services]);
+
+  // If the route already gives us a matched service (procedure route),
+  // fetch its requirements right away so the modal opens ready-to-go.
+  useEffect(() => {
+    const procedureIdToFetch =
+      matchedService?.procedure || matchedService?.company_offerings?.id;
+    if (procedureIdToFetch) {
+      fetchRequirements(procedureIdToFetch);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [matchedService?.procedure, matchedService?.company_offerings?.id]);
+
+  async function fetchRequirements(procedureId) {
+    if (!procedureId) {
+      setRequirements([]);
+      return;
+    }
+    setRequirementsLoading(true);
+    setRequirementsError("");
+    try {
+      const procedure = await getProcedureById(procedureId);
+      // Backend returns { id, title, ... } — map to the { id, name }
+      // shape the modal renders.
+      const mapped = (procedure.requirements || []).map((r) => ({
+        id: r.id,
+        name: r.title,
+      }));
+      setRequirements(mapped);
+    } catch (err) {
+      setRequirementsError("Couldn't load required documents for this service.");
+      setRequirements([]);
+    } finally {
+      setRequirementsLoading(false);
+    }
+  }
+
+  // Called by the modal once the user picks a service in Step 1
+  // (the no-procedureId flow), so we can fetch its requirements too.
+  const handleServiceSelected = (service) => {
+    const procedureIdToFetch = service?.procedure || service?.company_offerings?.id;
+    if (procedureIdToFetch) {
+      fetchRequirements(procedureIdToFetch);
+    } else {
+      setRequirements([]);
+    }
+  };
 
   // If we have a procedureId, we pre-match the service.
   // If not, the modal handles service selection itself.
@@ -133,11 +189,10 @@ export default function CompanyDetails() {
                 <div className="flex items-center gap-2 mt-2">
                   <FiStar
                     size={18}
-                    className={`${
-                      company.average_rating
+                    className={`${company.average_rating
                         ? "fill-yellow-400 text-yellow-400"
                         : "text-gray-300"
-                    }`}
+                      }`}
                   />
                   <span className="font-semibold text-[var(--text-primary)]">
                     {company.average_rating
@@ -309,11 +364,10 @@ export default function CompanyDetails() {
                       </p>
                     </div>
                     <span
-                      className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                        service.is_available
+                      className={`px-3 py-1 rounded-full text-xs font-semibold ${service.is_available
                           ? "bg-green-100 text-green-700"
                           : "bg-red-100 text-red-700"
-                      }`}
+                        }`}
                     >
                       {service.is_available ? "Available" : "Unavailable"}
                     </span>
@@ -415,6 +469,10 @@ export default function CompanyDetails() {
         // Otherwise pass null and let the modal show the service picker.
         preSelectedService={matchedService ?? null}
         availableServices={availableServices}
+        requirements={requirements}
+        requirementsLoading={requirementsLoading}
+        requirementsError={requirementsError}
+        onServiceSelected={handleServiceSelected}
         onSuccess={(order) => {
           setSubmittedOrder(order);
           setIsContactOpen(false);
