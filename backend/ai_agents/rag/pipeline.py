@@ -15,45 +15,44 @@ def handle_message(message):
             "intent": intent,
             "answer": rag_result["answer"],
             "tokens": rag_result["tokens"],
+            "procedure_id": rag_result.get("procedure_id"),
         }
-
     elif intent == "greeting":
         return {
             "intent": intent,
-            "answer": "Hello! I can help you with Egyptian government procedures. What do you need?",
+            "answer": "أهلاً بك! يمكنني مساعدتك في الإجراءات الحكومية المصرية. ماذا تحتاج؟",
             "tokens": 0,
+            "procedure_id": None,
         }
-
     elif intent == "booking":
         return {
             "intent": intent,
-            "answer": "Booking is not available yet. It will be added soon.",
+            "answer": "خدمة الحجز غير متاحة حالياً، وسيتم إضافتها قريباً.",
             "tokens": 0,
+            "procedure_id": None,
         }
-
     elif intent == "support":
         return {
             "intent": intent,
-            "answer": "For support, please contact the help team.",
+            "answer": "للمساعدة، يرجى التواصل مع فريق الدعم.",
             "tokens": 0,
+            "procedure_id": None,
         }
-
     else:
         return {
             "intent": intent,
-            "answer": "Sorry, I didn't understand. Could you rephrase?",
+            "answer": "عذراً، لم أفهم سؤالك. هل يمكنك إعادة صياغته؟",
             "tokens": 0,
+            "procedure_id": None,
         }
 
 
 if __name__ == "__main__":
-    # Test the full pipeline with different messages
     test_messages = [
-        "What documents do I need to renew my passport?",
-        "Hello",
-        "I want to book an appointment",
+        "عايز اجدد جواز السفر",
+        "السلام عليكم",
+        "عايز احجز موعد",
     ]
-
     for msg in test_messages:
         result = handle_message(msg)
         print(f"Message: {msg}")

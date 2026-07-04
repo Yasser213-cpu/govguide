@@ -10,9 +10,8 @@ def get_llm():
     global _llm
     if _llm is None:
         _llm = ChatOpenAI(
-            model="openrouter/free",
-            openai_api_key=os.getenv("OPENROUTER_API_KEY"),
-            openai_api_base="https://openrouter.ai/api/v1",
+            model="gpt-4o-mini",
+            openai_api_key=os.getenv("OPENAI_API_KEY"),
             temperature=0,
         )
     return _llm
