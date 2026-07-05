@@ -8,6 +8,8 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 from core.views import CrudAPIView
+from notifications.tasks import send_company_notification
+from notifications.models import Notification
 
 
 class ReviewAPIView(CrudAPIView):
@@ -32,6 +34,15 @@ class CreateReviewAPIView(CrudAPIView):
         )
         if serializer.is_valid():
             serializer.save(order=order)
+
+            company_owner = order.service.company.owner
+            send_company_notification.delay(
+                company_owner.id,
+                order.id,
+                Notification.REVIEW,
+                f"تقييم جديد على الطلب رقم #{order.id}",
+            )
+
             return Response(serializer.data)
         return Response(serializer.errors, status.HTTP_400_BAD_REQUEST)
 

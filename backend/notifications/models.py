@@ -7,12 +7,18 @@ class Notification(models.Model):
     REJECTED = "rejected"
     PAID = "paid"
     COMPLETED = "completed"
+    CHAT_MESSAGE = "chat_message"
+    NEW_ORDER = "new_order"
+    REVIEW = "review"
 
     TYPE_CHOICES = [
         (ACCEPTED, "Accepted"),
         (REJECTED, "Rejected"),
         (PAID, "Paid"),
         (COMPLETED, "Completed"),
+        (CHAT_MESSAGE, "Chat Message"),
+        (NEW_ORDER, "New Order"),
+        (REVIEW, "Review"),
     ]
 
     user = models.ForeignKey(
@@ -24,6 +30,8 @@ class Notification(models.Model):
         "orders.Order",
         on_delete=models.CASCADE,
         related_name="notifications",
+        null=True,
+        blank=True
     )
     notification_type = models.CharField(max_length=20, choices=TYPE_CHOICES)
     message = models.TextField()

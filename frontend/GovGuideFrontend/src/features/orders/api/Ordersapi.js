@@ -16,9 +16,12 @@ export const getCompanyOrder = async (orderId) => {
 };
 
 export const updateOrderStatus = async (orderId, status) => {
-  const response = await axiosClient.patch(`/api/v1/orders/${orderId}/status/`, {
-    status,
-  });
+  const response = await axiosClient.patch(
+    `/api/v1/orders/${orderId}/status/`,
+    {
+      status,
+    },
+  );
   return response.data;
 };
 
@@ -39,7 +42,7 @@ export const uploadOrderDocument = async (orderId, requirementId, file) => {
   const response = await axiosClient.post(
     `/api/v1/orders/${orderId}/documents`,
     form,
-    { headers: { "Content-Type": "multipart/form-data" } }
+    { headers: { "Content-Type": "multipart/form-data" } },
   );
   return response.data;
 };
@@ -62,4 +65,11 @@ export const getOrderById = async (orderId) => {
   return response.data;
 };
 
+export const submitReview = async (orderId, reviewData) => {
+  const response = await axiosClient.post(
+    `/api/v1/orders/${orderId}/review`,
+    reviewData,
+  );
 
+  return response.data;
+};

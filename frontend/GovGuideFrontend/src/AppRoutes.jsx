@@ -30,6 +30,8 @@ import Dashboard from "./pages/user/Dashboard";
 import CompanyDetails from "./pages/user/CompanyDetails";
 import MyRequests from "./pages/user/Myrequests";
 import RequestDetails from "./pages/user/RequestDetails";
+import Notifications from "./pages/user/Notifications";
+import UserMessages from "./pages/user/Messages";
 import Settings from "./pages/user/Settings";
 
 // Company Imports
@@ -39,6 +41,7 @@ import CompanyOrders from "./pages/company/CompanyOrders";
 import CompanyOrderDetail from "./pages/company/CompanyOrderDetail";
 import CompanyServices from "./pages/company/Services";
 import CompanyBookings from "./pages/company/Bookings";
+import CompanyMessages from "./pages/company/CompanyMessages";
 import CompanySettings from "./pages/company/Settings";
 import CompanyNotifications from "./pages/company/Notification";
 import CompanyProfile from "./pages/company/Profile";
@@ -131,6 +134,11 @@ export default function AppRoutes() {
                       path="/user/my-requests/:id"
                       element={<RequestDetails />}
                     />
+                    <Route
+                      path="/user/notifications"
+                      element={<Notifications />}
+                    />
+                    <Route path="/user/messages" element={<UserMessages />} />
 
                     <Route
                       path="/user/companies/:id"
@@ -162,7 +170,10 @@ export default function AppRoutes() {
                         path="/company/dashboard"
                         element={<CompanyDashboard />}
                       />
-                      <Route path="/company/orders" element={<CompanyOrders />} />
+                      <Route
+                        path="/company/orders"
+                        element={<CompanyOrders />}
+                      />
                       <Route
                         path="/company/orders/:id"
                         element={<CompanyOrderDetail />}
@@ -175,6 +186,10 @@ export default function AppRoutes() {
                         path="/company/bookings"
                         element={<CompanyBookings />}
                       />
+                      <Route
+                        path="/company/messages"
+                        element={<CompanyMessages />}
+                      ></Route>
                       <Route
                         path="/company/profile"
                         element={<CompanyProfile />}

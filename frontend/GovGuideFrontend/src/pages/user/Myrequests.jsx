@@ -17,6 +17,9 @@ import { getMyOrders, payOrder } from "../../features/orders/api/Ordersapi";
 import PageHeader from "../../components/layout/PageHeader";
 import { usePageLoading } from "../../context/PageLoadingContext";
 
+import Toast from "../../components/ui/Toast";
+import ReviewModal from "../../components/orders/ReviewModal";
+
 // ─── Status config ────────────────────────────────────────────────────────────
 
 const STATUS_CONFIG = {
@@ -66,13 +69,13 @@ const STATUS_CONFIG = {
     tab: "completed",
   },
   rejected: {
-    label: "Cancelled",
+    label: "Rejected",
     color: "text-red-500",
     bg: "bg-red-50",
     border: "border-red-200",
     bar: "bg-red-400",
     progress: 100,
-    tab: "cancelled",
+    tab: "rejected",
   },
 };
 
@@ -81,7 +84,7 @@ const TABS = [
   { key: "in_progress", label: "In Progress" },
   { key: "pending", label: "Pending" },
   { key: "completed", label: "Completed" },
-  { key: "cancelled", label: "Cancelled" },
+  { key: "rejected", label: "Rejected" },
 ];
 
 // ─── Status Badge ─────────────────────────────────────────────────────────────
@@ -213,9 +216,11 @@ function PayModal({ order, onConfirm, onCancel, paying, error }) {
   );
 }
 
+// ─── Review Modal ────────────────────────────────────────────────────────────
+
 // ─── Request Card ─────────────────────────────────────────────────────────────
 
-function RequestCard({ order, onClick, onPayClick }) {
+function RequestCard({ order, onClick, onPayClick, onReviewClick }) {
   const timeAgo = formatTimeAgo(new Date(order.created_at));
 
   return (
@@ -261,7 +266,7 @@ function RequestCard({ order, onClick, onPayClick }) {
               {order.status === "completed"
                 ? `Completed ${timeAgo}`
                 : order.status === "rejected"
-                  ? `Cancelled ${timeAgo}`
+                  ? `Rejected ${timeAgo}`
                   : `Updated ${timeAgo}`}
             </p>
           </div>
@@ -284,6 +289,26 @@ function RequestCard({ order, onClick, onPayClick }) {
           >
             <FiCreditCard size={14} />
             Pay Now
+          </button>
+        </div>
+      )}
+
+      {order.status === "completed" && (
+        <div className="mt-4 pt-4 border-t border-[var(--border)] flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2 text-sm text-green-600">
+            <FiCheckCircle size={15} />
+            <span className="font-medium">Tell us about your experience</span>
+          </div>
+
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onReviewClick(order);
+            }}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-600 text-white text-sm font-semibold hover:bg-green-700 transition shrink-0"
+          >
+            <FiCheckCircle size={14} />
+            Leave Review
           </button>
         </div>
       )}
@@ -311,8 +336,8 @@ function EmptyState({ tab, onNewRequest }) {
       title: "No completed requests",
       body: "Finished requests will show up here.",
     },
-    cancelled: {
-      title: "No cancelled requests",
+    rejected: {
+      title: "No rejected requests",
       body: "Requests that were rejected will appear here.",
     },
   };
@@ -371,7 +396,7 @@ function formatTimeAgo(date) {
 
 function getTabCount(orders, tab) {
   if (tab === "all") return orders.length;
-  if (tab === "cancelled")
+  if (tab === "rejected")
     return orders.filter((o) => o.status === "rejected").length;
   if (tab === "in_progress")
     return orders.filter((o) =>
@@ -382,7 +407,7 @@ function getTabCount(orders, tab) {
 
 function filterByTab(orders, tab) {
   if (tab === "all") return orders;
-  if (tab === "cancelled") return orders.filter((o) => o.status === "rejected");
+  if (tab === "rejected") return orders.filter((o) => o.status === "rejected");
   if (tab === "in_progress")
     return orders.filter((o) =>
       ["accepted", "paid", "in_progress"].includes(o.status),
@@ -425,6 +450,31 @@ export default function MyRequests() {
     () => filterByTab(orders, activeTab),
     [orders, activeTab],
   );
+
+  // Review modal state
+  const [reviewTarget, setReviewTarget] = useState(null);
+
+  const [toast, setToast] = useState({
+    show: false,
+    message: "",
+    type: "success",
+  });
+
+  const showToast = (message, type = "success") => {
+    setToast({
+      show: true,
+      message,
+      type,
+    });
+  };
+
+  const handleReviewClick = (order) => {
+    setReviewTarget(order);
+  };
+
+  const handleReviewClose = () => {
+    setReviewTarget(null);
+  };
 
   // ── Pay handlers ─────────────────────────────────────────────────────────
 
@@ -524,6 +574,7 @@ export default function MyRequests() {
               order={order}
               onClick={() => navigate(`/user/my-requests/${order.id}`)}
               onPayClick={handlePayClick}
+              onReviewClick={handleReviewClick}
             />
           ))}
         </div>
@@ -539,6 +590,24 @@ export default function MyRequests() {
           error={payError}
         />
       )}
+      {reviewTarget && (
+        <ReviewModal
+          order={reviewTarget}
+          onClose={handleReviewClose}
+          showToast={showToast}
+        />
+      )}
+      <Toast
+        show={toast.show}
+        message={toast.message}
+        type={toast.type}
+        onClose={() =>
+          setToast((prev) => ({
+            ...prev,
+            show: false,
+          }))
+        }
+      />
     </>
   );
 }
