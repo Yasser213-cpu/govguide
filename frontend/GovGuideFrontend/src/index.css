@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 :root {
+  --font-scale: 1;
   --primary: #0052ff;
   --primary-light: #ebf2ff;
   --primary-dark: #0040cc;
@@ -47,12 +48,24 @@
   --radius-full: 9999px;
 }
 
+html.dark {
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-light: #94a3b8;
+  --text-inverse: #111827;
+  --background-primary: #111827;
+  --background-secondary: #0f172a;
+  --background-tertiary: #1e293b;
+  --border: #334155;
+}
+
 * {
   box-sizing: border-box;
 }
 
 html {
   scroll-behavior: smooth;
+  font-size: calc(16px * var(--font-scale));
 }
 
 body {
