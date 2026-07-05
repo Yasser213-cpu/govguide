@@ -19,6 +19,9 @@ import {
 import PageHeader from "../../components/layout/PageHeader";
 import { getOrderById } from "../../features/orders/api/Ordersapi";
 import { usePageLoading } from "../../context/PageLoadingContext";
+import { payOrder } from "../../features/orders/api/Ordersapi";
+import ReviewModal from "../../components/orders/ReviewModal";
+import Toast from "../../components/ui/Toast";
 
 // ─── Status config (mirrors MyRequests for visual consistency) ───────────────
 
@@ -69,7 +72,7 @@ const STATUS_CONFIG = {
     icon: FiCheckCircle,
   },
   rejected: {
-    label: "Cancelled",
+    label: "Rejected",
     color: "text-red-500",
     bg: "bg-red-50",
     border: "border-red-200",
@@ -185,6 +188,29 @@ export default function RequestDetails() {
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [paying, setPaying] = useState(false);
+  const [reviewTarget, setReviewTarget] = useState(null);
+
+  const handlePay = async () => {
+    try {
+      setPaying(true);
+
+      await payOrder(order.id);
+
+      setOrder((prev) => ({
+        ...prev,
+        status: "paid",
+      }));
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setPaying(false);
+    }
+  };
+
+  const handleReviewClick = () => {
+    setReviewTarget(order);
+  };
 
   usePageLoading(loading);
 
@@ -225,6 +251,20 @@ export default function RequestDetails() {
 
   const cfg = order ? STATUS_CONFIG[order.status] : null;
   const StatusHeroIcon = cfg?.icon ?? FiFileText;
+
+  const [toast, setToast] = useState({
+    show: false,
+    message: "",
+    type: "success",
+  });
+
+  const showToast = (message, type = "success") => {
+    setToast({
+      show: true,
+      message,
+      type,
+    });
+  };
 
   return (
     <>
@@ -280,6 +320,48 @@ export default function RequestDetails() {
               </div>
             </div>
           </div>
+
+          {order.status === "accepted" && (
+            <div className="rounded-xl border border-[var(--border)] bg-[var(--background-primary)] px-5 py-4 flex items-center justify-between gap-4">
+              <div className="flex items-center gap-2 text-sm text-blue-600">
+                <FiCreditCard size={15} />
+                <span className="font-medium">Payment required to proceed</span>
+              </div>
+
+              <button
+                onClick={handlePay}
+                disabled={paying}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition disabled:opacity-60"
+              >
+                {paying ? (
+                  <FiLoader size={14} className="animate-spin" />
+                ) : (
+                  <FiCreditCard size={14} />
+                )}
+
+                {paying ? "Processing..." : "Pay Now"}
+              </button>
+            </div>
+          )}
+
+          {order.status === "completed" && (
+            <div className="rounded-xl border border-[var(--border)] bg-[var(--background-primary)] px-5 py-4 flex items-center justify-between gap-4">
+              <div className="flex items-center gap-2 text-sm text-green-600">
+                <FiCheckCircle size={15} />
+                <span className="font-medium">
+                  Tell us about your experience
+                </span>
+              </div>
+
+              <button
+                onClick={handleReviewClick}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-600 text-white text-sm font-semibold hover:bg-green-700 transition"
+              >
+                <FiCheckCircle size={14} />
+                Leave Review
+              </button>
+            </div>
+          )}
 
           {/* Request info + notes */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
@@ -375,6 +457,24 @@ export default function RequestDetails() {
           </div>
         </div>
       )}
+      {reviewTarget && (
+        <ReviewModal
+          order={reviewTarget}
+          onClose={() => setReviewTarget(null)}
+          showToast={showToast}
+        />
+      )}
+      <Toast
+        show={toast.show}
+        message={toast.message}
+        type={toast.type}
+        onClose={() =>
+          setToast((prev) => ({
+            ...prev,
+            show: false,
+          }))
+        }
+      />
     </>
   );
 }

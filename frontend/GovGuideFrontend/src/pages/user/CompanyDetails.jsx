@@ -12,11 +12,13 @@ import {
   FiCheckCircle,
   FiAlertCircle,
   FiStar,
+  FiMessageCircle,
 } from "react-icons/fi";
 
 import PageHeader from "../../components/layout/PageHeader";
 import ContactCompanyModal from "./Contactcompanymodal";
 import { usePageLoading } from "../../context/PageLoadingContext";
+import { createConversation } from "../../features/chat/api/chatApi";
 
 export default function CompanyDetails() {
   const { id, procedureId } = useParams();
@@ -28,6 +30,7 @@ export default function CompanyDetails() {
   usePageLoading(loading);
   const [isContactOpen, setIsContactOpen] = useState(false);
   const [submittedOrder, setSubmittedOrder] = useState(null);
+  const [startingChat, setStartingChat] = useState(false);
 
   // Requirements for the currently-selected service's procedure.
   // Fetched lazily (only once a service is known) from GET /procedures/{id}.
@@ -130,6 +133,20 @@ export default function CompanyDetails() {
   // If not, the modal handles service selection itself.
   const canContact = availableServices.length > 0;
 
+  const handleStartChat = async () => {
+    if (!company?.id) return;
+
+    try {
+      setStartingChat(true);
+      const { data } = await createConversation(company.id);
+      navigate("/user/messages", { state: { conversationId: data.id } });
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setStartingChat(false);
+    }
+  };
+
   if (error) {
     return (
       <div className="text-center py-20 text-red-500 font-medium">{error}</div>
@@ -150,7 +167,7 @@ export default function CompanyDetails() {
       />
 
       <button
-        onClick={() => navigate(-1)}
+        onClick={() => navigate("/user/companies")}
         className="mb-6 flex items-center gap-2 text-sm text-[var(--primary)] hover:underline"
       >
         <FiArrowLeft />
@@ -210,18 +227,29 @@ export default function CompanyDetails() {
 
             {/* Right */}
             <div className="flex flex-col gap-4">
-              <button
-                onClick={() => setIsContactOpen(true)}
-                disabled={!canContact}
-                title={
-                  canContact
-                    ? undefined
-                    : "This company has no available services."
-                }
-                className="px-6 py-3 rounded-xl bg-[var(--primary)] text-white font-semibold hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:opacity-40"
-              >
-                Contact Company
-              </button>
+              <div className="flex flex-col gap-3">
+                <button
+                  onClick={() => setIsContactOpen(true)}
+                  disabled={!canContact}
+                  title={
+                    canContact
+                      ? undefined
+                      : "This company has no available services."
+                  }
+                  className="px-6 py-3 rounded-xl bg-[var(--primary)] text-white font-semibold hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:opacity-40"
+                >
+                  Contact Company
+                </button>
+
+                <button
+                  onClick={handleStartChat}
+                  disabled={startingChat}
+                  className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl border border-[var(--primary)] text-[var(--primary)] font-semibold hover:bg-[var(--primary-light)] disabled:opacity-50"
+                >
+                  <FiMessageCircle />
+                  {startingChat ? "Opening chat..." : "Message Company"}
+                </button>
+              </div>
 
               {company.phone && (
                 <div className="flex items-center gap-2 text-[var(--text-secondary)]">

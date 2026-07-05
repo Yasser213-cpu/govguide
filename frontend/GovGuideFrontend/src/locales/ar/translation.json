@@ -34,6 +34,7 @@
     "companyOrders": "الطلبات",
     "companyServices": "الخدمات",
     "companyBookings": "الحجوزات",
+    "companyMessages": "الرسائل",
     "companySettings": "الإعدادات",
     "companyNotifications": "الإشعارات",
     "companyProfile": "الملف الشخصي",
@@ -108,6 +109,11 @@
       "title": "الحجوزات",
       "subtitle": "إدارة حجوزات العملاء",
       "placeholder": "سيظهر محتوى الحجوزات هنا."
+    },
+    "companyMessages": {
+      "title": "الرسائل",
+      "subtitle": "تواصل مع العملاء.",
+      "placeholder": "سيظهر محتوى الرسائل هنا."
     },
     "companySettings": {
       "title": "الإعدادات",

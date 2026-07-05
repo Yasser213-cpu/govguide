@@ -26,8 +26,8 @@ class OTP(models.Model):
         verification_purpose = "email_verification"
         reset_password_purpose = "reset_password"
         OTP_PURPOSE_CHOICES = [
-             (verification_purpose,"Email verification"),
-             (reset_password_purpose,"Reset password")
+            (verification_purpose,"Email verification"),
+            (reset_password_purpose,"Reset password")
 
         ]
         user = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.CASCADE , related_name="otps")

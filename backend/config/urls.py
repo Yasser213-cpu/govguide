@@ -31,6 +31,7 @@ urlpatterns = [
     path("api/v1/company/", include("orders.api.url_company_orders")),
     path("api/v1/notifications/", include("notifications.api.urls")),
     path("api/v1/reviews/", include("reviews.api.urls")),
+    path("api/v1/chat/", include("chat.api.urls")),
 ]
 
 if settings.DEBUG:

@@ -65,7 +65,10 @@ function CompanyCard({ company, onViewDetails }) {
 
   return (
     <div className="bg-[var(--background-primary)] border border-[var(--border)] rounded-xl p-5 hover:shadow-md hover:border-[var(--primary)] transition-all">
-      <div className="flex items-center justify-between gap-6">
+      <div
+        className="flex items-center justify-between gap-6"
+        onClick={() => onViewDetails(company.id)}
+      >
         {/* Left */}
         <div className="flex items-center gap-4 flex-1">
           <div className="h-16 w-16 rounded-xl bg-[var(--primary-light)] flex items-center justify-center shrink-0">

@@ -11,7 +11,7 @@ const STATUS_STYLES = {
     text: "text-[var(--primary)]",
   },
   completed: { label: "Completed", bg: "bg-green-100", text: "text-green-700" },
-  rejected: { label: "Cancelled", bg: "bg-red-100", text: "text-red-600" },
+  rejected: { label: "Rejected", bg: "bg-red-100", text: "text-red-600" },
 };
 
 function StatusBadge({ status }) {

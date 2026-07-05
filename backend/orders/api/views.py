@@ -14,7 +14,8 @@ from rest_framework.exceptions import NotFound
 from core.permissions import IsClient, IsCompany, isCompanyOwner
 from rest_framework.permissions import IsAuthenticated
 from ai_agents.tasks import run_ocr_on_document
-from notifications.tasks import send_order_notification
+from notifications.tasks import send_order_notification, send_company_notification
+from notifications.models import Notification
 
 
 class ClientOrdersAPIView(APIView):
@@ -44,7 +45,18 @@ class ClientOrdersAPIView(APIView):
     def post(self, request):
         serializer = OrderCreateSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(user=request.user)
+            order = serializer.save(user=request.user)
+
+            company_owner = order.service.company.owner
+            client_name = request.user.get_full_name() or request.user.email
+
+            send_company_notification.delay(
+                company_owner.id,
+                order.id,
+                Notification.NEW_ORDER,
+                f"طلب جديد رقم #{order.id} من {client_name}",
+            )
+
             return Response(serializer.data, status.HTTP_201_CREATED)
         return Response(serializer.errors, status.HTTP_400_BAD_REQUEST)
 
@@ -177,6 +189,14 @@ class PayOrderAPIView(APIView):
             order.save()
 
             OrderStatusHistory.objects.create(order=order, status=Order.PAID_STATUS)
+
+            company_owner = order.service.company.owner
+            send_company_notification.delay(
+                company_owner.id,
+                order.id,
+                Notification.PAID,
+                f"تم دفع الطلب رقم #{order.id}",
+            )
 
             return Response(
                 {"message": "Payment completed successfully.", "status": "paid"}
