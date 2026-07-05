@@ -10,7 +10,15 @@
     "back": "Back",
     "admin": "Admin",
     "company": "Company",
-    "user": "User"
+    "user": "User",
+    "language": "Language",
+    "languageDescription": "Switch between English and Arabic",
+    "appearance": "Appearance",
+    "darkModeDescription": "Choose a light or dark look",
+    "darkMode": "Dark Mode",
+    "lightMode": "Light Mode",
+    "fontSize": "Font Size",
+    "fontSizeDescription": "Adjust the overall text scale across the app"
   },
   "sidebar": {
     "userName": "Ahmed Mohamed",
@@ -188,10 +196,8 @@
     "registerDescription": "Join GovConnect AI and access government services quickly and securely.",
     "secureRegistration": "Secure Registration",
     "registrationSecurityDescription": "Your account is protected with enterprise-grade security.",
-
     "accountType": "Account Type",
     "citizen": "Citizen",
-
     "usernamePlaceholder": "name....",
     "resetPasswordDescription": "Enter your email to receive a password reset code",
     "sendResetCode": "Send Reset Code",

@@ -10,7 +10,15 @@
     "back": "رجوع",
     "admin": "مسؤول",
     "company": "شركة",
-    "user": "مستخدم"
+    "user": "مستخدم",
+    "language": "اللغة",
+    "languageDescription": "التبديل بين الإنجليزية والعربية",
+    "appearance": "المظهر",
+    "darkModeDescription": "اختر مظهرًا فاتحًا أو داكنًا",
+    "darkMode": "الوضع الداكن",
+    "lightMode": "الوضع الفاتح",
+    "fontSize": "حجم الخط",
+    "fontSizeDescription": "ضبط حجم النص العام داخل التطبيق"
   },
   "sidebar": {
     "userName": "أحمد محمد",
@@ -155,7 +163,6 @@
     "confirmPassword": "تأكيد كلمة المرور",
     "firstName": "الاسم الأول",
     "firstNamePlaceholder": "أدخل الاسم الأول",
-
     "lastName": "اسم العائلة",
     "lastNamePlaceholder": "أدخل اسم العائلة",
     "otp": "كود التحقق",
@@ -185,15 +192,12 @@
     "secureAuthentication": "مصادقة آمنة",
     "securityDescription": "يتم حماية معلوماتك باستخدام تقنيات أمان على مستوى المؤسسات.",
     "enterCredentials": "أدخل بيانات تسجيل الدخول للوصول إلى حسابك",
-
     "createAccountTitle": "إنشاء حساب",
     "registerDescription": "انضم إلى GovConnect AI للوصول إلى الخدمات الحكومية بسرعة وأمان.",
     "secureRegistration": "تسجيل آمن",
     "registrationSecurityDescription": "حسابك محمي باستخدام تقنيات أمان على مستوى المؤسسات.",
-
     "accountType": "نوع الحساب",
     "citizen": "مواطن",
-
     "usernamePlaceholder": "الاسم...",
     "resetPasswordDescription": "أدخل بريدك الإلكتروني لاستلام رمز إعادة تعيين كلمة المرور",
     "sendResetCode": "إرسال رمز إعادة التعيين",
