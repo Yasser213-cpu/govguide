@@ -8,6 +8,7 @@ import { AuthProvider } from "./context/AuthContext";
 import { CompanyProvider } from "./context/CompanyContext";
 import { UserProvider } from "./context/UserContext";
 import { PageLoadingProvider } from "./context/PageLoadingContext";
+import { ThemeProvider } from "./context/ThemeContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import GuestRoute from "./components/GuestRoute";
 import CompanyRoute from "./components/CompanyRoute";
@@ -31,6 +32,7 @@ import MyRequests from "./pages/user/Myrequests";
 import RequestDetails from "./pages/user/RequestDetails";
 import Notifications from "./pages/user/Notifications";
 import UserMessages from "./pages/user/Messages";
+import Settings from "./pages/user/Settings";
 
 // Company Imports
 import CompanyAppLayout from "./components/layout/CompanyAppLayout";
@@ -58,164 +60,170 @@ export default function AppRoutes() {
         <UserProvider>
           <CompanyProvider>
             <PageLoadingProvider>
-              <Routes>
-                {/* Public */}
-                <Route path="/" element={<Home />} />
-                <Route
-                  path="/register"
-                  element={
-                    <GuestRoute>
-                      <Register />
-                    </GuestRoute>
-                  }
-                />
-                <Route
-                  path="/login"
-                  element={
-                    <GuestRoute>
-                      <Login />
-                    </GuestRoute>
-                  }
-                />
-                <Route
-                  path="/verify-otp"
-                  element={
-                    <GuestRoute>
-                      <VerifyOtp />
-                    </GuestRoute>
-                  }
-                />
-                <Route
-                  path="/forgot-password"
-                  element={
-                    <GuestRoute>
-                      <ForgotPassword />
-                    </GuestRoute>
-                  }
-                />
-
-                <Route
-                  path="/ai-chat"
-                  element={<Navigate to="/user/ai-assistant" replace />}
-                />
-
-                {/* Public company browsing redirects to authenticated user view */}
-                <Route
-                  path="/companies"
-                  element={<Navigate to="/user/companies" replace />}
-                />
-
-                {/* Company setup — only for company role with no company yet */}
-                <Route
-                  path="/company/create"
-                  element={
-                    <CompanyRoute>
-                      <CreateCompany />
-                    </CompanyRoute>
-                  }
-                />
-
-                <Route
-                  element={
-                    <ProtectedRoute>
-                      <AppLayout />
-                    </ProtectedRoute>
-                  }
-                >
-                  <Route path="/user/dashboard" element={<Dashboard />} />
-                  <Route path="/user/ai-assistant" element={<AiChat />} />
-                  <Route path="/user/companies" element={<CompaniesList />} />
-                  <Route path="/user/my-requests" element={<MyRequests />} />
+              <ThemeProvider>
+                <Routes>
+                  {/* Public */}
+                  <Route path="/" element={<Home />} />
                   <Route
-                    path="/user/my-requests/:id"
-                    element={<RequestDetails />}
+                    path="/register"
+                    element={
+                      <GuestRoute>
+                        <Register />
+                      </GuestRoute>
+                    }
                   />
                   <Route
-                    path="/user/notifications"
-                    element={<Notifications />}
+                    path="/login"
+                    element={
+                      <GuestRoute>
+                        <Login />
+                      </GuestRoute>
+                    }
                   />
-                  <Route path="/user/messages" element={<UserMessages />} />
+                  <Route
+                    path="/verify-otp"
+                    element={
+                      <GuestRoute>
+                        <VerifyOtp />
+                      </GuestRoute>
+                    }
+                  />
+                  <Route
+                    path="/forgot-password"
+                    element={
+                      <GuestRoute>
+                        <ForgotPassword />
+                      </GuestRoute>
+                    }
+                  />
 
                   <Route
-                    path="/user/companies/:id"
-                    element={<CompanyDetails />}
+                    path="/ai-chat"
+                    element={<Navigate to="/user/ai-assistant" replace />}
                   />
 
-                  {navItems
-                    .filter(
-                      (item) =>
-                        ![
-                          "/user/dashboard",
-                          "/user/ai-assistant",
-                          "/user/companies",
-                          "/user/my-requests",
-                        ].includes(item.path),
-                    )
-                    .map((item) => (
+                  {/* Public company browsing redirects to authenticated user view */}
+                  <Route
+                    path="/companies"
+                    element={<Navigate to="/user/companies" replace />}
+                  />
+
+                  {/* Company setup — only for company role with no company yet */}
+                  <Route
+                    path="/company/create"
+                    element={
+                      <CompanyRoute>
+                        <CreateCompany />
+                      </CompanyRoute>
+                    }
+                  />
+
+                  <Route
+                    element={
+                      <ProtectedRoute>
+                        <AppLayout />
+                      </ProtectedRoute>
+                    }
+                  >
+                    <Route path="/user/dashboard" element={<Dashboard />} />
+                    <Route path="/user/ai-assistant" element={<AiChat />} />
+                    <Route path="/user/companies" element={<CompaniesList />} />
+                    <Route path="/user/my-requests" element={<MyRequests />} />
+                    <Route path="/user/settings" element={<Settings />} />
+                    <Route
+                      path="/user/my-requests/:id"
+                      element={<RequestDetails />}
+                    />
+                    <Route
+                      path="/user/notifications"
+                      element={<Notifications />}
+                    />
+                    <Route path="/user/messages" element={<UserMessages />} />
+
+                    <Route
+                      path="/user/companies/:id"
+                      element={<CompanyDetails />}
+                    />
+
+                    {navItems
+                      .filter(
+                        (item) =>
+                          ![
+                            "/user/dashboard",
+                            "/user/ai-assistant",
+                            "/user/companies",
+                            "/user/my-requests",
+                          ].includes(item.path),
+                      )
+                      .map((item) => (
+                        <Route
+                          key={item.path}
+                          path={item.path}
+                          element={<PlaceholderPage pageKey={item.key} />}
+                        />
+                      ))}
+                  </Route>
+
+                  <Route element={<CompanyProtectedRoute />}>
+                    <Route element={<CompanyAppLayout />}>
                       <Route
-                        key={item.path}
-                        path={item.path}
-                        element={<PlaceholderPage pageKey={item.key} />}
+                        path="/company/dashboard"
+                        element={<CompanyDashboard />}
                       />
-                    ))}
-                </Route>
-
-                <Route element={<CompanyProtectedRoute />}>
-                  <Route element={<CompanyAppLayout />}>
-                    <Route
-                      path="/company/dashboard"
-                      element={<CompanyDashboard />}
-                    />
-                    <Route path="/company/orders" element={<CompanyOrders />} />
-                    <Route
-                      path="/company/orders/:id"
-                      element={<CompanyOrderDetail />}
-                    />
-                    <Route
-                      path="/company/services"
-                      element={<CompanyServices />}
-                    />
-                    <Route
-                      path="/company/bookings"
-                      element={<CompanyBookings />}
-                    />
-                    <Route
-                      path="/company/messages"
-                      element={<CompanyMessages />}
-                    ></Route>
-                    <Route
-                      path="/company/profile"
-                      element={<CompanyProfile />}
-                    />
-                    <Route
-                      path="/company/settings"
-                      element={<CompanySettings />}
-                    />
-                    <Route
-                      path="/company/notifications"
-                      element={<CompanyNotifications />}
-                    />
+                      <Route
+                        path="/company/orders"
+                        element={<CompanyOrders />}
+                      />
+                      <Route
+                        path="/company/orders/:id"
+                        element={<CompanyOrderDetail />}
+                      />
+                      <Route
+                        path="/company/services"
+                        element={<CompanyServices />}
+                      />
+                      <Route
+                        path="/company/bookings"
+                        element={<CompanyBookings />}
+                      />
+                      <Route
+                        path="/company/messages"
+                        element={<CompanyMessages />}
+                      ></Route>
+                      <Route
+                        path="/company/profile"
+                        element={<CompanyProfile />}
+                      />
+                      <Route
+                        path="/company/settings"
+                        element={<CompanySettings />}
+                      />
+                      <Route
+                        path="/company/notifications"
+                        element={<CompanyNotifications />}
+                      />
+                    </Route>
                   </Route>
-                </Route>
 
-                {/* Admin Routes - Public for Testing */}
-                <Route element={<AdminProtectedRoute />}>
-                  <Route element={<AdminAppLayout />}>
-                    <Route
-                      path="/admin/dashboard"
-                      element={<AdminDashboard />}
-                    />
-                    <Route path="/admin/users" element={<AdminUsers />} />
-                    <Route
-                      path="/admin/companies"
-                      element={<AdminCompanies />}
-                    />
-                    <Route path="/admin/reports" element={<AdminReports />} />
+                  {/* Admin Routes - Public for Testing */}
+                  <Route element={<AdminProtectedRoute />}>
+                    <Route element={<AdminAppLayout />}>
+                      <Route
+                        path="/admin/dashboard"
+                        element={<AdminDashboard />}
+                      />
+                      <Route path="/admin/users" element={<AdminUsers />} />
+                      <Route
+                        path="/admin/companies"
+                        element={<AdminCompanies />}
+                      />
+                      <Route path="/admin/reports" element={<AdminReports />} />
+                    </Route>
                   </Route>
-                </Route>
 
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+              </ThemeProvider>
             </PageLoadingProvider>
           </CompanyProvider>
         </UserProvider>

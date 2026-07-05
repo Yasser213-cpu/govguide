@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from ..models import Order, Document, OrderStatusHistory
+from reviews.models import Review
 from procedures.models import Procedure, Requirement
 from companies.api.serializers import CompanyServicesSerializer
 
@@ -18,6 +19,7 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         order = Order.objects.create(**validated_data)
         OrderStatusHistory.objects.create(order=order, status=Order.PENDING_STATUS)
         return order
+
 
 class DocumentUploadSerializer(serializers.ModelSerializer):
     class Meta:
@@ -46,6 +48,7 @@ class ClientOrderDetailSerializer(serializers.ModelSerializer):
     company = serializers.StringRelatedField(source="service.company")
     procedure = serializers.StringRelatedField(source="service.procedure")
     documents = DocumentUploadSerializer(many=True, read_only=True)
+    has_review = serializers.SerializerMethodField()
 
     class Meta:
         model = Order
@@ -58,7 +61,11 @@ class ClientOrderDetailSerializer(serializers.ModelSerializer):
             "rejection_reason",
             "documents",
             "created_at",
+            "has_review",
         ]
+
+    def get_has_review(self, obj):
+        return Review.objects.filter(order=obj).exists()
 
 
 """

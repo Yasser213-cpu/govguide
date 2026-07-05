@@ -1,42 +1,57 @@
 import os
 import chromadb
-from sentence_transformers import SentenceTransformer
+from openai import OpenAI
 from langchain_openai import ChatOpenAI
+
+# Maps each source document to its procedure id in the DB
+SOURCE_TO_PROCEDURE = {
+    "جواز_السفر.txt": 1,
+    "بطاقة_الرقم_القومي.txt": 2,
+    "رخصة_القيادة.txt": 3,
+    "شهادة_الميلاد.txt": 4,
+    "صحيفة_الحالة_الجنائية.txt": 5,
+}
 
 # ---------- Paths ----------
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CHROMA_DIR = os.path.join(BASE_DIR, "chroma_store")
 
-# ---------- Lazy singletons (created only on first use, not at import) ----------
+# ---------- OpenAI embeddings (must match ingest.py) ----------
+EMBED_MODEL = "text-embedding-3-small"
+
+# Questions whose nearest chunk is farther than this are treated as out-of-scope
+DISTANCE_THRESHOLD = 1.5
+
 _llm = None
-_embed_model = None
+_openai_client = None
 _collection = None
 
 
 def get_llm():
-    """Create the LLM client once, on first use."""
     global _llm
     if _llm is None:
         _llm = ChatOpenAI(
-            model="openrouter/free",
-            openai_api_key=os.getenv("OPENROUTER_API_KEY"),
-            openai_api_base="https://openrouter.ai/api/v1",
+            model="gpt-4o-mini",
+            openai_api_key=os.getenv("OPENAI_API_KEY"),
             temperature=0.3,
         )
     return _llm
 
 
-def get_embed_model():
-    """Load the embedding model once, on first use."""
-    global _embed_model
-    if _embed_model is None:
-        print("Loading embedding model...")
-        _embed_model = SentenceTransformer("all-MiniLM-L6-v2")
-    return _embed_model
+def get_openai_client():
+    global _openai_client
+    if _openai_client is None:
+        _openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+    return _openai_client
+
+
+def get_embedding(text):
+    """Get an embedding vector from OpenAI (same model as ingest)."""
+    response = get_openai_client().embeddings.create(model=EMBED_MODEL, input=text)
+    return response.data[0].embedding
 
 
 def get_collection():
-    """Connect to the Chroma collection once, on first use."""
     global _collection
     if _collection is None:
         client = chromadb.PersistentClient(path=CHROMA_DIR)
@@ -45,33 +60,48 @@ def get_collection():
 
 
 def retrieve(query, top_k=3):
-    """Search Chroma and return the most relevant chunks as one text block."""
-    query_embedding = get_embed_model().encode(query).tolist()
-
+    """Search Chroma. Returns (context, source) or (None, None) if out of scope."""
+    query_embedding = get_embedding(query)
     results = get_collection().query(
         query_embeddings=[query_embedding],
         n_results=top_k,
     )
 
+    nearest_distance = results["distances"][0][0]
+    if nearest_distance > DISTANCE_THRESHOLD:
+        return None, None
+
     chunks = results["documents"][0]
     context = "\n\n".join(chunks)
-    return context
+    top_source = results["metadatas"][0][0].get("source")
+    return context, top_source
 
 
 def ask(query):
-    """Full RAG: retrieve context, then ask the LLM to answer from it."""
-    context = retrieve(query)
+    context, source = retrieve(query)
 
-    prompt = f"""You are a helpful assistant for Egyptian government procedures.
-Answer the user's question using ONLY the context below.
-If the answer is not in the context, say you don't have that information.
+    if context is None:
+        return {
+            "answer": "عذراً، أنا متخصص في الإجراءات الحكومية المصرية فقط "
+                      "(مثل جواز السفر، بطاقة الرقم القومي، رخصة القيادة، "
+                      "شهادة الميلاد، وصحيفة الحالة الجنائية). لا أملك معلومات عن هذا الموضوع.",
+            "tokens": 0,
+            "procedure_id": None,
+        }
 
-Context:
+    prompt = f"""أنت مساعد ذكي متخصص في الإجراءات الحكومية المصرية.
+أجب على سؤال المستخدم باستخدام المعلومات الموجودة في السياق التالي فقط.
+إذا لم تكن الإجابة موجودة في السياق، قل إنك لا تملك هذه المعلومة.
+إذا كان السؤال خارج نطاق الإجراءات الحكومية المصرية، لا تحاول الإجابة من معرفتك العامة،
+واذكر أنك متخصص في الإجراءات الحكومية المصرية فقط.
+أجب باللغة العربية.
+
+السياق:
 {context}
 
-Question: {query}
+السؤال: {query}
 
-Answer:"""
+الإجابة:"""
 
     response = get_llm().invoke(prompt)
 
@@ -79,12 +109,8 @@ Answer:"""
     if hasattr(response, "usage_metadata") and response.usage_metadata:
         tokens = response.usage_metadata.get("total_tokens", 0)
 
-    return {"answer": response.content, "tokens": tokens}
-
-
-# let's test
-if __name__ == "__main__":
-    question = "What documents do I need to renew my passport?"
-    answer = ask(question)
-    print(f"\nQuestion: {question}\n")
-    print(f"Answer: {answer}\n")
+    return {
+        "answer": response.content,
+        "tokens": tokens,
+        "procedure_id": SOURCE_TO_PROCEDURE.get(source),
+    }
