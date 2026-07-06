@@ -16,6 +16,41 @@ import {
 } from "../../features/orders/api/Ordersapi";
 
 /**
+ * Extracts a human-readable message from an Axios/DRF error response.
+ *
+ * DRF ValidationErrors come back in different shapes depending on where
+ * they're raised:
+ *   - Non-field errors:      { detail: "..." }
+ *   - Custom message key:    { message: "..." }
+ *   - Field-level errors:    { service: ["You already have an active order..."] }
+ *                            { notes: ["This field may not be blank."], ... }
+ *
+ * This walks all three shapes so field errors (like the duplicate-order
+ * check in OrderCreateSerializer.validate) actually reach the user instead
+ * of falling back to a generic message.
+ */
+function getErrorMessage(err, fallback) {
+  const data = err?.response?.data;
+
+  if (!data) return fallback;
+
+  if (typeof data === "string") return data;
+
+  if (data.detail) return data.detail;
+  if (data.message) return data.message;
+
+  // Field-level DRF errors: { field: ["msg", ...], ... }
+  const firstKey = Object.keys(data)[0];
+  if (firstKey) {
+    const value = data[firstKey];
+    const msg = Array.isArray(value) ? value[0] : value;
+    if (typeof msg === "string") return msg;
+  }
+
+  return fallback;
+}
+
+/**
  * ContactCompanyModal
  *
  * Two entry modes:
@@ -118,6 +153,27 @@ export default function ContactCompanyModal({
       return;
     }
 
+    // ── Client-side guard: every requirement needs a file before we submit ──
+    // This runs before the order is even created, so we never end up with an
+    // order that has no documents attached because of a client oversight.
+    // (Retries after a partial upload failure skip this — createdOrderId
+    // means the order already exists and we're just retrying failed files.)
+    if (!createdOrderId) {
+      const missing = {};
+      for (const req of requirementList) {
+        const reqKey = req.id ?? "generic";
+        if (!files[reqKey]) {
+          missing[reqKey] = "This document is required.";
+        }
+      }
+
+      if (Object.keys(missing).length > 0) {
+        setFileErrors(missing);
+        setError("Please upload all required documents before submitting.");
+        return;
+      }
+    }
+
     setSubmitting(true);
 
     let orderId = createdOrderId;
@@ -125,18 +181,32 @@ export default function ContactCompanyModal({
     try {
       // Step 1: create order (idempotent on retry)
       if (!orderId) {
-        const order = await createOrder({ service: selectedService.id, notes });
+        try {
+          const order = await createOrder({ service: selectedService.id, notes });
 
-        if (!order.id) {
+          if (!order.id) {
+            setError(
+              "Order was created but no order ID was returned. Documents can't be uploaded automatically — please contact support."
+            );
+            setSubmitting(false);
+            return;
+          }
+
+          orderId = order.id;
+          setCreatedOrderId(orderId);
+        } catch (err) {
+          // Surfaces backend validation errors, e.g. the duplicate-order
+          // check in OrderCreateSerializer.validate:
+          //   {"service": "You already have an active order for this service."}
           setError(
-            "Order was created but no order ID was returned. Documents can't be uploaded automatically — please contact support."
+            getErrorMessage(
+              err,
+              "Failed to submit your request. Please try again."
+            )
           );
           setSubmitting(false);
           return;
         }
-
-        orderId = order.id;
-        setCreatedOrderId(orderId);
       }
 
       // Step 2: upload each requirement file
@@ -157,11 +227,10 @@ export default function ContactCompanyModal({
         try {
           await uploadOrderDocument(orderId, req.id, file);
         } catch (err) {
-          const msg =
-            err?.response?.data?.detail ||
-            err?.response?.data?.message ||
-            "Upload failed for this file.";
-          newFileErrors[reqKey] = msg;
+          newFileErrors[reqKey] = getErrorMessage(
+            err,
+            "Upload failed for this file."
+          );
         }
       }
 
@@ -176,11 +245,9 @@ export default function ContactCompanyModal({
       resetState();
       onClose?.();
     } catch (err) {
-      const msg =
-        err?.response?.data?.detail ||
-        err?.response?.data?.message ||
-        "Failed to submit your request. Please try again.";
-      setError(msg);
+      setError(
+        getErrorMessage(err, "Failed to submit your request. Please try again.")
+      );
       setSubmitting(false);
     }
   };
@@ -373,11 +440,16 @@ export default function ContactCompanyModal({
                       return (
                         <div
                           key={reqKey}
-                          className="rounded-xl border border-[var(--border)] p-4"
+                          className={`rounded-xl border p-4 ${
+                            fileErrors[reqKey]
+                              ? "border-red-400"
+                              : "border-[var(--border)]"
+                          }`}
                         >
                           <div className="flex items-center justify-between gap-3">
                             <span className="text-sm font-medium text-[var(--text-primary)]">
                               {req.name}
+                              <span className="text-red-500"> *</span>
                             </span>
                             <label className="flex items-center gap-2 text-sm text-[var(--primary)] cursor-pointer hover:underline">
                               <FiUpload size={16} />
