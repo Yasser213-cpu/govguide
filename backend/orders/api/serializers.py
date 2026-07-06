@@ -15,9 +15,34 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         fields = ["id", "notes", "service"]
         read_only_fields = ["id"]
 
+    def validate(self, attrs):
+        user = self.context["request"].user
+        service = attrs["service"]
+
+        has_active_order = (
+            Order.objects.filter(
+                user=user,
+                service=service,
+            )
+            .exclude(
+                status=Order.COMPLETED_STATUS,
+            )
+            .exists()
+        )
+
+        if has_active_order:
+            raise serializers.ValidationError(
+                {"service": "You already have an active order for this service."}
+            )
+
+        return attrs
+
     def create(self, validated_data):
         order = Order.objects.create(**validated_data)
-        OrderStatusHistory.objects.create(order=order, status=Order.PENDING_STATUS)
+        OrderStatusHistory.objects.create(
+            order=order,
+            status=Order.PENDING_STATUS,
+        )
         return order
 
 
