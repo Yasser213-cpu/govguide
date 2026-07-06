@@ -3,10 +3,12 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny
 from ..models import AISession
-
 from .serializers import ChatRequestSerializer,RecommendedCompanySerializer,RecommendRequestSerializer
 from ai_agents.rag.pipeline import handle_message
 from ..recommendation import recommend_companies
+from core.permissions import isCompanyOwner
+from rest_framework.permissions import IsAuthenticated
+from ai_agents.company_insights import analyze_company, build_advice
 
 
 
@@ -64,3 +66,18 @@ class RecommendCompaniesView(APIView):
             {"procedure_id": procedure_id, "results": output_serializer.data},
             status=status.HTTP_200_OK,
         )
+class CompanyInsightsView(APIView):
+    def get_permissions(self):
+        return [IsAuthenticated(), isCompanyOwner()]
+
+    def get(self, request, procedure_id):
+        company = getattr(request.user, "company", None)
+        if company is None:
+            return Response(
+                {"error": "هذا الحساب غير مرتبط بشركة"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        analysis = analyze_company(company.id, procedure_id)
+        advice = build_advice(analysis)
+        return Response(advice, status=status.HTTP_200_OK)

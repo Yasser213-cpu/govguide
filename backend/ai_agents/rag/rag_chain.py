@@ -3,13 +3,12 @@ import chromadb
 from openai import OpenAI
 from langchain_openai import ChatOpenAI
 
-# Maps each source document to its procedure id in the DB
-SOURCE_TO_PROCEDURE = {
-    "جواز_السفر.txt": 1,
-    "بطاقة_الرقم_القومي.txt": 2,
-    "رخصة_القيادة.txt": 3,
-    "شهادة_الميلاد.txt": 4,
-    "صحيفة_الحالة_الجنائية.txt": 5,
+SOURCE_TO_PROCEDURE_NAME = {
+    "جواز_السفر.txt": "تجديد جواز السفر",
+    "بطاقة_الرقم_القومي.txt": "إصدار بطاقة الرقم القومي",
+    "رخصة_القيادة.txt": "إصدار رخصة قيادة خاصة",
+    "شهادة_الميلاد.txt": "استخراج شهادة ميلاد مميكنة",
+    "صحيفة_الحالة_الجنائية.txt": "استخراج صحيفة الحالة الجنائية",
 }
 
 # ---------- Paths ----------
@@ -112,5 +111,15 @@ def ask(query):
     return {
         "answer": response.content,
         "tokens": tokens,
-        "procedure_id": SOURCE_TO_PROCEDURE.get(source),
-    }
+        "procedure_id": get_procedure_id(source),    }
+
+def get_procedure_id(source):
+    """Look up the real procedure id from the DB by name (ids differ per DB)."""
+    if not source:
+        return None
+    name = SOURCE_TO_PROCEDURE_NAME.get(source)
+    if not name:
+        return None
+    from procedures.models import Procedure
+    proc = Procedure.objects.filter(name=name).first()
+    return proc.id if proc else None
