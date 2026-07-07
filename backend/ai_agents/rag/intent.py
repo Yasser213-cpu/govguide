@@ -5,8 +5,18 @@ from langchain_openai import ChatOpenAI
 _llm = None
 
 
+# def get_llm():
+#     """Create the intent-classifier LLM once, on first use."""
+#     global _llm
+#     if _llm is None:
+#         _llm = ChatOpenAI(
+#             model="gpt-4o-mini",
+#             openai_api_key=os.getenv("OPENAI_API_KEY"),
+#             temperature=0,
+#         )
+#     return _llm
+
 def get_llm():
-    """Create the intent-classifier LLM once, on first use."""
     global _llm
     if _llm is None:
         _llm = ChatOpenAI(
