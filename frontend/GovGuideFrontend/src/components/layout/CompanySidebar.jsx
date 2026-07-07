@@ -4,7 +4,6 @@ import { useAuth } from "../../hooks/useAuth";
 import {
   FiGrid,
   FiBriefcase,
-  FiCalendar,
   FiSettings,
   FiBell,
   FiUser,
@@ -22,7 +21,6 @@ const companyNavItems = [
   { path: "/company/profile", icon: FiUser, key: "companyProfile" },
   { path: "/company/services", icon: FiBriefcase, key: "companyServices" },
   { path: "/company/orders", icon: FiFileText, key: "companyOrders" },
-  { path: "/company/bookings", icon: FiCalendar, key: "companyBookings" },
   { path: "/company/messages", icon: FiMail, key: "companyMessages" },
   {
     path: "/company/notifications",

@@ -14,12 +14,12 @@ import GuestRoute from "./components/GuestRoute";
 import CompanyRoute from "./components/CompanyRoute";
 import CompanyProtectedRoute from "./components/CompanyProtectedRoute";
 import AdminProtectedRoute from "./components/AdminProtectedRoute";
+import Home from "./pages/Home";
 
 import Register from "./pages/auth/Register";
 import Login from "./pages/auth/Login";
 import VerifyOtp from "./pages/auth/VerifyOtp";
 import ForgotPassword from "./pages/auth/ForgotPassword";
-import Home from "./pages/Home";
 import CreateCompany from "./pages/company/CreateCompany";
 import CompaniesList from "./pages/user/CompaniesList";
 import AiChat from "./pages/user/AiChat";

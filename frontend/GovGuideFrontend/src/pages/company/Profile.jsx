@@ -1,14 +1,11 @@
-import { useEffect, useState ,useRef} from "react";
+import { useEffect, useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import PageHeader from "../../components/layout/PageHeader";
 import Toast from "../../components/ui/Toast";
 import { useCompany } from "../../context/CompanyContext";
 import axiosClient from "../../api/axiosClient";
-import { usePageLoading } from "../../context/PageLoadingContext";
 
 export default function CompanyProfile() {
-  usePageLoading(loadingCompanies || loadingOrders);
-  
   const { t } = useTranslation();
   const { company, loading, refreshCompany } = useCompany();
   const fileInputRef = useRef(null);
@@ -43,25 +40,23 @@ export default function CompanyProfile() {
         street: company.street || "",
         logo: null,
       });
-  
+
       const API_URL = "http://localhost:8000";
 
-setPreviewLogo(
-  company.logo ? `${API_URL}${company.logo}` : ""
-);
+      setPreviewLogo(company.logo ? `${API_URL}${company.logo}` : "");
     }
   }, [company]);
 
   const handleLogoChange = (e) => {
     const file = e.target.files[0];
-  
+
     if (!file) return;
-  
+
     setCompanyData((prev) => ({
       ...prev,
       logo: file,
     }));
-  
+
     setPreviewLogo(URL.createObjectURL(file));
   };
 
@@ -84,26 +79,22 @@ setPreviewLogo(
 
       const formData = new FormData();
 
-formData.append("name", companyData.name);
-formData.append("description", companyData.description);
-formData.append("phone", companyData.phone);
-formData.append("governorate", companyData.governorate);
-formData.append("city", companyData.city);
-formData.append("street", companyData.street);
+      formData.append("name", companyData.name);
+      formData.append("description", companyData.description);
+      formData.append("phone", companyData.phone);
+      formData.append("governorate", companyData.governorate);
+      formData.append("city", companyData.city);
+      formData.append("street", companyData.street);
 
-if (companyData.logo) {
-  formData.append("logo", companyData.logo);
-}
+      if (companyData.logo) {
+        formData.append("logo", companyData.logo);
+      }
 
-await axiosClient.put(
-  `/api/v1/companies/${company.id}`,
-  formData,
-  {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  }
-);
+      await axiosClient.put(`/api/v1/companies/${company.id}`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
       await refreshCompany();
 
@@ -148,44 +139,41 @@ await axiosClient.put(
         onSubmit={handleSubmit}
         className="space-y-6 rounded-xl border border-[var(--border)] bg-[var(--background-primary)] p-6"
       >
+        <div>
+          <label className="mb-3 block font-medium">Company Logo</label>
 
-<div>
-  <label className="mb-3 block font-medium">
-    Company Logo
-  </label>
+          <div className="flex items-center gap-5">
+            {previewLogo ? (
+              <img
+                src={previewLogo}
+                alt="Company Logo"
+                className="h-24 w-24 rounded-xl border object-cover"
+              />
+            ) : (
+              <div className="flex h-24 w-24 items-center justify-center rounded-xl border border-dashed text-sm text-gray-500">
+                No Logo
+              </div>
+            )}
 
-  <div className="flex items-center gap-5">
-  {previewLogo ? (
-  <img
-    src={previewLogo}
-    alt="Company Logo"
-    className="h-24 w-24 rounded-xl border object-cover"
-  />
-) : (
-  <div className="flex h-24 w-24 items-center justify-center rounded-xl border border-dashed text-sm text-gray-500">
-    No Logo
-  </div>
-)}
+            <div>
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 transition"
+              >
+                {previewLogo ? "Change Logo" : "Add Logo"}
+              </button>
 
-    <div>
-      <button
-        type="button"
-        onClick={() => fileInputRef.current?.click()}
-        className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 transition"
-      >
-        {previewLogo ? "Change Logo" : "Add Logo"}
-      </button>
-
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        onChange={handleLogoChange}
-        className="hidden"
-      />
-    </div>
-  </div>
-</div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleLogoChange}
+                className="hidden"
+              />
+            </div>
+          </div>
+        </div>
 
         <div>
           <label className="mb-2 block font-medium">Company Name</label>

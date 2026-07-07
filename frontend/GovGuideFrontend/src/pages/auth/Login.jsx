@@ -8,7 +8,6 @@ import { getValidationErrors } from "../../utils/validation";
 import { FiLock, FiMail } from "react-icons/fi";
 import { useCompany } from "../../context/CompanyContext";
 import { useUser } from "../../context/UserContext";
-import { usePageLoading } from "../../context/PageLoadingContext";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -20,8 +19,6 @@ export default function Login() {
     setError: setAuthError,
   } = useAuth();
   const { refreshUser } = useUser();
-
-  usePageLoading(loadingCompanies || loadingOrders);
 
   const { refreshCompany } = useCompany();
 

@@ -4,12 +4,11 @@ import Card from "../../components/ui/Card";
 import Button from "../../components/ui/Button";
 import LanguageSwitcher from "../../components/LanguageSwitcher";
 import { useTheme } from "../../hooks/useTheme";
-import { usePageLoading } from "../../context/PageLoadingContext";
 
 export default function Settings() {
   const { t } = useTranslation();
-  const { theme, toggleTheme, fontScale, setFontScale, fontScaleOptions } = useTheme();
-  usePageLoading(loadingCompanies || loadingOrders);
+  const { theme, toggleTheme, fontScale, setFontScale, fontScaleOptions } =
+    useTheme();
 
   return (
     <>
@@ -26,7 +25,8 @@ export default function Settings() {
                 {t("common.language") || "Language"}
               </h2>
               <p className="mt-1 text-sm text-[var(--text-secondary)]">
-                {t("common.languageDescription") || "Switch between English and Arabic"}
+                {t("common.languageDescription") ||
+                  "Switch between English and Arabic"}
               </p>
             </div>
             <LanguageSwitcher />
@@ -40,11 +40,14 @@ export default function Settings() {
                 {t("common.appearance") || "Appearance"}
               </h2>
               <p className="mt-1 text-sm text-[var(--text-secondary)]">
-                {t("common.darkModeDescription") || "Choose a light or dark look"}
+                {t("common.darkModeDescription") ||
+                  "Choose a light or dark look"}
               </p>
             </div>
             <Button onClick={toggleTheme} variant="outline">
-              {theme === "dark" ? t("common.lightMode") || "Light Mode" : t("common.darkMode") || "Dark Mode"}
+              {theme === "dark"
+                ? t("common.lightMode") || "Light Mode"
+                : t("common.darkMode") || "Dark Mode"}
             </Button>
           </div>
         </Card>
@@ -56,7 +59,8 @@ export default function Settings() {
                 {t("common.fontSize") || "Font Size"}
               </h2>
               <p className="mt-1 text-sm text-[var(--text-secondary)]">
-                {t("common.fontSizeDescription") || "Adjust the overall text scale across the app"}
+                {t("common.fontSizeDescription") ||
+                  "Adjust the overall text scale across the app"}
               </p>
             </div>
 

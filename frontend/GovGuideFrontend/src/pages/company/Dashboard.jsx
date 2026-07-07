@@ -12,7 +12,6 @@ import {
 } from "../../features/orders/api/Ordersapi";
 import CompanyOrderCards from "../../components/company/dashboard/CompanyOrderCards";
 import OrderDetailsPanel from "../../components/company/dashboard/OrderDetailsPanel";
-import { usePageLoading } from "../../context/PageLoadingContext";
 
 const ACTIVE_STATUSES = ["accepted", "paid", "in_progress"];
 const DASHBOARD_ORDERS_LIMIT = 5;
@@ -26,8 +25,6 @@ function computeOrderStats(orders) {
 }
 
 export default function CompanyDashboard() {
-  usePageLoading(loadingCompanies || loadingOrders);
-  
   const { t } = useTranslation();
   const { company } = useCompany();
 
@@ -47,7 +44,7 @@ export default function CompanyDashboard() {
       setOrdersLoading(true);
       setOrdersError(null);
       const data = await getCompanyOrders();
-      const list = Array.isArray(data) ? data : data.results ?? [];
+      const list = Array.isArray(data) ? data : (data.results ?? []);
       list.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
       setOrders(list);
     } catch {

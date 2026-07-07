@@ -4,17 +4,12 @@ import PageHeader from "../../components/layout/PageHeader";
 import axiosClient from "../../api/axiosClient";
 import { useCompany } from "../../context/CompanyContext";
 import { FiEdit2, FiTrash2 } from "react-icons/fi";
-import { useNavigate } from "react-router-dom";
 import ServiceModal from "../../components/layout/company/ServiceModal";
 import ConfirmDeleteModal from "../../components/layout/company/ConfirmDeleteModal";
 import Toast from "../../components/ui/Toast";
-import { usePageLoading } from "../../context/PageLoadingContext";
 
 export default function Services() {
-  usePageLoading(loadingCompanies || loadingOrders);
-  
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const { company, loading: companyLoading } = useCompany();
 
   const [services, setServices] = useState([]);

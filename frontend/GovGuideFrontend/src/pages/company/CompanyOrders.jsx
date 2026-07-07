@@ -7,7 +7,6 @@ import PageHeader from "../../components/layout/PageHeader";
 import Pagination from "../../components/ui/Pagination";
 import { getCompanyOrders } from "../../features/orders/api/Ordersapi";
 import CompanyOrderCards from "../../components/company/dashboard/CompanyOrderCards";
-import { usePageLoading } from "../../context/PageLoadingContext";
 
 const PAGE_SIZE = 5;
 
@@ -15,19 +14,20 @@ export default function CompanyOrders() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  usePageLoading(loadingCompanies || loadingOrders);
 
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [currentPage, setCurrentPage] = useState(Number(searchParams.get("page")) || 1);
+  const [currentPage, setCurrentPage] = useState(
+    Number(searchParams.get("page")) || 1,
+  );
 
   const fetchOrders = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
       const data = await getCompanyOrders();
-      const list = Array.isArray(data) ? data : data.results ?? [];
+      const list = Array.isArray(data) ? data : (data.results ?? []);
       list.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
       setOrders(list);
     } catch {

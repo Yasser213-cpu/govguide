@@ -17,7 +17,6 @@ import {
   markAllNotificationsAsRead,
 } from "../../features/notifications/notificationsApi";
 import useUnreadNotificationsCount from "../../features/notifications/useUnreadNotificationsCount";
-import { usePageLoading } from "../../context/PageLoadingContext";
 
 // ─── STATUS STYLE MAP ───────────────────────────────
 
@@ -146,7 +145,6 @@ export default function CompanyNotifications() {
   const navigate = useNavigate();
   const [filter, setFilter] = useState("all");
   const { refresh: refreshUnreadCount } = useUnreadNotificationsCount();
-  usePageLoading(loadingCompanies || loadingOrders);
 
   useEffect(() => {
     async function load() {

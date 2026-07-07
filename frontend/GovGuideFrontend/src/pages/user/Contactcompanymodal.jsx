@@ -14,8 +14,6 @@ import {
   createOrder,
   uploadOrderDocument,
 } from "../../features/orders/api/Ordersapi";
-import { usePageLoading } from "../../context/PageLoadingContext";
-
 
 /**
  * Extracts a human-readable message from an Axios/DRF error response.
@@ -94,9 +92,8 @@ export default function ContactCompanyModal({
   // Step: "pick" | "form"
   const [step, setStep] = useState(preSelectedService ? "form" : "pick");
   const [selectedService, setSelectedService] = useState(
-    preSelectedService ?? null
+    preSelectedService ?? null,
   );
-  usePageLoading(loadingCompanies || loadingOrders);
 
   const [notes, setNotes] = useState("");
   const [files, setFiles] = useState({});
@@ -185,11 +182,14 @@ export default function ContactCompanyModal({
       // Step 1: create order (idempotent on retry)
       if (!orderId) {
         try {
-          const order = await createOrder({ service: selectedService.id, notes });
+          const order = await createOrder({
+            service: selectedService.id,
+            notes,
+          });
 
           if (!order.id) {
             setError(
-              "Order was created but no order ID was returned. Documents can't be uploaded automatically — please contact support."
+              "Order was created but no order ID was returned. Documents can't be uploaded automatically — please contact support.",
             );
             setSubmitting(false);
             return;
@@ -204,8 +204,8 @@ export default function ContactCompanyModal({
           setError(
             getErrorMessage(
               err,
-              "Failed to submit your request. Please try again."
-            )
+              "Failed to submit your request. Please try again.",
+            ),
           );
           setSubmitting(false);
           return;
@@ -232,7 +232,7 @@ export default function ContactCompanyModal({
         } catch (err) {
           newFileErrors[reqKey] = getErrorMessage(
             err,
-            "Upload failed for this file."
+            "Upload failed for this file.",
           );
         }
       }
@@ -249,7 +249,10 @@ export default function ContactCompanyModal({
       onClose?.();
     } catch (err) {
       setError(
-        getErrorMessage(err, "Failed to submit your request. Please try again.")
+        getErrorMessage(
+          err,
+          "Failed to submit your request. Please try again.",
+        ),
       );
       setSubmitting(false);
     }
@@ -287,20 +290,25 @@ export default function ContactCompanyModal({
         {!preSelectedService && (
           <div className="flex items-center gap-2 mb-5">
             <div
-              className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1 rounded-full ${step === "pick"
+              className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1 rounded-full ${
+                step === "pick"
                   ? "bg-[var(--primary)] text-white"
                   : "bg-[var(--primary-light)] text-[var(--primary)]"
-                }`}
+              }`}
             >
               <span>1</span>
               <span>Select Service</span>
             </div>
-            <FiChevronRight size={14} className="text-[var(--text-secondary)]" />
+            <FiChevronRight
+              size={14}
+              className="text-[var(--text-secondary)]"
+            />
             <div
-              className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1 rounded-full ${step === "form"
+              className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1 rounded-full ${
+                step === "form"
                   ? "bg-[var(--primary)] text-white"
                   : "bg-[var(--border)] text-[var(--text-secondary)]"
-                }`}
+              }`}
             >
               <span>2</span>
               <span>Upload &amp; Submit</span>
@@ -331,7 +339,8 @@ export default function ContactCompanyModal({
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex-1">
                       <p className="font-semibold text-[var(--text-primary)] group-hover:text-[var(--primary)]">
-                        {service.company_offerings?.name || "Government Service"}
+                        {service.company_offerings?.name ||
+                          "Government Service"}
                       </p>
                       {service.company_offerings?.description && (
                         <p className="text-xs text-[var(--text-secondary)] mt-1 line-clamp-2">
@@ -370,7 +379,8 @@ export default function ContactCompanyModal({
                   Selected Service
                 </p>
                 <p className="text-sm font-semibold text-[var(--text-primary)]">
-                  {selectedService.company_offerings?.name || "Government Service"}
+                  {selectedService.company_offerings?.name ||
+                    "Government Service"}
                 </p>
                 <div className="flex items-center gap-4 mt-1">
                   <span className="flex items-center gap-1 text-xs text-[var(--text-secondary)]">
@@ -396,7 +406,9 @@ export default function ContactCompanyModal({
               <div>
                 <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
                   Notes{" "}
-                  <span className="text-[var(--text-secondary)]">(optional)</span>
+                  <span className="text-[var(--text-secondary)]">
+                    (optional)
+                  </span>
                 </label>
                 <textarea
                   value={notes}
@@ -432,7 +444,8 @@ export default function ContactCompanyModal({
                   (!requirements || requirements.length === 0) && (
                     <p className="mb-3 text-xs text-amber-600 flex items-center gap-1">
                       <FiAlertCircle size={14} />
-                      Requirement list not available yet — using a generic upload.
+                      Requirement list not available yet — using a generic
+                      upload.
                     </p>
                   )}
 
@@ -463,7 +476,7 @@ export default function ContactCompanyModal({
                                 onChange={(e) =>
                                   handleFileChange(
                                     reqKey,
-                                    e.target.files?.[0] || null
+                                    e.target.files?.[0] || null,
                                   )
                                 }
                               />

@@ -5,11 +5,9 @@ import ChatMessage from "../../features/ai-chat/components/ChatMessage";
 import ChatInput from "../../features/ai-chat/components/ChatInput";
 import TypingIndicator from "../../features/ai-chat/components/TypingIndicator";
 import { useAiChat } from "../../features/ai-chat/hooks/useAiChat";
-import { usePageLoading } from "../../context/PageLoadingContext";
 
 const AiChat = () => {
   const { messages, loading, sendUserMessage } = useAiChat();
-  usePageLoading(loadingCompanies || loadingOrders);
 
   const messagesEndRef = useRef(null);
 
