@@ -31,17 +31,12 @@ class ProceduresAPIView(APIView):
             procedure = self.get_object(id)
             if not procedure.is_active:
                 raise NotFound({"detail": "There is no procedure matches this id"})
-
             serializer = ProcedureSerializer(procedure)
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         procedures = Procedure.objects.filter(is_active=True)
         procedure_filter = ProcedureFilter(request.GET, queryset=procedures)
-        paginator = PageNumberPagination()
-        paginator.page_size = 10
-        result_page = paginator.paginate_queryset(procedure_filter.qs, request)
-
-        serializer = ProcedureListSerializer(result_page, many=True)       
+        serializer = ProcedureListSerializer(procedure_filter.qs, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
