@@ -10,12 +10,14 @@ import {
   FiLogOut,
   FiFileText,
   FiMail,
+  FiTrendingUp
 } from "react-icons/fi";
 import { BsBank2 } from "react-icons/bs";
 import { useCompany } from "../../context/CompanyContext";
 
 const companyNavItems = [
   { path: "/company/dashboard", icon: FiGrid, key: "companyDashboard" },
+  { path: "/company/insights",  icon: FiTrendingUp, key: "Insights"},
   { path: "/company/profile", icon: FiUser, key: "companyProfile" },
   { path: "/company/services", icon: FiBriefcase, key: "companyServices" },
   { path: "/company/orders", icon: FiFileText, key: "companyOrders" },

@@ -18,8 +18,8 @@ class CompanyServicesFilter(django_filters.FilterSet):
     procedure = django_filters.CharFilter(
         field_name="procedure__name", lookup_expr="icontains"
     )
-    company = django_filters.CharFilter(
-        field_name="company__name", lookup_expr="icontains"
+    company = django_filters.NumberFilter(
+        field_name="company__id", lookup_expr="exact"
     )
     price_min = django_filters.NumberFilter(
         field_name="company_service_fee", lookup_expr="gte"
