@@ -5,6 +5,7 @@ from .serializers import (
     CompanyOrderDetailSerializer,
     OrderStatusSerializer,
     OrderStatusHistorySerializer,
+    DocumentSerializer,
 )
 from rest_framework.response import Response
 from rest_framework import status
@@ -95,6 +96,20 @@ class UploadOrderDocument(APIView):
     def get_permissions(self):
         return [IsAuthenticated(), IsClient()]
 
+    def get_object(self, id):
+        try:
+            order = Order.objects.get(pk=id)
+            self.check_object_permissions(self.request, order)
+            return order
+        except Order.DoesNotExist:
+            raise NotFound("There is no order matches this id")
+
+    def get(self, request, id):
+        order = self.get_object(id)
+        documents = order.documents.all()
+        serializer = DocumentSerializer(documents, many=True)
+        return Response(serializer.data, status.HTTP_200_OK)
+
     def post(self, request, id):
         try:
             order = Order.objects.get(pk=id)
@@ -122,7 +137,6 @@ class UploadOrderDocument(APIView):
             run_ocr_on_document.delay(document.id)
             return Response(serializer.data, status.HTTP_201_CREATED)
         return Response(serializer.errors, status.HTTP_400_BAD_REQUEST)
-
 
 class OrderStatusAPIView(APIView):
 

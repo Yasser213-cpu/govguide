@@ -1,3 +1,5 @@
+import uuid
+
 from django.db import models
 from django.conf import settings
 
@@ -7,6 +9,7 @@ class AISession(models.Model):
         on_delete=models.CASCADE,
         related_name="ai_sessions"
     )
+    session_id = models.UUIDField(default=uuid.uuid4, editable=False, db_index=True)
     message = models.TextField()
     answer = models.TextField()
     intent = models.CharField(max_length=50, blank=True)

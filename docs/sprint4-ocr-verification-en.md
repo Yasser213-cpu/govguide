@@ -37,9 +37,9 @@ POST /api/v1/orders/<order_id>/documents
 
 **Body:** `form-data`
 
-| Key | Type | Notes |
-|-----|------|-------|
-| `file` | File | The document image |
+| Key           | Type    | Notes                                                                                                                  |
+| ------------- | ------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `file`        | File    | The document image                                                                                                     |
 | `requirement` | Integer | The requirement id this document fulfills. Must belong to the order's procedure, and must not already have a document. |
 
 **Response — 201 Created**
@@ -64,13 +64,13 @@ OCR starts automatically right after this response; results appear on the docume
 
 These fields hold the OCR + verification output:
 
-| Field | Type | Meaning |
-|-------|------|---------|
-| `extracted_text` | text | Text extracted by OCR |
-| `ocr_confidence` | float (0..100) | Average OCR confidence |
-| `ocr_status` | string | `pending` / `done` / `failed` |
-| `needs_review` | boolean | Any signal that warrants human review? |
-| `verification_flags` | list | List of signals (see below) |
+| Field                | Type           | Meaning                                |
+| -------------------- | -------------- | -------------------------------------- |
+| `extracted_text`     | text           | Text extracted by OCR                  |
+| `ocr_confidence`     | float (0..100) | Average OCR confidence                 |
+| `ocr_status`         | string         | `pending` / `done` / `failed`          |
+| `needs_review`       | boolean        | Any signal that warrants human review? |
+| `verification_flags` | list           | List of signals (see below)            |
 
 These come back in the company order detail endpoint (the document list per order).
 
@@ -92,10 +92,10 @@ Use this to show "Processing..." while `pending`, the results when `done`, or an
 
 A list with zero or more of these:
 
-| Flag | Meaning |
-|------|---------|
-| `low_confidence` | OCR confidence is low (< 40) — image is probably unclear |
-| `little_text` | Extracted text is very short — file may not be a readable image |
+| Flag             | Meaning                                                               |
+| ---------------- | --------------------------------------------------------------------- |
+| `low_confidence` | OCR confidence is low (< 40) — image is probably unclear              |
+| `little_text`    | Extracted text is very short — file may not be a readable image       |
 | `type_uncertain` | Document type doesn't match the expected requirement, or is uncertain |
 
 - Empty list (`[]`) and `needs_review = false` → document looks fine.
@@ -108,6 +108,7 @@ A list with zero or more of these:
 ## Verification philosophy
 
 The check does two things:
+
 1. **Quality check:** is confidence low? is the text nearly empty?
 2. **Type check:** does the uploaded document match the expected requirement? (e.g. expected "ID card" but a passport was uploaded)
 

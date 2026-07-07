@@ -123,7 +123,17 @@ class CompanyDocumentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Document
-        fields = ["id", "requirement", "file", "uploaded_at"]
+        fields = [
+            "id",
+            "requirement",
+            "file",
+            "uploaded_at",
+            "extracted_text",
+            "ocr_confidence",
+            "ocr_status",
+            "needs_review",
+            "verification_flags",
+        ]
 
 
 class CompanyOrderDetailSerializer(serializers.ModelSerializer):
@@ -143,6 +153,22 @@ class CompanyOrderDetailSerializer(serializers.ModelSerializer):
             "created_at",
         ]
 
+class DocumentSerializer(serializers.ModelSerializer):
+    requirement = serializers.StringRelatedField()
+
+    class Meta:
+        model = Document
+        fields = [
+            "id",
+            "requirement",
+            "file",
+            "uploaded_at",
+            "extracted_text",
+            "ocr_confidence",
+            "ocr_status",
+            "needs_review",
+            "verification_flags",
+        ]
 
 class OrderStatusSerializer(serializers.ModelSerializer):
     class Meta:

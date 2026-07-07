@@ -1,13 +1,25 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { BsBank2 } from "react-icons/bs";
+import { FiClock } from "react-icons/fi";
 import PageHeader from "../../components/layout/PageHeader";
 import ChatMessage from "../../features/ai-chat/components/ChatMessage";
 import ChatInput from "../../features/ai-chat/components/ChatInput";
 import TypingIndicator from "../../features/ai-chat/components/TypingIndicator";
+import ChatHistoryPanel from "../../features/ai-chat/components/ChatHistoryPanel";
 import { useAiChat } from "../../features/ai-chat/hooks/useAiChat";
+import { useChatHistory } from "../../features/ai-chat/hooks/useChatHistory";
 
 const AiChat = () => {
-  const { messages, loading, sendUserMessage } = useAiChat();
+  const {
+    messages,
+    loading,
+    sendUserMessage,
+    startNewConversation,
+    loadConversation,
+  } = useAiChat();
+
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const history = useChatHistory();
 
   const messagesEndRef = useRef(null);
 
@@ -17,14 +29,44 @@ const AiChat = () => {
     });
   }, [messages, loading]);
 
+  const handleOpenHistory = () => {
+    setHistoryOpen(true);
+    history.open();
+  };
+
+  const handleNewChat = () => {
+    startNewConversation();
+    setHistoryOpen(false);
+  };
+
+  const handleSelectSession = async (sessionId) => {
+    try {
+      const sessionMessages = await history.openSession(sessionId);
+      loadConversation(sessionId, sessionMessages);
+      setHistoryOpen(false);
+    } catch {
+      // Session load failed — keep the panel open so the user can retry.
+    }
+  };
+
   return (
     <>
-      <PageHeader
-        title="AI Assistant"
-        subtitle="Your smart assistant for Egyptian government services."
-      />
+      <div className="flex items-center justify-between">
+        <PageHeader
+          title="AI Assistant"
+          subtitle="Your smart assistant for Egyptian government services."
+        />
+        <button
+          type="button"
+          onClick={handleOpenHistory}
+          className="mb-6 flex items-center gap-2 rounded-xl border border-[var(--border)] px-4 py-2 text-sm font-medium text-[var(--text-primary)] hover:border-[var(--primary)]"
+        >
+          <FiClock size={16} />
+          History
+        </button>
+      </div>
 
-      <div className="flex h-[calc(100vh-190px)] flex-col overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--background-primary)]">
+      <div className="relative flex h-[calc(100vh-190px)] flex-col overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--background-primary)]">
         {/* Chat Body */}
         <div className="flex-1 overflow-y-auto p-6">
           {messages.length === 1 && (
@@ -54,6 +96,19 @@ const AiChat = () => {
         </div>
 
         <ChatInput onSend={sendUserMessage} loading={loading} />
+
+        <ChatHistoryPanel
+          open={historyOpen}
+          onClose={() => setHistoryOpen(false)}
+          sessions={history.sessions}
+          loading={history.loading}
+          loadingMore={history.loadingMore}
+          error={history.error}
+          hasMore={history.hasMore}
+          onLoadMore={history.loadMore}
+          onSelectSession={handleSelectSession}
+          onNewChat={handleNewChat}
+        />
       </div>
     </>
   );

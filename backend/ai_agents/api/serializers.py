@@ -15,9 +15,37 @@ class AISessionSerializer(serializers.ModelSerializer):
         ]
 
 
+class AISessionDetailSerializer(serializers.ModelSerializer):
+    procedure_id = serializers.SerializerMethodField()
+
+    class Meta:
+        model = AISession
+        fields = [
+            "id",
+            "message",
+            "answer",
+            "intent",
+            "procedure_id",
+            "tokens_used",
+            "created_at",
+        ]
+
+    def get_procedure_id(self, obj):
+        return getattr(obj, "procedure_id", None)
+
+
+class ChatSessionListSerializer(serializers.Serializer):
+    session_id = serializers.UUIDField()
+    preview = serializers.CharField(allow_null=True, allow_blank=True)
+    message_count = serializers.IntegerField()
+    started_at = serializers.DateTimeField()
+    last_message_at = serializers.DateTimeField()
+
+
 class ChatRequestSerializer(serializers.Serializer):
     """Validates the incoming chat message."""
     message = serializers.CharField(max_length=1000)
+    session_id = serializers.UUIDField(required=False, allow_null=True)
 
 
 class ChatResponseSerializer(serializers.Serializer):

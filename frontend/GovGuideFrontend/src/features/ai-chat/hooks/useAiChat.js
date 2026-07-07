@@ -5,15 +5,15 @@ import { recommendCompanies } from "../api/Recommendationapi";
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-export const useAiChat = () => {
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      sender: "assistant",
-      text: "Hello! 👋\n\nI'm GovGuide AI Assistant.\nAsk me anything about passports, national ID, driving licenses, company registration, or any government service.",
-    },
-  ]);
+const INITIAL_GREETING = {
+  id: 1,
+  sender: "assistant",
+  text: "Hello! 👋\n\nI'm GovGuide AI Assistant.\nAsk me anything about passports, national ID, driving licenses, company registration, or any government service.",
+};
 
+export const useAiChat = () => {
+  const [messages, setMessages] = useState([INITIAL_GREETING]);
+  const [sessionId, setSessionId] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const typeAssistantReply = async (messageId, fullText) => {
@@ -62,6 +62,31 @@ export const useAiChat = () => {
     }
   };
 
+  const startNewConversation = () => {
+    setSessionId(null);
+    setMessages([INITIAL_GREETING]);
+  };
+
+  const loadConversation = (nextSessionId, sessionMessages) => {
+    setSessionId(nextSessionId);
+
+    const loadedMessages = sessionMessages.flatMap((exchange) => [
+      {
+        id: `user-${exchange.id}`,
+        sender: "user",
+        text: exchange.message,
+      },
+      {
+        id: `assistant-${exchange.id}`,
+        sender: "assistant",
+        text: exchange.answer,
+        intent: exchange.intent,
+      },
+    ]);
+
+    setMessages(loadedMessages);
+  };
+
   const sendUserMessage = async (text) => {
     if (!text.trim()) return;
 
@@ -76,7 +101,11 @@ export const useAiChat = () => {
     setLoading(true);
 
     try {
-      const data = await sendMessage(text);
+      const data = await sendMessage(text, sessionId);
+
+      if (data.session_id) {
+        setSessionId(data.session_id);
+      }
 
       const aiMessage = {
         id: Date.now() + 1,
@@ -115,6 +144,9 @@ export const useAiChat = () => {
   return {
     messages,
     loading,
+    sessionId,
     sendUserMessage,
+    startNewConversation,
+    loadConversation,
   };
 };
