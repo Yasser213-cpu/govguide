@@ -19,6 +19,7 @@ import PageHeader from "../../components/layout/PageHeader";
 import ContactCompanyModal from "./Contactcompanymodal";
 import { usePageLoading } from "../../context/PageLoadingContext";
 import { createConversation } from "../../features/chat/api/chatApi";
+import Toast from "../../components/ui/Toast";
 
 export default function CompanyDetails() {
   const { id, procedureId } = useParams();
@@ -31,6 +32,14 @@ export default function CompanyDetails() {
   const [isContactOpen, setIsContactOpen] = useState(false);
   const [submittedOrder, setSubmittedOrder] = useState(null);
   const [startingChat, setStartingChat] = useState(false);
+
+  // Toast state — moved up here with the other hooks so it's always
+  // called before any early return (Rules of Hooks).
+  const [toast, setToast] = useState({
+    show: false,
+    message: "",
+    type: "success",
+  });
 
   // Requirements for the currently-selected service's procedure.
   // Fetched lazily (only once a service is known) from GET /procedures/{id}.
@@ -238,7 +247,7 @@ export default function CompanyDetails() {
                   }
                   className="px-6 py-3 rounded-xl bg-[var(--primary)] text-white font-semibold hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:opacity-40"
                 >
-                  Contact Company
+                  Ask for a Service
                 </button>
 
                 <button
@@ -247,7 +256,7 @@ export default function CompanyDetails() {
                   className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl border border-[var(--primary)] text-[var(--primary)] font-semibold hover:bg-[var(--primary-light)] disabled:opacity-50"
                 >
                   <FiMessageCircle />
-                  {startingChat ? "Opening chat..." : "Message Company"}
+                  {startingChat ? "Opening chat..." : "Contact Company"}
                 </button>
               </div>
 
@@ -261,13 +270,12 @@ export default function CompanyDetails() {
           </div>
         </div>
 
-        {submittedOrder && (
-          <div className="mt-6 flex items-center gap-2 rounded-xl bg-green-50 text-green-700 px-5 py-4 text-sm">
-            <FiCheckCircle />
-            Your request has been submitted (Order #{submittedOrder.id}). The
-            company will review it shortly.
-          </div>
-        )}
+        <Toast
+          show={toast.show}
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast((prev) => ({ ...prev, show: false }))}
+        />
 
         {/* Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 mt-6">
@@ -500,6 +508,11 @@ export default function CompanyDetails() {
         onSuccess={(order) => {
           setSubmittedOrder(order);
           setIsContactOpen(false);
+          setToast({
+            show: true,
+            message: `Your request has been submitted (Order #${order.id}). The company will review it shortly.`,
+            type: "success",
+          });
         }}
       />
     </>
