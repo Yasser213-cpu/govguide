@@ -1,4 +1,18 @@
 from rest_framework import serializers
+from ai_agents.models import AISession
+
+
+class AISessionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AISession
+        fields = [
+            "id",
+            "message",
+            "answer",
+            "intent",
+            "tokens_used",
+            "created_at",
+        ]
 
 
 class ChatRequestSerializer(serializers.Serializer):
