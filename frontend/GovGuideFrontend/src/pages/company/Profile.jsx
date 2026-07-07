@@ -4,8 +4,11 @@ import PageHeader from "../../components/layout/PageHeader";
 import Toast from "../../components/ui/Toast";
 import { useCompany } from "../../context/CompanyContext";
 import axiosClient from "../../api/axiosClient";
+import { usePageLoading } from "../../context/PageLoadingContext";
 
 export default function CompanyProfile() {
+  usePageLoading(loadingCompanies || loadingOrders);
+  
   const { t } = useTranslation();
   const { company, loading, refreshCompany } = useCompany();
   const fileInputRef = useRef(null);

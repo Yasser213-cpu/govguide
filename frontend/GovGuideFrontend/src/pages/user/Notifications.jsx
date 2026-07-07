@@ -16,6 +16,7 @@ import {
 } from "../../features/notifications/notificationsApi";
 import { getMyOrders } from "../../features/orders/api/Ordersapi";
 import useUnreadNotificationsCount from "../../features/notifications/useUnreadNotificationsCount";
+import { usePageLoading } from "../../context/PageLoadingContext";
 
 // ─── STATUS STYLE MAP ───────────────────────────────
 
@@ -215,7 +216,9 @@ export default function Notifications() {
   const ORDER = ["Today", "Yesterday", "Last 7 Days", "Older"];
 
   const hasUnread = notifications.some((n) => !n.is_read);
-
+  
+  usePageLoading(loadingCompanies || loadingOrders);
+  
   return (
     <>
       <PageHeader

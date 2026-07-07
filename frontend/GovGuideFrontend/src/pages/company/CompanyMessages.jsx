@@ -31,6 +31,9 @@ export default function CompanyMessages() {
   const { t } = useTranslation();
   const endRef = useRef(null);
 
+  usePageLoading(loadingCompanies || loadingOrders);
+
+
   const loadConversations = async () => {
     try {
       const { data } = await getConversations();
@@ -155,6 +158,8 @@ export default function CompanyMessages() {
       .toLowerCase()
       .includes(search.trim().toLowerCase()),
   );
+  usePageLoading(loadingCompanies || loadingOrders);
+  
 
   return (
     <>

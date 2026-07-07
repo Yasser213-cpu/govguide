@@ -6,6 +6,7 @@ import { Button, Input } from "../../components/ui";
 import LanguageSwitcher from "../../components/LanguageSwitcher";
 import { getValidationErrors } from "../../utils/validation";
 import { FiLock, FiUserPlus, FiUser, FiBriefcase } from "react-icons/fi";
+import { usePageLoading } from "../../context/PageLoadingContext";
 
 export default function Register() {
   const navigate = useNavigate();
@@ -26,6 +27,7 @@ export default function Register() {
     password: "",
     confirmPassword: "",
   });
+  usePageLoading(loadingCompanies || loadingOrders);
 
   const [errors, setErrors] = useState({});
 

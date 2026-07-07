@@ -12,6 +12,8 @@ import {
   FiClock,
   FiHeart,
 } from "react-icons/fi";
+import { usePageLoading } from "../../context/PageLoadingContext";
+
 
 const GOVERNORATES = [
   "All Areas",
@@ -42,6 +44,7 @@ const GOVERNORATES = [
 
 function CompanyCard({ company, onViewDetails }) {
   const services = company.company_services || [];
+  usePageLoading(loadingCompanies || loadingOrders);
   const minFee = services.length
     ? Math.min(...services.map((s) => parseFloat(s.company_service_fee)))
     : null;
@@ -58,6 +61,7 @@ function CompanyCard({ company, onViewDetails }) {
         .slice(0, 3),
     ),
   ];
+
 
   return (
     <div className="bg-[var(--background-primary)] border border-[var(--border)] rounded-xl p-5 flex flex-col gap-4 hover:shadow-md hover:border-[var(--primary)] transition-all group">

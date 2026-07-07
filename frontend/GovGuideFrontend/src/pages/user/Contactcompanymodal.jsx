@@ -14,6 +14,8 @@ import {
   createOrder,
   uploadOrderDocument,
 } from "../../features/orders/api/Ordersapi";
+import { usePageLoading } from "../../context/PageLoadingContext";
+
 
 /**
  * Extracts a human-readable message from an Axios/DRF error response.
@@ -94,6 +96,7 @@ export default function ContactCompanyModal({
   const [selectedService, setSelectedService] = useState(
     preSelectedService ?? null
   );
+  usePageLoading(loadingCompanies || loadingOrders);
 
   const [notes, setNotes] = useState("");
   const [files, setFiles] = useState({});
