@@ -9,6 +9,19 @@ from ..recommendation import recommend_companies
 from core.permissions import isCompanyOwner
 from rest_framework.permissions import IsAuthenticated
 from ai_agents.company_insights import analyze_company, build_advice
+from rest_framework.generics import ListAPIView
+from rest_framework.permissions import IsAuthenticated
+from ai_agents.models import AISession
+from .serializers import AISessionSerializer
+
+
+class ChatHistoryView(ListAPIView):
+    serializer_class = AISessionSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        # Only the logged-in user's own chat history, newest first
+        return AISession.objects.filter(user=self.request.user).order_by("-created_at")
 
 
 
