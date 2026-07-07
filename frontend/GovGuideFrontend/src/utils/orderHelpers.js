@@ -99,15 +99,11 @@ export function getAvailableStatusActions(status) {
   switch (status) {
     case "pending":
       return [
-        { key: "accept", label: "Accept Order", nextStatus: "accepted", variant: "primary" },
         {
-          key: "modifications",
-          label: "Request Modifications",
-          nextStatus: "rejected",
-          variant: "warning",
-          confirmTitle: "Request Modifications",
-          confirmMessage:
-            "The client will be notified to update their documents and resubmit.",
+          key: "accept",
+          label: "Accept Order",
+          nextStatus: "accepted",
+          variant: "primary",
         },
         {
           key: "reject",
@@ -115,7 +111,8 @@ export function getAvailableStatusActions(status) {
           nextStatus: "rejected",
           variant: "danger",
           confirmTitle: "Reject Order",
-          confirmMessage: "This order will be rejected and the client will be notified.",
+          confirmMessage:
+            "This order will be rejected and the client will be notified.",
         },
       ];
     case "paid":

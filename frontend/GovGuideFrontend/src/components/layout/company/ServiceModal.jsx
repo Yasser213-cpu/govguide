@@ -19,6 +19,10 @@ export default function ServiceModal({
   const [procedures, setProcedures] = useState([]);
   const [loadingProcedures, setLoadingProcedures] = useState(false);
 
+  // Placeholders derived from the selected procedure's default price/days
+  const [feePlaceholder, setFeePlaceholder] = useState("");
+  const [daysPlaceholder, setDaysPlaceholder] = useState("");
+
   useEffect(() => {
     if (!open) return;
 
@@ -55,6 +59,8 @@ export default function ServiceModal({
         estimated_completion_days: "",
         is_available: true,
       });
+      setFeePlaceholder("");
+      setDaysPlaceholder("");
     }
   }, [open, service]);
 
@@ -70,7 +76,9 @@ export default function ServiceModal({
       try {
         const res = await axiosClient.get("/api/v1/procedures/");
 
-        setProcedures(res.data || []);
+        setProcedures(
+          Array.isArray(res.data) ? res.data : res.data?.results || [],
+        );
       } catch (err) {
         console.error("Failed to load procedures:", err);
       } finally {
@@ -91,6 +99,27 @@ export default function ServiceModal({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
+  };
+
+  // Special handler for the procedure select: also updates the
+  // fee/days placeholders based on the chosen procedure's defaults.
+  const handleProcedureChange = (e) => {
+    const { value } = e.target;
+
+    setFormData((prev) => ({ ...prev, procedure: value }));
+
+    const selected = procedures.find((p) => String(p.id) === String(value));
+
+    if (selected) {
+      const defaultFee = selected.estimated_government_fee ?? "";
+      const defaultDays = selected.estimated_processing_days ?? "";
+
+      setFeePlaceholder(defaultFee !== "" ? String(defaultFee) : "");
+      setDaysPlaceholder(defaultDays !== "" ? String(defaultDays) : "");
+    } else {
+      setFeePlaceholder("");
+      setDaysPlaceholder("");
+    }
   };
 
   const handleSubmit = (e) => {
@@ -138,7 +167,7 @@ export default function ServiceModal({
               <select
                 name="procedure"
                 value={formData.procedure}
-                onChange={handleChange}
+                onChange={handleProcedureChange}
                 className="w-full rounded-xl border px-4 py-3"
               >
                 <option value="">Select procedure</option>
@@ -170,6 +199,7 @@ export default function ServiceModal({
               name="company_service_fee"
               value={formData.company_service_fee}
               onChange={handleChange}
+              placeholder={feePlaceholder}
               className="w-full rounded-xl border px-4 py-3"
               id="company_service_fee"
             />
@@ -186,6 +216,7 @@ export default function ServiceModal({
               name="estimated_completion_days"
               value={formData.estimated_completion_days}
               onChange={handleChange}
+              placeholder={daysPlaceholder}
               className="w-full rounded-xl border px-4 py-3"
             />
           </div>
