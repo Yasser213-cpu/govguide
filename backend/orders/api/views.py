@@ -43,22 +43,26 @@ class ClientOrdersAPIView(APIView):
         return Response(serializer.data, status.HTTP_200_OK)
 
     def post(self, request):
-        serializer = OrderCreateSerializer(data=request.data)
-        if serializer.is_valid():
-            order = serializer.save(user=request.user)
+        serializer = OrderCreateSerializer(
+            data=request.data,
+            context={"request": request},
+        )
 
-            company_owner = order.service.company.owner
-            client_name = request.user.get_full_name() or request.user.email
+        serializer.is_valid(raise_exception=True)
 
-            send_company_notification.delay(
-                company_owner.id,
-                order.id,
-                Notification.NEW_ORDER,
-                f"طلب جديد رقم #{order.id} من {client_name}",
-            )
+        order = serializer.save(user=request.user)
 
-            return Response(serializer.data, status.HTTP_201_CREATED)
-        return Response(serializer.errors, status.HTTP_400_BAD_REQUEST)
+        company_owner = order.service.company.owner
+        client_name = request.user.get_full_name() or request.user.email
+
+        send_company_notification.delay(
+            company_owner.id,
+            order.id,
+            Notification.NEW_ORDER,
+            f"طلب جديد رقم #{order.id} من {client_name}",
+        )
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class CompanyOrdersAPIView(APIView):
@@ -140,7 +144,7 @@ class OrderStatusAPIView(APIView):
             order,
             data=request.data,
             partial=True,
-            context={"order": order},  
+            context={"order": order},
         )
 
         serializer.is_valid(raise_exception=True)
@@ -163,6 +167,7 @@ class OrderStatusAPIView(APIView):
             )
 
         return Response(serializer.data)
+
 
 class PayOrderAPIView(APIView):
     def get_permissions(self):

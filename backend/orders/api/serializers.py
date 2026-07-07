@@ -15,9 +15,54 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         fields = ["id", "notes", "service"]
         read_only_fields = ["id"]
 
+    def validate(self, attrs):
+        user = self.context["request"].user
+        service = attrs["service"]
+
+        # COMPLETED and REJECTED are both terminal statuses (see
+        # OrderStatusSerializer.allowed_transition — neither has any
+        # outgoing transitions), so orders in either state should NOT
+        # count as "active" and block a new order.
+        active_orders_qs = Order.objects.filter(user=user).exclude(
+            status__in=[Order.COMPLETED_STATUS, Order.REJECTED_STATUS]
+        )
+
+        # Case 1: same exact service (same company + same procedure)
+        has_active_order_same_service = active_orders_qs.filter(
+            service=service,
+        ).exists()
+
+        if has_active_order_same_service:
+            raise serializers.ValidationError(
+                {"service": "You already have an active order for this service."}
+            )
+
+        # Case 2: same procedure, different company
+        # (blocks e.g. requesting "ID renewal" from Company B while an
+        # active order for "ID renewal" from Company A already exists)
+        has_active_order_same_procedure = active_orders_qs.filter(
+            service__procedure=service.procedure,
+        ).exists()
+
+        if has_active_order_same_procedure:
+            raise serializers.ValidationError(
+                {
+                    "service": (
+                        "You already have an active order for this service "
+                        "with another company. Please complete or cancel it "
+                        "before submitting a new request."
+                    )
+                }
+            )
+
+        return attrs
+
     def create(self, validated_data):
         order = Order.objects.create(**validated_data)
-        OrderStatusHistory.objects.create(order=order, status=Order.PENDING_STATUS)
+        OrderStatusHistory.objects.create(
+            order=order,
+            status=Order.PENDING_STATUS,
+        )
         return order
 
 

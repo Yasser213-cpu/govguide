@@ -11,14 +11,10 @@ SOURCE_TO_PROCEDURE_NAME = {
     "صحيفة_الحالة_الجنائية.txt": "استخراج صحيفة الحالة الجنائية",
 }
 
-# ---------- Paths ----------
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CHROMA_DIR = os.path.join(BASE_DIR, "chroma_store")
 
-# ---------- OpenAI embeddings (must match ingest.py) ----------
 EMBED_MODEL = "text-embedding-3-small"
-
-# Questions whose nearest chunk is farther than this are treated as out-of-scope
 DISTANCE_THRESHOLD = 1.5
 
 _llm = None
@@ -111,7 +107,9 @@ def ask(query):
     return {
         "answer": response.content,
         "tokens": tokens,
-        "procedure_id": get_procedure_id(source),    }
+        "procedure_id": get_procedure_id(source),
+    }
+
 
 def get_procedure_id(source):
     """Look up the real procedure id from the DB by name (ids differ per DB)."""
