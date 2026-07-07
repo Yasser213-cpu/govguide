@@ -45,6 +45,7 @@ import CompanyMessages from "./pages/company/CompanyMessages";
 import CompanySettings from "./pages/company/Settings";
 import CompanyNotifications from "./pages/company/Notification";
 import CompanyProfile from "./pages/company/Profile";
+import CompanyInsights from "./pages/company/Insights";
 
 // Admin Imports
 import AdminAppLayout from "./components/layout/AdminAppLayout";
@@ -201,6 +202,10 @@ export default function AppRoutes() {
                       <Route
                         path="/company/notifications"
                         element={<CompanyNotifications />}
+                      />
+                      <Route
+                        path="/company/insights"
+                        element={<CompanyInsights />}
                       />
                     </Route>
                   </Route>
