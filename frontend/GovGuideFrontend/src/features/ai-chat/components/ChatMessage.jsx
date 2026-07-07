@@ -43,7 +43,10 @@ const ChatMessage = ({ message }) => {
 
         {/* Ranked companies (only present once recommend-companies resolves) */}
         {!isUser && message.companies && (
-          <CompanyRecommendations results={message.companies} />
+          <CompanyRecommendations
+            results={message.companies}
+            procedureId={message.procedure?.id}
+          />
         )}
       </div>
 

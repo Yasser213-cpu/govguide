@@ -11,9 +11,11 @@ import {
  * `results` is already sorted by score descending — render in order, no
  * client-side sorting needed.
  *
- * Clicking a card navigates to /companies/:id (company profile page).
+ * Clicking a card navigates to /user/companies/:id (or /:id/:procedureId
+ * when we know which procedure this recommendation was for, so
+ * CompanyDetails can pre-match the service and preload requirements).
  */
-const CompanyRecommendations = ({ results = [] }) => {
+const CompanyRecommendations = ({ results = [], procedureId }) => {
   const navigate = useNavigate();
 
   if (!results.length) {
@@ -25,7 +27,11 @@ const CompanyRecommendations = ({ results = [] }) => {
   }
 
   const goToCompany = (companyId) => {
-    navigate(`/companies/${companyId}`);
+    if (procedureId) {
+      navigate(`/user/companies/${companyId}/${procedureId}`);
+    } else {
+      navigate(`/user/companies/${companyId}`);
+    }
   };
 
   return (
