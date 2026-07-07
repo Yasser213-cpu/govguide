@@ -4,10 +4,12 @@ import Card from "../../components/ui/Card";
 import Button from "../../components/ui/Button";
 import LanguageSwitcher from "../../components/LanguageSwitcher";
 import { useTheme } from "../../hooks/useTheme";
+import { usePageLoading } from "../../context/PageLoadingContext";
 
 export default function Settings() {
   const { t } = useTranslation();
   const { theme, toggleTheme, fontScale, setFontScale, fontScaleOptions } = useTheme();
+  usePageLoading(loadingCompanies || loadingOrders);
 
   return (
     <>

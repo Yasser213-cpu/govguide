@@ -5,6 +5,7 @@ import { createCompany } from "../../api/companyApi";
 import { Button, Input } from "../../components/ui";
 import { FiBriefcase, FiMapPin, FiPhone, FiFileText } from "react-icons/fi";
 import { useCompany } from "../../context/CompanyContext";
+import { usePageLoading } from "../../context/PageLoadingContext";
 
 const GOVERNORATES = [
   "Cairo",
@@ -47,7 +48,8 @@ const initialForm = {
 };
 
 export default function CreateCompany() {
-  console.log("CreateCompany mounted");
+  usePageLoading(loadingCompanies || loadingOrders);
+
   const navigate = useNavigate();
   const { markCompanyCreated, login } = useAuth();
   const { setCompany } = useCompany();

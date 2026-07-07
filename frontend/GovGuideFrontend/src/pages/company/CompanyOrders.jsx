@@ -7,6 +7,7 @@ import PageHeader from "../../components/layout/PageHeader";
 import Pagination from "../../components/ui/Pagination";
 import { getCompanyOrders } from "../../features/orders/api/Ordersapi";
 import CompanyOrderCards from "../../components/company/dashboard/CompanyOrderCards";
+import { usePageLoading } from "../../context/PageLoadingContext";
 
 const PAGE_SIZE = 5;
 
@@ -14,6 +15,7 @@ export default function CompanyOrders() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  usePageLoading(loadingCompanies || loadingOrders);
 
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);

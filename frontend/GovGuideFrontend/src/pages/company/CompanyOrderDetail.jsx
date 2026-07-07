@@ -8,11 +8,13 @@ import {
   getCompanyOrder,
   updateOrderStatus,
 } from "../../features/orders/api/Ordersapi";
+import { usePageLoading } from "../../context/PageLoadingContext";
+
 
 export default function CompanyOrderDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-
+  usePageLoading(loadingCompanies || loadingOrders);
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");

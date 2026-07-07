@@ -8,6 +8,7 @@ import {
   validatePassword,
   validateOtp,
 } from "../../utils/validation";
+import { usePageLoading } from "../../context/PageLoadingContext";
 
 export default function ForgotPassword() {
   const navigate = useNavigate();
@@ -19,6 +20,9 @@ export default function ForgotPassword() {
     error: authError,
     setError,
   } = useAuth();
+  
+  usePageLoading(loadingCompanies || loadingOrders);
+
 
   // 3 steps: "email" → "otp" → "reset"
   const [step, setStep] = useState("email");
