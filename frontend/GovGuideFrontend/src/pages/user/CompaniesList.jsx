@@ -42,6 +42,7 @@ const GOVERNORATES = [
 ];
 
 function CompanyCard({ company, onViewDetails }) {
+
   const services = company.company_services || [];
   const minFee = services.length
     ? Math.min(...services.map((s) => parseFloat(s.company_service_fee)))
@@ -230,6 +231,7 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
 }
 
 export default function CompaniesList() {
+  
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 

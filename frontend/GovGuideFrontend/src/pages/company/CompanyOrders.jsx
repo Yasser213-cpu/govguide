@@ -18,14 +18,16 @@ export default function CompanyOrders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [currentPage, setCurrentPage] = useState(Number(searchParams.get("page")) || 1);
+  const [currentPage, setCurrentPage] = useState(
+    Number(searchParams.get("page")) || 1,
+  );
 
   const fetchOrders = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
       const data = await getCompanyOrders();
-      const list = Array.isArray(data) ? data : data.results ?? [];
+      const list = Array.isArray(data) ? data : (data.results ?? []);
       list.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
       setOrders(list);
     } catch {

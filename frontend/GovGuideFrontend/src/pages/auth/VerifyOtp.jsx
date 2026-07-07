@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "../../hooks/useAuth";
 import { Button, Input, Card } from "../../components/ui";
 import { validateOtp } from "../../utils/validation";
+import { usePageLoading } from "../../context/PageLoadingContext";
 
 export default function VerifyOtp() {
   const navigate = useNavigate();
@@ -16,7 +17,9 @@ export default function VerifyOtp() {
     error: authError,
     setError: setAuthError,
   } = useAuth();
-
+  
+  usePageLoading(loadingCompanies || loadingOrders);
+  
   const email =
   location.state?.email ||
   sessionStorage.getItem("pendingEmail") ||

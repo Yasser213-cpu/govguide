@@ -12,7 +12,6 @@ import {
 export default function CompanyOrderDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");

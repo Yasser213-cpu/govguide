@@ -4,13 +4,11 @@ import { getCompanies } from "../../api/companyApi";
 import {
   FiSearch,
   FiMapPin,
-  FiPhone,
   FiChevronLeft,
   FiChevronRight,
   FiFilter,
   FiX,
   FiClock,
-  FiHeart,
 } from "react-icons/fi";
 
 const GOVERNORATES = [
