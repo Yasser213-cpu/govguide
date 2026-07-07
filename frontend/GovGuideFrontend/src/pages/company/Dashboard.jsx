@@ -44,7 +44,7 @@ export default function CompanyDashboard() {
       setOrdersLoading(true);
       setOrdersError(null);
       const data = await getCompanyOrders();
-      const list = Array.isArray(data) ? data : data.results ?? [];
+      const list = Array.isArray(data) ? data : (data.results ?? []);
       list.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
       setOrders(list);
     } catch {

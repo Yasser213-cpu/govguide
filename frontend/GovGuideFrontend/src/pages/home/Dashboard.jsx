@@ -2,11 +2,13 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "../../hooks/useAuth";
 import { Button } from "../../components/ui";
 import { useNavigate } from "react-router-dom";
+import { usePageLoading } from "../../context/PageLoadingContext";
 
 export default function Dashboard() {
   const { t } = useTranslation();
   const { logout } = useAuth();
   const navigate = useNavigate();
+  usePageLoading(loadingCompanies || loadingOrders);
 
 
   const handleLogout = () => {

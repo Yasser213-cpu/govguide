@@ -6,7 +6,8 @@ import { useTheme } from "../../hooks/useTheme";
 
 export default function Settings() {
   const { t } = useTranslation();
-  const { theme, toggleTheme, fontScale, setFontScale, fontScaleOptions } = useTheme();
+  const { theme, toggleTheme, fontScale, setFontScale, fontScaleOptions } =
+    useTheme();
 
   return (
     <div className="space-y-6">
@@ -26,7 +27,8 @@ export default function Settings() {
               {t("common.language") || "Language"}
             </h2>
             <p className="mt-1 text-sm text-[var(--text-secondary)]">
-              {t("common.languageDescription") || "Switch between English and Arabic"}
+              {t("common.languageDescription") ||
+                "Switch between English and Arabic"}
             </p>
           </div>
           <LanguageSwitcher />
@@ -44,7 +46,9 @@ export default function Settings() {
             </p>
           </div>
           <Button onClick={toggleTheme} variant="outline">
-            {theme === "dark" ? t("common.lightMode") || "Light Mode" : t("common.darkMode") || "Dark Mode"}
+            {theme === "dark"
+              ? t("common.lightMode") || "Light Mode"
+              : t("common.darkMode") || "Dark Mode"}
           </Button>
         </div>
       </Card>
@@ -56,7 +60,8 @@ export default function Settings() {
               {t("common.fontSize") || "Font Size"}
             </h2>
             <p className="mt-1 text-sm text-[var(--text-secondary)]">
-              {t("common.fontSizeDescription") || "Adjust the overall text scale across the app"}
+              {t("common.fontSizeDescription") ||
+                "Adjust the overall text scale across the app"}
             </p>
           </div>
 

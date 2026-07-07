@@ -23,8 +23,9 @@ export default function PhoneInput({
 
       <div className="flex w-full gap-2 items-center">
         <div
-          className={`min-w-[70px] rounded-md border px-3 py-3 text-base font-medium text-[var(--text-primary)] bg-[var(--background-secondary)] text-center ${error ? "border-[var(--danger)]" : "border-[var(--border)]"
-            }`}
+          className={`min-w-[70px] rounded-md border px-3 py-3 text-base font-medium text-[var(--text-primary)] bg-[var(--background-secondary)] text-center ${
+            error ? "border-[var(--danger)]" : "border-[var(--border)]"
+          }`}
         >
           +20
         </div>
@@ -35,8 +36,9 @@ export default function PhoneInput({
             placeholder="1012345678"
             value={value}
             onChange={handlePhoneChange}
-            className={`w-full rounded-md border px-4 py-3 text-base bg-[var(--background-primary)] text-[var(--text-primary)] transition duration-200 ease-in-out focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary-light)] focus:outline-none disabled:cursor-not-allowed disabled:opacity-60 ${error ? "border-[var(--danger)]" : "border-[var(--border)]"
-              }`}
+            className={`w-full rounded-md border px-4 py-3 text-base bg-[var(--background-primary)] text-[var(--text-primary)] transition duration-200 ease-in-out focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary-light)] focus:outline-none disabled:cursor-not-allowed disabled:opacity-60 ${
+              error ? "border-[var(--danger)]" : "border-[var(--border)]"
+            }`}
             {...props}
           />
         </div>

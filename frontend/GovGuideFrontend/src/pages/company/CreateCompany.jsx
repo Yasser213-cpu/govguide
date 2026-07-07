@@ -47,7 +47,6 @@ const initialForm = {
 };
 
 export default function CreateCompany() {
-  console.log("CreateCompany mounted");
   const navigate = useNavigate();
   const { markCompanyCreated, login } = useAuth();
   const { setCompany } = useCompany();
