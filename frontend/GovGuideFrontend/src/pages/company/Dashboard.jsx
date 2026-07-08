@@ -12,6 +12,7 @@ import {
 } from "../../features/orders/api/Ordersapi";
 import CompanyOrderCards from "../../components/company/dashboard/CompanyOrderCards";
 import OrderDetailsPanel from "../../components/company/dashboard/OrderDetailsPanel";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 const ACTIVE_STATUSES = ["accepted", "paid", "in_progress"];
 const DASHBOARD_ORDERS_LIMIT = 5;
@@ -25,6 +26,7 @@ function computeOrderStats(orders) {
 }
 
 export default function CompanyDashboard() {
+  useDocumentTitle("Company Dashboard");
   const { t } = useTranslation();
   const { company } = useCompany();
 

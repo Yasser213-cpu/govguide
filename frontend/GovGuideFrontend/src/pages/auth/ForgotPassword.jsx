@@ -8,8 +8,10 @@ import {
   validatePassword,
   validateOtp,
 } from "../../utils/validation";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 export default function ForgotPassword() {
+  useDocumentTitle("Forgot Password");
   const navigate = useNavigate();
   const { t } = useTranslation();
   const {

@@ -145,7 +145,6 @@ export default function AppRoutes() {
                       path="/user/companies/:id"
                       element={<CompanyDetails />}
                     />
-                    <Route path="/user/companies/:id/:procedureId" element={<CompanyDetails />} />
 
                     {navItems
                       .filter(

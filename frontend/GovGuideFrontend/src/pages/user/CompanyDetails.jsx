@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { getCompany } from "../../api/companyApi";
 import { getProcedureById } from "../../features/ai-chat/api/Procedureapi";
@@ -20,8 +21,10 @@ import ContactCompanyModal from "./Contactcompanymodal";
 import { usePageLoading } from "../../context/PageLoadingContext";
 import { createConversation } from "../../features/chat/api/chatApi";
 import Toast from "../../components/ui/Toast";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 export default function CompanyDetails() {
+  useDocumentTitle("Company Details");
   const { id, procedureId } = useParams();
   const navigate = useNavigate();
 

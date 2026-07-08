@@ -6,8 +6,10 @@ import { Button, Input } from "../../components/ui";
 import LanguageSwitcher from "../../components/LanguageSwitcher";
 import { getValidationErrors } from "../../utils/validation";
 import { FiLock, FiUserPlus, FiUser, FiBriefcase } from "react-icons/fi";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 export default function Register() {
+  useDocumentTitle("Register");
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { register, loading, error: authError, setError } = useAuth();

@@ -4,8 +4,10 @@ import PageHeader from "../../components/layout/PageHeader";
 import Toast from "../../components/ui/Toast";
 import { useCompany } from "../../context/CompanyContext";
 import axiosClient from "../../api/axiosClient";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 export default function CompanyProfile() {
+  useDocumentTitle("Company Profile");
   const { t } = useTranslation();
   const { company, loading, refreshCompany } = useCompany();
   const fileInputRef = useRef(null);

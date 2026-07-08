@@ -13,8 +13,10 @@ import {
 import { jwtDecode } from "jwt-decode";
 import PageHeader from "../../components/layout/PageHeader";
 import { FiSend } from "react-icons/fi";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 export default function CompanyMessages() {
+  useDocumentTitle("Company Messages");
   const [conversations, setConversations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedConversation, setSelectedConversation] = useState(null);

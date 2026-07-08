@@ -7,8 +7,10 @@ import Card from "../../components/ui/Card";
 import { getCompanyInsights } from "../../features/insights/api/insightsApi";
 import { getProcedures, getServices } from "../../api/companyApi";
 import { useCompany } from "../../context/CompanyContext";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 export default function CompanyInsights() {
+  useDocumentTitle("Company Insights");
   const { t } = useTranslation();
   const { company } = useCompany();
 
@@ -29,29 +31,31 @@ export default function CompanyInsights() {
     const loadProcedures = async () => {
       try {
         const procedureRes = await getProcedures();
-        const procedureList =
-          Array.isArray(procedureRes.data)
-            ? procedureRes.data
-            : procedureRes.data.results ?? [];
+        const procedureList = Array.isArray(procedureRes.data)
+          ? procedureRes.data
+          : (procedureRes.data.results ?? []);
 
         let serviceList = company?.company_services ?? [];
         if (!serviceList.length) {
           const serviceRes = await getServices({ company: company.id });
-          serviceList =
-            Array.isArray(serviceRes.data)
-              ? serviceRes.data
-              : serviceRes.data.results ?? [];
+          serviceList = Array.isArray(serviceRes.data)
+            ? serviceRes.data
+            : (serviceRes.data.results ?? []);
         }
 
         const availableProcedureIds = new Set(
           serviceList
-            .map((service) => service?.procedure ?? service?.company_offerings?.id)
+            .map(
+              (service) => service?.procedure ?? service?.company_offerings?.id,
+            )
             .filter(Boolean)
-            .map(String)
+            .map(String),
         );
 
         const filteredProcedures = procedureList
-          .filter((procedure) => availableProcedureIds.has(String(procedure.id)))
+          .filter((procedure) =>
+            availableProcedureIds.has(String(procedure.id)),
+          )
           .map((procedure) => ({ id: procedure.id, name: procedure.name }));
 
         setProcedures(filteredProcedures);
@@ -72,7 +76,8 @@ export default function CompanyInsights() {
       setInsights(data);
     } catch (err) {
       setError(
-        err?.response?.data?.detail || "Failed to load insights. Please try again."
+        err?.response?.data?.detail ||
+          "Failed to load insights. Please try again.",
       );
       setInsights(null);
     } finally {
@@ -93,9 +98,12 @@ export default function CompanyInsights() {
   return (
     <>
       <PageHeader
-        title={t("pages.companyInsights.title", { defaultValue: "Company Insights" })}
+        title={t("pages.companyInsights.title", {
+          defaultValue: "Company Insights",
+        })}
         subtitle={t("pages.companyInsights.subtitle", {
-          defaultValue: "See how you rank against competitors and how to improve.",
+          defaultValue:
+            "See how you rank against competitors and how to improve.",
         })}
       />
 
@@ -106,7 +114,9 @@ export default function CompanyInsights() {
           className="border rounded-lg px-3 py-2"
         >
           <option value="">
-            {t("pages.companyInsights.selectProcedure", { defaultValue: "Select a procedure" })}
+            {t("pages.companyInsights.selectProcedure", {
+              defaultValue: "Select a procedure",
+            })}
           </option>
           {procedures.map((procedure) => (
             <option key={procedure.id} value={procedure.id}>
@@ -115,7 +125,9 @@ export default function CompanyInsights() {
           ))}
         </select>
 
-        {loading && <p>{t("common.loading", { defaultValue: "Loading..." })}</p>}
+        {loading && (
+          <p>{t("common.loading", { defaultValue: "Loading..." })}</p>
+        )}
         {error && <p className="text-red-600">{error}</p>}
 
         {insights && (
@@ -132,14 +144,23 @@ export default function CompanyInsights() {
 
             <Card className="p-6">
               <h3 className="font-semibold mb-3 flex items-center gap-2 text-green-700">
-                <FiCheckCircle /> {t("pages.companyInsights.strengths", { defaultValue: "Strengths" })}
+                <FiCheckCircle />{" "}
+                {t("pages.companyInsights.strengths", {
+                  defaultValue: "Strengths",
+                })}
               </h3>
-              {!(Array.isArray(insights.strengths) && insights.strengths.length > 0) ? (
+              {!(
+                Array.isArray(insights.strengths) &&
+                insights.strengths.length > 0
+              ) ? (
                 <p className="text-sm text-gray-500">—</p>
               ) : (
                 <ul className="space-y-2" dir="rtl">
                   {insights.strengths.map((s, i) => (
-                    <li key={i} className="text-sm bg-green-50 border border-green-200 rounded-lg p-3">
+                    <li
+                      key={i}
+                      className="text-sm bg-green-50 border border-green-200 rounded-lg p-3"
+                    >
                       {s}
                     </li>
                   ))}
@@ -149,14 +170,23 @@ export default function CompanyInsights() {
 
             <Card className="p-6">
               <h3 className="font-semibold mb-3 flex items-center gap-2 text-amber-700">
-                <FiAlertTriangle /> {t("pages.companyInsights.weaknesses", { defaultValue: "Areas to improve" })}
+                <FiAlertTriangle />{" "}
+                {t("pages.companyInsights.weaknesses", {
+                  defaultValue: "Areas to improve",
+                })}
               </h3>
-              {!(Array.isArray(insights.weaknesses) && insights.weaknesses.length > 0) ? (
+              {!(
+                Array.isArray(insights.weaknesses) &&
+                insights.weaknesses.length > 0
+              ) ? (
                 <p className="text-sm text-gray-500">—</p>
               ) : (
                 <ul className="space-y-2" dir="rtl">
                   {insights.weaknesses.map((w, i) => (
-                    <li key={i} className="text-sm bg-amber-50 border border-amber-200 rounded-lg p-3">
+                    <li
+                      key={i}
+                      className="text-sm bg-amber-50 border border-amber-200 rounded-lg p-3"
+                    >
                       {w}
                     </li>
                   ))}

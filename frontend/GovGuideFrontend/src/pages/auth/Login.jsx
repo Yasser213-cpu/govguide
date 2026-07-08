@@ -8,8 +8,10 @@ import { getValidationErrors } from "../../utils/validation";
 import { FiLock, FiMail } from "react-icons/fi";
 import { useCompany } from "../../context/CompanyContext";
 import { useUser } from "../../context/UserContext";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 export default function Login() {
+  useDocumentTitle("Login");
   const navigate = useNavigate();
   const { t } = useTranslation();
   const {

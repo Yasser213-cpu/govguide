@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import {
   FiX,
   FiUpload,
@@ -14,6 +16,7 @@ import {
   createOrder,
   uploadOrderDocument,
 } from "../../features/orders/api/Ordersapi";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 /**
  * Extracts a human-readable message from an Axios/DRF error response.
@@ -89,6 +92,7 @@ export default function ContactCompanyModal({
   onServiceSelected,
   onSuccess,
 }) {
+  useDocumentTitle("Contact Company");
   // Step: "pick" | "form"
   const [step, setStep] = useState(preSelectedService ? "form" : "pick");
   const [selectedService, setSelectedService] = useState(

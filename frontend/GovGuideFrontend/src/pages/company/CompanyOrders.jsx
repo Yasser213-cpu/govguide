@@ -7,10 +7,12 @@ import PageHeader from "../../components/layout/PageHeader";
 import Pagination from "../../components/ui/Pagination";
 import { getCompanyOrders } from "../../features/orders/api/Ordersapi";
 import CompanyOrderCards from "../../components/company/dashboard/CompanyOrderCards";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 const PAGE_SIZE = 5;
 
 export default function CompanyOrders() {
+  useDocumentTitle("Orders");
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();

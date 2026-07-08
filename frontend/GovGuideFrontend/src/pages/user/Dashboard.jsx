@@ -12,8 +12,10 @@ import AiAssistantCard from "../../components/dashboard/AiAssistantCard";
 import RecentRequests from "../../components/dashboard/RecentRequests";
 import RecommendedCompanies from "../../components/dashboard/RecommendedCompanies";
 import { usePageLoading } from "../../context/PageLoadingContext";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 export default function Dashboard() {
+  useDocumentTitle("Dashboard");
   const { t } = useTranslation();
   const { user } = useUser();
 

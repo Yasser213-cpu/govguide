@@ -10,7 +10,6 @@ export default function Dashboard() {
   const navigate = useNavigate();
   usePageLoading(loadingCompanies || loadingOrders);
 
-
   const handleLogout = () => {
     logout();
     navigate("/login", { replace: true });
@@ -29,7 +28,9 @@ export default function Dashboard() {
         </div>
 
         <div className="p-6 bg-[var(--background-primary)] rounded-2xl">
-          <h2 className="text-xl font-bold mb-4 text-[var(--text-primary)]">Dashboard Content</h2>
+          <h2 className="text-xl font-bold mb-4 text-[var(--text-primary)]">
+            Dashboard Content
+          </h2>
 
           <p className="text-[var(--text-secondary)] mb-4">
             This is a protected route. You are authenticated as:

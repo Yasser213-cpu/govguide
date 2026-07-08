@@ -4,8 +4,10 @@ import Card from "../../components/ui/Card";
 import Button from "../../components/ui/Button";
 import LanguageSwitcher from "../../components/LanguageSwitcher";
 import { useTheme } from "../../hooks/useTheme";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 export default function Settings() {
+  useDocumentTitle("Settings");
   const { t } = useTranslation();
   const { theme, toggleTheme, fontScale, setFontScale, fontScaleOptions } =
     useTheme();

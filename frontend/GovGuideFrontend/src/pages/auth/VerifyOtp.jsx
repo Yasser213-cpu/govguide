@@ -4,8 +4,10 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "../../hooks/useAuth";
 import { Button, Input, Card } from "../../components/ui";
 import { validateOtp } from "../../utils/validation";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 export default function VerifyOtp() {
+  useDocumentTitle("Verify OTP");
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useTranslation();
