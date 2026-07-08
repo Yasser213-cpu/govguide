@@ -12,9 +12,17 @@ import AiAssistantCard from "../../components/dashboard/AiAssistantCard";
 import RecentRequests from "../../components/dashboard/RecentRequests";
 import RecommendedCompanies from "../../components/dashboard/RecommendedCompanies";
 import { usePageLoading } from "../../context/PageLoadingContext";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 export default function Dashboard() {
-  const { t } = useTranslation();
+    const isRTL = i18n.dir() === "rtl";
+
+  useEffect(() => {
+    document.documentElement.dir = isRTL ? "rtl" : "ltr";
+    document.documentElement.lang = i18n.language?.startsWith("ar") ? "ar" : "en";
+  }, [i18n, isRTL]);
+  useDocumentTitle("Dashboard");
+  const { t, i18n } = useTranslation();
   const { user } = useUser();
 
   const [recommendedCompanies, setRecommendedCompanies] = useState([]);

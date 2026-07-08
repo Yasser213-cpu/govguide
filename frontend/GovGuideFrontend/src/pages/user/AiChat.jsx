@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { BsBank2 } from "react-icons/bs";
 import { FiClock } from "react-icons/fi";
 import PageHeader from "../../components/layout/PageHeader";
@@ -8,8 +9,10 @@ import TypingIndicator from "../../features/ai-chat/components/TypingIndicator";
 import ChatHistoryPanel from "../../features/ai-chat/components/ChatHistoryPanel";
 import { useAiChat } from "../../features/ai-chat/hooks/useAiChat";
 import { useChatHistory } from "../../features/ai-chat/hooks/useChatHistory";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 const AiChat = () => {
+  useDocumentTitle("AI Assistant");
   const {
     messages,
     loading,

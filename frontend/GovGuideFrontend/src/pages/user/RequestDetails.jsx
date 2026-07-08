@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   FiArrowLeft,
@@ -22,6 +23,7 @@ import { usePageLoading } from "../../context/PageLoadingContext";
 import { payOrder } from "../../features/orders/api/Ordersapi";
 import ReviewModal from "../../components/orders/ReviewModal";
 import Toast from "../../components/ui/Toast";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 // ─── Status config (mirrors MyRequests for visual consistency) ───────────────
 
@@ -182,6 +184,7 @@ function InfoItem({ icon: Icon, label, value }) {
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function RequestDetails() {
+  useDocumentTitle("Request Details");
   const { id } = useParams();
   const navigate = useNavigate();
 

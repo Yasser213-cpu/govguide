@@ -14,8 +14,16 @@ import {
 import { jwtDecode } from "jwt-decode";
 import PageHeader from "../../components/layout/PageHeader";
 import { FiSend } from "react-icons/fi";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 export default function UserMessages() {
+    const isRTL = i18n.dir() === "rtl";
+
+  useEffect(() => {
+    document.documentElement.dir = isRTL ? "rtl" : "ltr";
+    document.documentElement.lang = i18n.language?.startsWith("ar") ? "ar" : "en";
+  }, [i18n, isRTL]);
+  useDocumentTitle("Messages");
   const [conversations, setConversations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedConversation, setSelectedConversation] = useState(null);
@@ -29,7 +37,7 @@ export default function UserMessages() {
   const token = sessionStorage.getItem("access");
   const decoded = token ? jwtDecode(token) : null;
   const currentUserId = decoded?.user_id || decoded?.id;
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const endRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();

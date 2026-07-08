@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { getCompanies } from "../../api/companyApi";
 import {
@@ -13,6 +14,7 @@ import {
 } from "react-icons/fi";
 import PageHeader from "../../components/layout/PageHeader";
 import { usePageLoading } from "../../context/PageLoadingContext";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 const GOVERNORATES = [
   "All Areas",
@@ -42,7 +44,6 @@ const GOVERNORATES = [
 ];
 
 function CompanyCard({ company, onViewDetails }) {
-
   const services = company.company_services || [];
   const minFee = services.length
     ? Math.min(...services.map((s) => parseFloat(s.company_service_fee)))
@@ -231,7 +232,7 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
 }
 
 export default function CompaniesList() {
-  
+  useDocumentTitle("Companies");
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 

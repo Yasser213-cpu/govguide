@@ -1,3 +1,6 @@
+import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
+
 import Navbar from "../components/landing/Navbar";
 import HeroSection from "../components/landing/HeroSection";
 import FeaturesSection from "../components/landing/Features";
@@ -8,8 +11,11 @@ import Comparison from "../components/landing/Comparison";
 import FAQ from "../components/landing/FAQ";
 import CTASection from "../components/landing/CTA";
 import Footer from "../components/landing/Footer";
+import useDocumentTitle from "../hooks/useDocumentTitle";
 
 export default function Home() {
+  useDocumentTitle("Your Gateway to Egyptian Government Services");
+
   return (
     <>
       <Navbar />

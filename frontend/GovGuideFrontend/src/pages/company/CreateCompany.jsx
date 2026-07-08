@@ -1,10 +1,13 @@
 import { useState } from "react";
+import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { createCompany } from "../../api/companyApi";
 import { Button, Input } from "../../components/ui";
 import { FiBriefcase, FiMapPin, FiPhone, FiFileText } from "react-icons/fi";
 import { useCompany } from "../../context/CompanyContext";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 const GOVERNORATES = [
   "Cairo",
@@ -47,6 +50,7 @@ const initialForm = {
 };
 
 export default function CreateCompany() {
+  useDocumentTitle("Create Company Profile");
   const navigate = useNavigate();
   const { markCompanyCreated, login } = useAuth();
   const { setCompany } = useCompany();

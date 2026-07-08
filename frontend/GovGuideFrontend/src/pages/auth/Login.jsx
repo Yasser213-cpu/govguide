@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../../hooks/useAuth";
@@ -8,10 +9,18 @@ import { getValidationErrors } from "../../utils/validation";
 import { FiLock, FiMail } from "react-icons/fi";
 import { useCompany } from "../../context/CompanyContext";
 import { useUser } from "../../context/UserContext";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 export default function Login() {
+    const isRTL = i18n.dir() === "rtl";
+
+  useEffect(() => {
+    document.documentElement.dir = isRTL ? "rtl" : "ltr";
+    document.documentElement.lang = i18n.language?.startsWith("ar") ? "ar" : "en";
+  }, [i18n, isRTL]);
+  useDocumentTitle("Login");
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const {
     login,
     loading,

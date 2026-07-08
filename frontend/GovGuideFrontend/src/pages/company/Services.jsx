@@ -7,9 +7,17 @@ import { FiEdit2, FiTrash2 } from "react-icons/fi";
 import ServiceModal from "../../components/layout/company/ServiceModal";
 import ConfirmDeleteModal from "../../components/layout/company/ConfirmDeleteModal";
 import Toast from "../../components/ui/Toast";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 export default function Services() {
-  const { t } = useTranslation();
+    const isRTL = i18n.dir() === "rtl";
+
+  useEffect(() => {
+    document.documentElement.dir = isRTL ? "rtl" : "ltr";
+    document.documentElement.lang = i18n.language?.startsWith("ar") ? "ar" : "en";
+  }, [i18n, isRTL]);
+  useDocumentTitle("Company Services");
+  const { t, i18n } = useTranslation();
   const { company, loading: companyLoading } = useCompany();
 
   const [services, setServices] = useState([]);

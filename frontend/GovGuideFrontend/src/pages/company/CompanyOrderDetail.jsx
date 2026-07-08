@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { FiArrowLeft } from "react-icons/fi";
 
@@ -8,8 +9,10 @@ import {
   getCompanyOrder,
   updateOrderStatus,
 } from "../../features/orders/api/Ordersapi";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 export default function CompanyOrderDetail() {
+  useDocumentTitle("Order Details");
   const { id } = useParams();
   const navigate = useNavigate();
   const [order, setOrder] = useState(null);

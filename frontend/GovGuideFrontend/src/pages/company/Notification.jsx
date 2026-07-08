@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import {
   FiBell,
@@ -17,6 +18,7 @@ import {
   markAllNotificationsAsRead,
 } from "../../features/notifications/notificationsApi";
 import useUnreadNotificationsCount from "../../features/notifications/useUnreadNotificationsCount";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 // ─── STATUS STYLE MAP ───────────────────────────────
 
@@ -141,6 +143,7 @@ function applyFilters(list, filter) {
 // ─── PAGE ───────────────────────────────
 
 export default function CompanyNotifications() {
+  useDocumentTitle("Notifications");
   const [notifications, setNotifications] = useState([]);
   const navigate = useNavigate();
   const [filter, setFilter] = useState("all");

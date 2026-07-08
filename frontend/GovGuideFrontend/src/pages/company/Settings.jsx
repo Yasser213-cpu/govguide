@@ -1,12 +1,21 @@
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import PageHeader from "../../components/layout/PageHeader";
 import Card from "../../components/ui/Card";
 import Button from "../../components/ui/Button";
 import LanguageSwitcher from "../../components/LanguageSwitcher";
 import { useTheme } from "../../hooks/useTheme";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 export default function Settings() {
-  const { t } = useTranslation();
+    const isRTL = i18n.dir() === "rtl";
+
+  useEffect(() => {
+    document.documentElement.dir = isRTL ? "rtl" : "ltr";
+    document.documentElement.lang = i18n.language?.startsWith("ar") ? "ar" : "en";
+  }, [i18n, isRTL]);
+  useDocumentTitle("Settings");
+  const { t, i18n } = useTranslation();
   const { theme, toggleTheme, fontScale, setFontScale, fontScaleOptions } =
     useTheme();
 

@@ -12,6 +12,7 @@ import {
 } from "../../features/orders/api/Ordersapi";
 import CompanyOrderCards from "../../components/company/dashboard/CompanyOrderCards";
 import OrderDetailsPanel from "../../components/company/dashboard/OrderDetailsPanel";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 const ACTIVE_STATUSES = ["accepted", "paid", "in_progress"];
 const DASHBOARD_ORDERS_LIMIT = 5;
@@ -25,7 +26,14 @@ function computeOrderStats(orders) {
 }
 
 export default function CompanyDashboard() {
-  const { t } = useTranslation();
+    const isRTL = i18n.dir() === "rtl";
+
+  useEffect(() => {
+    document.documentElement.dir = isRTL ? "rtl" : "ltr";
+    document.documentElement.lang = i18n.language?.startsWith("ar") ? "ar" : "en";
+  }, [i18n, isRTL]);
+  useDocumentTitle("Company Dashboard");
+  const { t, i18n } = useTranslation();
   const { company } = useCompany();
 
   const [orders, setOrders] = useState([]);

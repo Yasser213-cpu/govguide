@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { getCompanies } from "../../api/companyApi";
 import {
@@ -10,6 +11,7 @@ import {
   FiX,
   FiClock,
 } from "react-icons/fi";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 const GOVERNORATES = [
   "All Areas",
@@ -207,6 +209,7 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
 }
 
 export default function CompaniesList() {
+  useDocumentTitle("Companies");
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 

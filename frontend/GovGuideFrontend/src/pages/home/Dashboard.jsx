@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../../hooks/useAuth";
 import { Button } from "../../components/ui";
@@ -5,7 +6,13 @@ import { useNavigate } from "react-router-dom";
 import { usePageLoading } from "../../context/PageLoadingContext";
 
 export default function Dashboard() {
-  const { t } = useTranslation();
+    const isRTL = i18n.dir() === "rtl";
+
+  useEffect(() => {
+    document.documentElement.dir = isRTL ? "rtl" : "ltr";
+    document.documentElement.lang = i18n.language?.startsWith("ar") ? "ar" : "en";
+  }, [i18n, isRTL]);
+  const { t, i18n } = useTranslation();
   const { logout } = useAuth();
   const navigate = useNavigate();
   usePageLoading(loadingCompanies || loadingOrders);

@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import {
   FiFileText,
@@ -19,6 +20,7 @@ import { usePageLoading } from "../../context/PageLoadingContext";
 
 import Toast from "../../components/ui/Toast";
 import ReviewModal from "../../components/orders/ReviewModal";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 // ─── Status config ────────────────────────────────────────────────────────────
 
@@ -418,6 +420,7 @@ function filterByTab(orders, tab) {
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function MyRequests() {
+  useDocumentTitle("My Requests");
   const navigate = useNavigate();
 
   const [orders, setOrders] = useState([]);

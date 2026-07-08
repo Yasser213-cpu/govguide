@@ -7,11 +7,21 @@ import PageHeader from "../../components/layout/PageHeader";
 import Pagination from "../../components/ui/Pagination";
 import { getCompanyOrders } from "../../features/orders/api/Ordersapi";
 import CompanyOrderCards from "../../components/company/dashboard/CompanyOrderCards";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 const PAGE_SIZE = 5;
 
 export default function CompanyOrders() {
-  const { t } = useTranslation();
+  const isRTL = i18n.dir() === "rtl";
+
+  useEffect(() => {
+    document.documentElement.dir = isRTL ? "rtl" : "ltr";
+    document.documentElement.lang = i18n.language?.startsWith("ar")
+      ? "ar"
+      : "en";
+  }, [i18n, isRTL]);
+  useDocumentTitle("Orders");
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 

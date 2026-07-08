@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import {
   FiBell,
@@ -16,6 +17,7 @@ import {
 } from "../../features/notifications/notificationsApi";
 import { getMyOrders } from "../../features/orders/api/Ordersapi";
 import useUnreadNotificationsCount from "../../features/notifications/useUnreadNotificationsCount";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 // ─── STATUS STYLE MAP ───────────────────────────────
 
@@ -130,6 +132,7 @@ function getOrderTitle(orderId, orders) {
 // ─── PAGE ───────────────────────────────
 
 export default function Notifications() {
+  useDocumentTitle("Notifications");
   const [notifications, setNotifications] = useState([]);
   const navigate = useNavigate();
   const [filter, setFilter] = useState("all");
