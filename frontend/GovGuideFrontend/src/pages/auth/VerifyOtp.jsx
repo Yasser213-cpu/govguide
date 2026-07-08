@@ -7,16 +7,10 @@ import { validateOtp } from "../../utils/validation";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 export default function VerifyOtp() {
-    const isRTL = i18n.dir() === "rtl";
-
-  useEffect(() => {
-    document.documentElement.dir = isRTL ? "rtl" : "ltr";
-    document.documentElement.lang = i18n.language?.startsWith("ar") ? "ar" : "en";
-  }, [i18n, isRTL]);
   useDocumentTitle("Verify OTP");
   const navigate = useNavigate();
   const location = useLocation();
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const {
     verifyOtp,
     resendOtp,

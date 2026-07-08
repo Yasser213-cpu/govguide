@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../../hooks/useAuth";
@@ -10,15 +9,9 @@ import { FiLock, FiUserPlus, FiUser, FiBriefcase } from "react-icons/fi";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 export default function Register() {
-    const isRTL = i18n.dir() === "rtl";
-
-  useEffect(() => {
-    document.documentElement.dir = isRTL ? "rtl" : "ltr";
-    document.documentElement.lang = i18n.language?.startsWith("ar") ? "ar" : "en";
-  }, [i18n, isRTL]);
   useDocumentTitle("Register");
   const navigate = useNavigate();
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { register, loading, error: authError, setError } = useAuth();
 
   const roles = [

@@ -16,12 +16,6 @@ import { FiSend } from "react-icons/fi";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 export default function CompanyMessages() {
-    const isRTL = i18n.dir() === "rtl";
-
-  useEffect(() => {
-    document.documentElement.dir = isRTL ? "rtl" : "ltr";
-    document.documentElement.lang = i18n.language?.startsWith("ar") ? "ar" : "en";
-  }, [i18n, isRTL]);
   useDocumentTitle("Company Messages");
   const [conversations, setConversations] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -36,7 +30,7 @@ export default function CompanyMessages() {
   const token = sessionStorage.getItem("access");
   const decoded = token ? jwtDecode(token) : null;
   const currentUserId = decoded?.user_id || decoded?.id;
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const endRef = useRef(null);
 
   const loadConversations = async () => {

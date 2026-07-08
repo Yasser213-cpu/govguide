@@ -12,16 +12,8 @@ import useDocumentTitle from "../../hooks/useDocumentTitle";
 const PAGE_SIZE = 5;
 
 export default function CompanyOrders() {
-  const isRTL = i18n.dir() === "rtl";
-
-  useEffect(() => {
-    document.documentElement.dir = isRTL ? "rtl" : "ltr";
-    document.documentElement.lang = i18n.language?.startsWith("ar")
-      ? "ar"
-      : "en";
-  }, [i18n, isRTL]);
   useDocumentTitle("Orders");
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 

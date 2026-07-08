@@ -1,15 +1,8 @@
-import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import PageHeader from "../../components/layout/PageHeader";
 
 export default function PlaceholderPage({ pageKey }) {
-    const isRTL = i18n.dir() === "rtl";
-
-  useEffect(() => {
-    document.documentElement.dir = isRTL ? "rtl" : "ltr";
-    document.documentElement.lang = i18n.language?.startsWith("ar") ? "ar" : "en";
-  }, [i18n, isRTL]);
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
 
   return (
     <>
