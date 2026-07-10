@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
   FiArrowLeft,
   FiAlertCircle,
@@ -18,9 +18,8 @@ import {
   FiBriefcase,
 } from "react-icons/fi";
 import PageHeader from "../../components/layout/PageHeader";
-import { getOrderById } from "../../features/orders/api/Ordersapi";
+import { getOrderById, createCheckoutSession } from "../../features/orders/api/Ordersapi";
 import { usePageLoading } from "../../context/PageLoadingContext";
-import { payOrder } from "../../features/orders/api/Ordersapi";
 import ReviewModal from "../../components/orders/ReviewModal";
 import Toast from "../../components/ui/Toast";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
@@ -187,73 +186,15 @@ export default function RequestDetails() {
   useDocumentTitle("Request Details");
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const paymentResult = searchParams.get("payment");
 
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [paying, setPaying] = useState(false);
+  const [payError, setPayError] = useState("");
   const [reviewTarget, setReviewTarget] = useState(null);
-
-  const handlePay = async () => {
-    try {
-      setPaying(true);
-
-      await payOrder(order.id);
-
-      setOrder((prev) => ({
-        ...prev,
-        status: "paid",
-      }));
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setPaying(false);
-    }
-  };
-
-  const handleReviewClick = () => {
-    setReviewTarget(order);
-  };
-
-  usePageLoading(loading);
-
-  useEffect(() => {
-    async function loadOrder() {
-      setLoading(true);
-      setError("");
-
-      try {
-        const data = await getOrderById(id);
-        setOrder(data);
-      } catch (err) {
-        setError(
-          err?.response?.data?.detail ||
-            err?.response?.data?.message ||
-            "Failed to load request details. Please try again.",
-        );
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    if (id) {
-      loadOrder();
-    }
-  }, [id]);
-
-  const formatDate = (value) => {
-    if (!value) return "-";
-    return new Date(value).toLocaleString("en-EG", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
-  const cfg = order ? STATUS_CONFIG[order.status] : null;
-  const StatusHeroIcon = cfg?.icon ?? FiFileText;
 
   const [toast, setToast] = useState({
     show: false,
@@ -268,6 +209,86 @@ export default function RequestDetails() {
       type,
     });
   };
+
+  const loadOrder = async () => {
+    setLoading(true);
+    setError("");
+
+    try {
+      const data = await getOrderById(id);
+      setOrder(data);
+    } catch (err) {
+      setError(
+        err?.response?.data?.detail ||
+          err?.response?.data?.message ||
+          "Failed to load request details. Please try again.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePay = async () => {
+    if (!order) return;
+    setPaying(true);
+    setPayError("");
+    try {
+      const { checkout_url } = await createCheckoutSession(order.id);
+      window.location.href = checkout_url;
+    } catch (err) {
+      const msg =
+        err?.response?.data?.detail ||
+        err?.response?.data?.error ||
+        err?.response?.data?.message ||
+        "Payment failed. Please try again.";
+      setPayError(msg);
+      setPaying(false);
+    }
+  };
+
+  const handleReviewClick = () => {
+    setReviewTarget(order);
+  };
+
+  usePageLoading(loading);
+
+  useEffect(() => {
+    if (id) {
+      loadOrder();
+    }
+  }, [id]);
+
+  useEffect(() => {
+    if (!paymentResult || !id) return;
+
+    if (paymentResult === "success") {
+      showToast(
+        "Payment submitted. Your order will update once payment is confirmed.",
+        "success",
+      );
+      loadOrder();
+    } else if (paymentResult === "cancelled") {
+      showToast("Payment was cancelled. You can try again when ready.", "error");
+    }
+
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.delete("payment");
+    setSearchParams(nextParams, { replace: true });
+  }, [paymentResult, id, setSearchParams]);
+
+  const formatDate = (value) => {
+    if (!value) return "-";
+    return new Date(value).toLocaleString("en-EG", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  const cfg = order ? STATUS_CONFIG[order.status] : null;
+  const StatusHeroIcon = cfg?.icon ?? FiFileText;
 
   return (
     <>
@@ -325,25 +346,37 @@ export default function RequestDetails() {
           </div>
 
           {order.status === "accepted" && (
-            <div className="rounded-xl border border-[var(--border)] bg-[var(--background-primary)] px-5 py-4 flex items-center justify-between gap-4">
-              <div className="flex items-center gap-2 text-sm text-blue-600">
-                <FiCreditCard size={15} />
-                <span className="font-medium">Payment required to proceed</span>
+            <div className="rounded-xl border border-[var(--border)] bg-[var(--background-primary)] px-5 py-4 flex flex-col gap-3">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-2 text-sm text-blue-600">
+                  <FiCreditCard size={15} />
+                  <span className="font-medium">
+                    {order.payment?.status === "failed"
+                      ? "Payment failed — please try again"
+                      : "Payment required to proceed"}
+                  </span>
+                </div>
+
+                <button
+                  onClick={handlePay}
+                  disabled={paying}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition disabled:opacity-60"
+                >
+                  {paying ? (
+                    <FiLoader size={14} className="animate-spin" />
+                  ) : (
+                    <FiCreditCard size={14} />
+                  )}
+
+                  {paying ? "Redirecting..." : "Pay Now"}
+                </button>
               </div>
-
-              <button
-                onClick={handlePay}
-                disabled={paying}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition disabled:opacity-60"
-              >
-                {paying ? (
-                  <FiLoader size={14} className="animate-spin" />
-                ) : (
-                  <FiCreditCard size={14} />
-                )}
-
-                {paying ? "Processing..." : "Pay Now"}
-              </button>
+              {payError && (
+                <div className="flex items-center gap-2 rounded-lg bg-red-50 text-red-600 px-4 py-3 text-sm">
+                  <FiAlertCircle size={15} />
+                  {payError}
+                </div>
+              )}
             </div>
           )}
 

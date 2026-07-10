@@ -9,7 +9,7 @@ from .serializers import (
 )
 from rest_framework.response import Response
 from rest_framework import status
-from ..models import Order, OrderStatusHistory
+from ..models import Order, OrderStatusHistory, Payment
 from rest_framework.views import APIView
 from rest_framework.exceptions import NotFound
 from core.permissions import IsClient, IsCompany, isCompanyOwner
@@ -17,6 +17,10 @@ from rest_framework.permissions import IsAuthenticated
 from ai_agents.tasks import run_ocr_on_document
 from notifications.tasks import send_order_notification, send_company_notification
 from notifications.models import Notification
+import stripe
+from django.conf import settings
+
+stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
 class ClientOrdersAPIView(APIView):
@@ -183,46 +187,96 @@ class OrderStatusAPIView(APIView):
         return Response(serializer.data)
 
 
-class PayOrderAPIView(APIView):
+class CreateCheckoutSessionAPIView(APIView):
     def get_permissions(self):
         return [IsAuthenticated(), IsClient()]
 
     def post(self, request, id):
         try:
-
-            order = Order.objects.get(pk=id)
+            order = Order.objects.select_related(
+                "service__procedure", "service__company"
+            ).get(pk=id)
             self.check_object_permissions(request, order)
-
-            if order.status == Order.PAID_STATUS:
-                return Response(
-                    {"detail": "This order has already been paid."},
-                    status.HTTP_400_BAD_REQUEST,
-                )
-            elif order.status != Order.ACCEPTED_STATUS:
-                return Response(
-                    {"error": "Only accepted orders can be paid."},
-                    status.HTTP_400_BAD_REQUEST,
-                )
-
-            order.status = Order.PAID_STATUS
-            order.save()
-
-            OrderStatusHistory.objects.create(order=order, status=Order.PAID_STATUS)
-
-            company_owner = order.service.company.owner
-            send_company_notification.delay(
-                company_owner.id,
-                order.id,
-                Notification.PAID,
-                f"تم دفع الطلب رقم #{order.id}",
-            )
-
-            return Response(
-                {"message": "Payment completed successfully.", "status": "paid"}
-            )
-
         except Order.DoesNotExist:
-            raise NotFound("There is no order matches this id")
+            raise NotFound("There is no order matching this id.")
+
+        if order.status == Order.PAID_STATUS:
+            return Response(
+                {"detail": "This order has already been paid."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if order.status != Order.ACCEPTED_STATUS:
+            return Response(
+                {"error": "Only accepted orders can be paid."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        payment, created = Payment.objects.get_or_create(
+            order=order,
+            defaults={
+                "amount": order.service.company_service_fee,
+                "currency": "egp",
+            },
+        )
+
+        if payment.status == Payment.SUCCESS:
+            return Response(
+                {"detail": "This order has already been paid."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not created and payment.status == Payment.FAILED:
+            payment.status = Payment.PENDING
+            payment.save(update_fields=["status"])
+
+        session = stripe.checkout.Session.create(
+            payment_method_types=["card"],
+            line_items=[
+                {
+                    "price_data": {
+                        "currency": payment.currency,
+                        "product_data": {"name": order.procedure.name},
+                        "unit_amount": int(payment.amount * 100),
+                    },
+                    "quantity": 1,
+                }
+            ],
+            mode="payment",
+            success_url=(
+                f"{settings.FRONTEND_URL}/user/my-requests/{order.id}"
+                "?payment=success"
+            ),
+            cancel_url=(
+                f"{settings.FRONTEND_URL}/user/my-requests/{order.id}"
+                "?payment=cancelled"
+            ),
+            metadata={
+                "order_id": str(order.id),
+                "payment_id": str(payment.id),
+            },
+        )
+
+        payment.stripe_checkout_session_id = session.id
+        payment.save(update_fields=["stripe_checkout_session_id"])
+
+        return Response({"checkout_url": session.url})
+
+
+class PayOrderAPIView(APIView):
+    def get_permissions(self):
+        return [IsAuthenticated(), IsClient()]
+
+    def post(self, request, id):
+        return Response(
+            {
+                "error": (
+                    "Direct payment is disabled. "
+                    "Use the create-checkout-session endpoint instead."
+                )
+            },
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
 
 
 class OrderStatusHistoryAPIView(APIView):

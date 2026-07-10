@@ -14,7 +14,7 @@ import {
   FiCreditCard,
   FiLoader,
 } from "react-icons/fi";
-import { getMyOrders, payOrder } from "../../features/orders/api/Ordersapi";
+import { getMyOrders, createCheckoutSession } from "../../features/orders/api/Ordersapi";
 import PageHeader from "../../components/layout/PageHeader";
 import { usePageLoading } from "../../context/PageLoadingContext";
 
@@ -497,19 +497,15 @@ export default function MyRequests() {
     setPaying(true);
     setPayError("");
     try {
-      await payOrder(payTarget.id);
-      // Optimistically update status in local state → no need for a refetch
-      setOrders((prev) =>
-        prev.map((o) => (o.id === payTarget.id ? { ...o, status: "paid" } : o)),
-      );
-      setPayTarget(null);
+      const { checkout_url } = await createCheckoutSession(payTarget.id);
+      window.location.href = checkout_url;
     } catch (err) {
       const msg =
         err?.response?.data?.detail ||
+        err?.response?.data?.error ||
         err?.response?.data?.message ||
         "Payment failed. Please try again.";
       setPayError(msg);
-    } finally {
       setPaying(false);
     }
   };

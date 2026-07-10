@@ -11,6 +11,10 @@ urlpatterns = [
         views.OrderStatusAPIView.as_view(),
     ),
     path("<int:id>/pay", views.PayOrderAPIView.as_view()),
+    path(
+        "<int:id>/create-checkout-session/",
+        views.CreateCheckoutSessionAPIView.as_view(),
+    ),
     path("<int:id>/timeline", views.OrderStatusHistoryAPIView.as_view()),
     path("<int:id>/review", CreateReviewAPIView.as_view()),
 ]

@@ -48,12 +48,21 @@ export const uploadOrderDocument = async (orderId, requirementId, file) => {
 };
 
 /**
- * Mark an accepted order as paid.
- * POST /api/v1/orders/{id}/pay
- * Only valid when order status is "accepted".
+ * Create a Stripe Checkout Session for an accepted order.
+ * POST /api/v1/orders/{id}/create-checkout-session/
  *
  * @param {number} orderId
- * @returns {Promise<{ message: string, status: "paid" }>}
+ * @returns {Promise<{ checkout_url: string }>}
+ */
+export const createCheckoutSession = async (orderId) => {
+  const response = await axiosClient.post(
+    `/api/v1/orders/${orderId}/create-checkout-session/`,
+  );
+  return response.data;
+};
+
+/**
+ * @deprecated Use createCheckoutSession for Stripe payments.
  */
 export const payOrder = async (orderId) => {
   const response = await axiosClient.post(`/api/v1/orders/${orderId}/pay`);
