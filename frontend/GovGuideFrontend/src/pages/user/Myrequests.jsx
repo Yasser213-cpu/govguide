@@ -15,6 +15,7 @@ import {
   FiLoader,
 } from "react-icons/fi";
 import { getMyOrders, createCheckoutSession } from "../../features/orders/api/Ordersapi";
+import { canPayOrder } from "../../utils/orderHelpers";
 import PageHeader from "../../components/layout/PageHeader";
 import { usePageLoading } from "../../context/PageLoadingContext";
 
@@ -275,8 +276,8 @@ function RequestCard({ order, onClick, onPayClick, onReviewClick }) {
         </div>
       </button>
 
-      {/* Pay Now CTA — only when accepted */}
-      {order.status === "accepted" && (
+      {/* Pay Now CTA — only when accepted and not yet paid */}
+      {canPayOrder(order) && (
         <div className="mt-4 pt-4 border-t border-[var(--border)] flex items-center justify-between gap-4">
           <div className="flex items-center gap-2 text-sm text-blue-600">
             <FiCreditCard size={15} />
@@ -296,22 +297,31 @@ function RequestCard({ order, onClick, onPayClick, onReviewClick }) {
       )}
 
       {order.status === "completed" && (
-        <div className="mt-4 pt-4 border-t border-[var(--border)] flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2 text-sm text-green-600">
-            <FiCheckCircle size={15} />
-            <span className="font-medium">Tell us about your experience</span>
+        <div className="mt-4 pt-4 border-t border-[var(--border)] flex flex-col gap-3">
+          <div className="flex items-start gap-2 text-sm text-green-600">
+            <FiCheckCircle size={15} className="mt-0.5 shrink-0" />
+            <span>
+              Order completed — your documents will be delivered within a
+              maximum of 3 days.
+            </span>
           </div>
-
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onReviewClick(order);
-            }}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-600 text-white text-sm font-semibold hover:bg-green-700 transition shrink-0"
-          >
-            <FiCheckCircle size={14} />
-            Leave Review
-          </button>
+          {!order.has_review && (
+            <div className="flex items-center justify-between gap-4">
+              <span className="text-sm text-green-600 font-medium">
+                Tell us about your experience
+              </span>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onReviewClick(order);
+                }}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-600 text-white text-sm font-semibold hover:bg-green-700 transition shrink-0"
+              >
+                <FiCheckCircle size={14} />
+                Leave Review
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

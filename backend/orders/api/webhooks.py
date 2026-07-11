@@ -4,16 +4,13 @@ import stripe
 from django.conf import settings
 from django.db import transaction
 from django.http import HttpResponse
-from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
 
-from notifications.models import Notification
-from notifications.tasks import send_company_notification
-
-from ..models import Order, OrderStatusHistory, Payment
+from ..models import Payment
+from ..services.payment import mark_payment_success
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +50,12 @@ class StripeWebhookAPIView(APIView):
         return HttpResponse(status=200)
 
     def _get_payment(self, session):
-        payment_id = session.get("metadata", {}).get("payment_id")
+        # `session` is a stripe StripeObject, not a dict — it has no
+        # .get() method. Use getattr (with defaults) or attribute
+        # access instead, which StripeObject supports via __getattr__.
+        metadata = getattr(session, "metadata", None)
+        payment_id = getattr(metadata, "payment_id", None) if metadata else None
+
         if payment_id:
             try:
                 return Payment.objects.select_related(
@@ -62,7 +64,7 @@ class StripeWebhookAPIView(APIView):
             except Payment.DoesNotExist:
                 pass
 
-        session_id = session.get("id")
+        session_id = getattr(session, "id", None)
         if session_id:
             try:
                 return Payment.objects.select_related(
@@ -80,32 +82,10 @@ class StripeWebhookAPIView(APIView):
             logger.warning("checkout.session.completed: payment not found")
             return
 
-        if payment.status == Payment.SUCCESS:
-            return
-
-        payment.status = Payment.SUCCESS
-        payment.paid_at = timezone.now()
-        payment.stripe_payment_intent_id = session.get("payment_intent") or ""
-        payment.save(
-            update_fields=["status", "paid_at", "stripe_payment_intent_id"]
+        mark_payment_success(
+            payment,
+            stripe_payment_intent_id=getattr(session, "payment_intent", "") or "",
         )
-
-        order = payment.order
-        if order.status != Order.PAID_STATUS:
-            order.status = Order.PAID_STATUS
-            order.save(update_fields=["status", "updated_at"])
-            OrderStatusHistory.objects.create(
-                order=order,
-                status=Order.PAID_STATUS,
-            )
-
-            company_owner = order.service.company.owner
-            send_company_notification.delay(
-                company_owner.id,
-                order.id,
-                Notification.PAID,
-                f"تم دفع الطلب رقم #{order.id}",
-            )
 
     @transaction.atomic
     def _handle_checkout_failed(self, session):
@@ -118,7 +98,7 @@ class StripeWebhookAPIView(APIView):
 
     @transaction.atomic
     def _handle_payment_intent_failed(self, payment_intent):
-        payment_intent_id = payment_intent.get("id")
+        payment_intent_id = getattr(payment_intent, "id", None)
         if not payment_intent_id:
             return
 
@@ -127,8 +107,8 @@ class StripeWebhookAPIView(APIView):
                 stripe_payment_intent_id=payment_intent_id
             )
         except Payment.DoesNotExist:
-            metadata = payment_intent.get("metadata", {})
-            payment_id = metadata.get("payment_id")
+            metadata = getattr(payment_intent, "metadata", None)
+            payment_id = getattr(metadata, "payment_id", None) if metadata else None
             if not payment_id:
                 return
             try:

@@ -62,6 +62,17 @@ export const createCheckoutSession = async (orderId) => {
 };
 
 /**
+ * Verify Stripe payment after redirect and sync order status.
+ * POST /api/v1/orders/{id}/verify-payment/
+ */
+export const verifyPayment = async (orderId) => {
+  const response = await axiosClient.post(
+    `/api/v1/orders/${orderId}/verify-payment/`,
+  );
+  return response.data;
+};
+
+/**
  * @deprecated Use createCheckoutSession for Stripe payments.
  */
 export const payOrder = async (orderId) => {

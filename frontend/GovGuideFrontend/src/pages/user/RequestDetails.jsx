@@ -18,7 +18,7 @@ import {
   FiBriefcase,
 } from "react-icons/fi";
 import PageHeader from "../../components/layout/PageHeader";
-import { getOrderById, createCheckoutSession } from "../../features/orders/api/Ordersapi";
+import { getOrderById, createCheckoutSession, verifyPayment } from "../../features/orders/api/Ordersapi";
 import { usePageLoading } from "../../context/PageLoadingContext";
 import ReviewModal from "../../components/orders/ReviewModal";
 import Toast from "../../components/ui/Toast";
@@ -193,6 +193,7 @@ export default function RequestDetails() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [paying, setPaying] = useState(false);
+  const [confirmingPayment, setConfirmingPayment] = useState(false);
   const [payError, setPayError] = useState("");
   const [reviewTarget, setReviewTarget] = useState(null);
 
@@ -261,19 +262,45 @@ export default function RequestDetails() {
   useEffect(() => {
     if (!paymentResult || !id) return;
 
-    if (paymentResult === "success") {
-      showToast(
-        "Payment submitted. Your order will update once payment is confirmed.",
-        "success",
-      );
-      loadOrder();
-    } else if (paymentResult === "cancelled") {
-      showToast("Payment was cancelled. You can try again when ready.", "error");
-    }
+    const handlePaymentReturn = async () => {
+      const nextParams = new URLSearchParams(searchParams);
+      nextParams.delete("payment");
+      setSearchParams(nextParams, { replace: true });
 
-    const nextParams = new URLSearchParams(searchParams);
-    nextParams.delete("payment");
-    setSearchParams(nextParams, { replace: true });
+      if (paymentResult === "cancelled") {
+        showToast("Payment was cancelled. You can try again when ready.", "error");
+        return;
+      }
+
+      if (paymentResult === "success") {
+        setConfirmingPayment(true);
+        try {
+          for (let attempt = 0; attempt < 8; attempt++) {
+            const data = await verifyPayment(id);
+            if (data.status === "paid" || data.payment?.status === "success") {
+              setOrder(data);
+              showToast("Payment confirmed! Your order is now paid.", "success");
+              return;
+            }
+            await new Promise((resolve) => setTimeout(resolve, 1500));
+          }
+          await loadOrder();
+          showToast(
+            "Payment submitted. Your order will update once payment is confirmed.",
+            "success",
+          );
+        } catch {
+          showToast(
+            "Payment submitted. We could not confirm it yet — please refresh shortly.",
+            "success",
+          );
+        } finally {
+          setConfirmingPayment(false);
+        }
+      }
+    };
+
+    handlePaymentReturn();
   }, [paymentResult, id, setSearchParams]);
 
   const formatDate = (value) => {
@@ -289,6 +316,8 @@ export default function RequestDetails() {
 
   const cfg = order ? STATUS_CONFIG[order.status] : null;
   const StatusHeroIcon = cfg?.icon ?? FiFileText;
+  const showPayNow =
+    order?.status === "accepted" && order?.payment?.status !== "success";
 
   return (
     <>
@@ -345,30 +374,36 @@ export default function RequestDetails() {
             </div>
           </div>
 
-          {order.status === "accepted" && (
+          {showPayNow && (
             <div className="rounded-xl border border-[var(--border)] bg-[var(--background-primary)] px-5 py-4 flex flex-col gap-3">
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-2 text-sm text-blue-600">
                   <FiCreditCard size={15} />
                   <span className="font-medium">
-                    {order.payment?.status === "failed"
-                      ? "Payment failed — please try again"
-                      : "Payment required to proceed"}
+                    {confirmingPayment
+                      ? "Confirming your payment..."
+                      : order.payment?.status === "failed"
+                        ? "Payment failed — please try again"
+                        : "Payment required to proceed"}
                   </span>
                 </div>
 
                 <button
                   onClick={handlePay}
-                  disabled={paying}
+                  disabled={paying || confirmingPayment}
                   className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition disabled:opacity-60"
                 >
-                  {paying ? (
+                  {paying || confirmingPayment ? (
                     <FiLoader size={14} className="animate-spin" />
                   ) : (
                     <FiCreditCard size={14} />
                   )}
 
-                  {paying ? "Redirecting..." : "Pay Now"}
+                  {confirmingPayment
+                    ? "Confirming..."
+                    : paying
+                      ? "Redirecting..."
+                      : "Pay Now"}
                 </button>
               </div>
               {payError && (
@@ -380,22 +415,58 @@ export default function RequestDetails() {
             </div>
           )}
 
+          {order.status === "paid" && (
+            <div className="rounded-xl border border-blue-200 bg-blue-50 px-5 py-4 flex items-start gap-3">
+              <FiCheckCircle size={16} className="text-blue-600 mt-0.5 shrink-0" />
+              <div className="text-sm text-blue-700">
+                <p className="font-semibold">Payment received</p>
+                <p className="mt-1">
+                  The company has been notified. They will start processing your
+                  order soon.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {order.status === "in_progress" && (
+            <div className="rounded-xl border border-[var(--primary)]/20 bg-[var(--primary-light)] px-5 py-4 flex items-start gap-3">
+              <FiRefreshCw size={16} className="text-[var(--primary)] mt-0.5 shrink-0" />
+              <div className="text-sm text-[var(--primary)]">
+                <p className="font-semibold">Order in progress</p>
+                <p className="mt-1">
+                  The company is currently processing your request.
+                </p>
+              </div>
+            </div>
+          )}
+
           {order.status === "completed" && (
-            <div className="rounded-xl border border-[var(--border)] bg-[var(--background-primary)] px-5 py-4 flex items-center justify-between gap-4">
-              <div className="flex items-center gap-2 text-sm text-green-600">
-                <FiCheckCircle size={15} />
-                <span className="font-medium">
-                  Tell us about your experience
-                </span>
+            <div className="rounded-xl border border-green-200 bg-green-50 px-5 py-4 flex flex-col gap-3">
+              <div className="flex items-start gap-3">
+                <FiCheckCircle size={16} className="text-green-600 mt-0.5 shrink-0" />
+                <div className="text-sm text-green-700">
+                  <p className="font-semibold">Order completed</p>
+                  <p className="mt-1">
+                    Your documents will be delivered to you within a maximum of
+                    3 days.
+                  </p>
+                </div>
               </div>
 
-              <button
-                onClick={handleReviewClick}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-600 text-white text-sm font-semibold hover:bg-green-700 transition"
-              >
-                <FiCheckCircle size={14} />
-                Leave Review
-              </button>
+              {!order.has_review && (
+                <div className="flex items-center justify-between gap-4 pt-3 border-t border-green-200">
+                  <span className="text-sm text-green-700 font-medium">
+                    Tell us about your experience
+                  </span>
+                  <button
+                    onClick={handleReviewClick}
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-600 text-white text-sm font-semibold hover:bg-green-700 transition"
+                  >
+                    <FiCheckCircle size={14} />
+                    Leave Review
+                  </button>
+                </div>
+              )}
             </div>
           )}
 

@@ -10,6 +10,7 @@ from .serializers import (
 from rest_framework.response import Response
 from rest_framework import status
 from ..models import Order, OrderStatusHistory, Payment
+from ..services.payment import mark_payment_success
 from rest_framework.views import APIView
 from rest_framework.exceptions import NotFound
 from core.permissions import IsClient, IsCompany, isCompanyOwner
@@ -174,6 +175,7 @@ class OrderStatusAPIView(APIView):
             "accepted": f"تم قبول طلبك رقم #{order.id}",
             "rejected": f"تم رفض طلبك رقم #{order.id}",
             "paid": f"تم تأكيد الدفع لطلبك رقم #{order.id}",
+            "in_progress": f"بدأت الشركة معالجة طلبك رقم #{order.id}",
             "completed": f"تم إكمال طلبك رقم #{order.id}",
         }
 
@@ -260,6 +262,64 @@ class CreateCheckoutSessionAPIView(APIView):
         payment.save(update_fields=["stripe_checkout_session_id"])
 
         return Response({"checkout_url": session.url})
+
+
+class VerifyPaymentAPIView(APIView):
+    """Confirm Stripe payment after redirect (fallback when webhook is delayed)."""
+
+    def get_permissions(self):
+        return [IsAuthenticated(), IsClient()]
+
+    def post(self, request, id):
+        try:
+            order = Order.objects.select_related(
+                "service__company", "payment"
+            ).get(pk=id)
+            self.check_object_permissions(request, order)
+        except Order.DoesNotExist:
+            raise NotFound("There is no order matching this id.")
+
+        if order.status == Order.PAID_STATUS:
+            serializer = ClientOrderDetailSerializer(order)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        try:
+            payment = order.payment
+        except Payment.DoesNotExist:
+            return Response(
+                {"detail": "No payment found for this order."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if payment.status == Payment.SUCCESS:
+            serializer = ClientOrderDetailSerializer(order)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        if not payment.stripe_checkout_session_id:
+            return Response(
+                {"detail": "No checkout session found for this order."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            session = stripe.checkout.Session.retrieve(
+                payment.stripe_checkout_session_id
+            )
+        except stripe.error.StripeError:
+            return Response(
+                {"detail": "Unable to verify payment with Stripe."},
+                status=status.HTTP_502_BAD_GATEWAY,
+            )
+
+        if session.payment_status == "paid":
+            mark_payment_success(
+                payment,
+                stripe_payment_intent_id=session.payment_intent or "",
+            )
+            order.refresh_from_db()
+
+        serializer = ClientOrderDetailSerializer(order)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class PayOrderAPIView(APIView):
