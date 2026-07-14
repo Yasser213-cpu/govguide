@@ -95,6 +95,12 @@ export const VERIFICATION_FLAG_LABELS = {
   type_uncertain: "Type Uncertain",
 };
 
+export function canPayOrder(order) {
+  return (
+    order?.status === "accepted" && order?.payment?.status !== "success"
+  );
+}
+
 export function getAvailableStatusActions(status) {
   switch (status) {
     case "pending":

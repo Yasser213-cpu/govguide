@@ -20,6 +20,8 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
+from orders.api.webhooks import StripeWebhookAPIView
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/v1/auth/", include("users.api.urls")),
@@ -32,6 +34,11 @@ urlpatterns = [
     path("api/v1/notifications/", include("notifications.api.urls")),
     path("api/v1/reviews/", include("reviews.api.urls")),
     path("api/v1/chat/", include("chat.api.urls")),
+    path(
+        "api/v1/payments/webhook/",
+        StripeWebhookAPIView.as_view(),
+        name="stripe-webhook",
+    ),
 ]
 
 if settings.DEBUG:
