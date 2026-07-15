@@ -15,7 +15,17 @@ class RequirementSerializer(serializers.ModelSerializer):
 
 
 class ProcedureSerializer(serializers.ModelSerializer):
+    # Read: full requirement objects (id, title, description, done)
     requirements = RequirementSerializer(many=True, read_only=True)
+
+    # Write: send a plain list of existing requirement ids, e.g. [1, 3, 5]
+    requirement_ids = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=Requirement.objects.all(),
+        source="requirements",
+        write_only=True,
+        required=False,
+    )
 
     class Meta:
         model = Procedure
@@ -27,6 +37,8 @@ class ProcedureSerializer(serializers.ModelSerializer):
             "estimated_processing_days",
             "government_authority",
             "requirements",
+            "requirement_ids",
+            "is_active",
         ]
         read_only_fields = ["id"]
 

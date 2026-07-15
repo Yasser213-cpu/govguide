@@ -70,6 +70,18 @@ class ClientOrdersAPIView(APIView):
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+    def delete(self, request, id):
+        order = self.get_object(id)
+
+        if order.status != Order.PENDING_STATUS:
+            return Response(
+                {"error": "Only pending orders can be cancelled."},
+                status.HTTP_400_BAD_REQUEST,
+            )
+
+        order.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 class CompanyOrdersAPIView(APIView):
 

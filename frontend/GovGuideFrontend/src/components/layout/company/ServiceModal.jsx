@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import axiosClient from "../../../api/axiosClient";
 
 export default function ServiceModal({
@@ -23,6 +23,14 @@ export default function ServiceModal({
   const [feePlaceholder, setFeePlaceholder] = useState("");
   const [daysPlaceholder, setDaysPlaceholder] = useState("");
 
+  // =========================
+  // Searchable procedure dropdown state
+  // =========================
+  const [procedureSearch, setProcedureSearch] = useState("");
+  const [selectedProcedureName, setSelectedProcedureName] = useState("");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
   useEffect(() => {
     if (!open) return;
 
@@ -38,6 +46,23 @@ export default function ServiceModal({
       window.removeEventListener("keydown", handleEsc);
     };
   }, [open, onClose]);
+
+  // Close the procedure dropdown when clicking outside of it
+  useEffect(() => {
+    if (!isDropdownOpen) return;
+
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isDropdownOpen]);
 
   // =========================
   // Reset form on close/open mode
@@ -62,6 +87,10 @@ export default function ServiceModal({
       setFeePlaceholder("");
       setDaysPlaceholder("");
     }
+
+    setProcedureSearch("");
+    setSelectedProcedureName("");
+    setIsDropdownOpen(false);
   }, [open, service]);
 
   // =========================
@@ -101,14 +130,12 @@ export default function ServiceModal({
     }));
   };
 
-  // Special handler for the procedure select: also updates the
-  // fee/days placeholders based on the chosen procedure's defaults.
-  const handleProcedureChange = (e) => {
-    const { value } = e.target;
-
-    setFormData((prev) => ({ ...prev, procedure: value }));
-
-    const selected = procedures.find((p) => String(p.id) === String(value));
+  // Applies a chosen procedure: sets the form value + placeholders + closes dropdown
+  const applyProcedureSelection = (selected) => {
+    setFormData((prev) => ({ ...prev, procedure: selected?.id ?? "" }));
+    setSelectedProcedureName(selected?.name ?? "");
+    setProcedureSearch("");
+    setIsDropdownOpen(false);
 
     if (selected) {
       const defaultFee = selected.estimated_government_fee ?? "";
@@ -128,6 +155,11 @@ export default function ServiceModal({
   };
 
   if (!open) return null;
+
+  // Filter procedures locally based on the search text
+  const filteredProcedures = procedures.filter((p) =>
+    p.name?.toLowerCase().includes(procedureSearch.toLowerCase()),
+  );
 
   return (
     <div
@@ -164,24 +196,52 @@ export default function ServiceModal({
                 className="w-full rounded-xl border bg-gray-100 px-4 py-3"
               />
             ) : (
-              <select
-                name="procedure"
-                value={formData.procedure}
-                onChange={handleProcedureChange}
-                className="w-full rounded-xl border px-4 py-3"
-              >
-                <option value="">Select procedure</option>
+              <div className="relative" ref={dropdownRef}>
+                <input
+                  type="text"
+                  placeholder={
+                    loadingProcedures ? "Loading..." : "Search procedure..."
+                  }
+                  value={
+                    isDropdownOpen ? procedureSearch : selectedProcedureName
+                  }
+                  onChange={(e) => {
+                    setProcedureSearch(e.target.value);
+                    if (!isDropdownOpen) setIsDropdownOpen(true);
+                  }}
+                  onFocus={() => {
+                    setIsDropdownOpen(true);
+                    setProcedureSearch("");
+                  }}
+                  disabled={loadingProcedures}
+                  className="w-full rounded-xl border px-4 py-3"
+                />
 
-                {loadingProcedures ? (
-                  <option>Loading...</option>
-                ) : (
-                  procedures.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name}
-                    </option>
-                  ))
+                {isDropdownOpen && (
+                  <div className="absolute z-10 mt-1 max-h-56 w-full overflow-y-auto rounded-xl border bg-white shadow-lg">
+                    {filteredProcedures.length === 0 ? (
+                      <div className="px-4 py-3 text-sm text-gray-500">
+                        No procedures found
+                      </div>
+                    ) : (
+                      filteredProcedures.map((p) => (
+                        <button
+                          type="button"
+                          key={p.id}
+                          onClick={() => applyProcedureSelection(p)}
+                          className={`block w-full px-4 py-2 text-left hover:bg-gray-100 ${
+                            String(formData.procedure) === String(p.id)
+                              ? "bg-blue-50 font-medium"
+                              : ""
+                          }`}
+                        >
+                          {p.name}
+                        </button>
+                      ))
+                    )}
+                  </div>
                 )}
-              </select>
+              </div>
             )}
           </div>
 

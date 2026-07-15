@@ -1,5 +1,4 @@
 import { useEffect, useState, useMemo } from "react";
-import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import {
   FiFileText,
@@ -14,7 +13,11 @@ import {
   FiCreditCard,
   FiLoader,
 } from "react-icons/fi";
-import { getMyOrders, createCheckoutSession } from "../../features/orders/api/Ordersapi";
+import {
+  getMyOrders,
+  cancelOrder,
+  createCheckoutSession,
+} from "../../features/orders/api/Ordersapi";
 import { canPayOrder } from "../../utils/orderHelpers";
 import PageHeader from "../../components/layout/PageHeader";
 import { usePageLoading } from "../../context/PageLoadingContext";
@@ -165,6 +168,60 @@ function StatusIcon({ status }) {
   return <FiFileText {...iconProps} className="text-[var(--text-secondary)]" />;
 }
 
+// ─── Cancel Confirmation Modal ────────────────────────────────────────────
+
+function CancelModal({ order, onConfirm, onCancel, cancelling, error }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+      <div className="w-full max-w-sm rounded-2xl bg-[var(--background-primary)] border border-[var(--border)] p-6">
+        <div className="flex items-center justify-center h-14 w-14 rounded-full bg-red-50 mx-auto mb-4">
+          <FiXCircle size={26} className="text-red-500" />
+        </div>
+
+        <h3 className="text-lg font-bold text-[var(--text-primary)] text-center mb-1">
+          Cancel Request
+        </h3>
+        <p className="text-sm text-[var(--text-secondary)] text-center mb-5">
+          Are you sure you want to cancel your request for{" "}
+          <span className="font-semibold text-[var(--text-primary)]">
+            {order.procedure}
+          </span>{" "}
+          with{" "}
+          <span className="font-semibold text-[var(--text-primary)]">
+            {order.company}
+          </span>
+          ? This action cannot be undone.
+        </p>
+
+        {error && (
+          <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 text-red-600 px-4 py-3 text-sm">
+            <FiAlertCircle size={15} />
+            {error}
+          </div>
+        )}
+
+        <div className="flex gap-3">
+          <button
+            onClick={onCancel}
+            disabled={cancelling}
+            className="flex-1 px-4 py-2.5 rounded-xl border border-[var(--border)] text-sm font-semibold text-[var(--text-primary)] disabled:opacity-40 hover:bg-[var(--background-secondary)] transition"
+          >
+            Keep Request
+          </button>
+          <button
+            onClick={onConfirm}
+            disabled={cancelling}
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-red-600 text-white text-sm font-semibold hover:bg-red-700 disabled:opacity-60 transition"
+          >
+            {cancelling && <FiLoader size={14} className="animate-spin" />}
+            {cancelling ? "Cancelling…" : "Yes, Cancel"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Pay Confirmation Modal ───────────────────────────────────────────────────
 
 function PayModal({ order, onConfirm, onCancel, paying, error }) {
@@ -223,7 +280,13 @@ function PayModal({ order, onConfirm, onCancel, paying, error }) {
 
 // ─── Request Card ─────────────────────────────────────────────────────────────
 
-function RequestCard({ order, onClick, onPayClick, onReviewClick }) {
+function RequestCard({
+  order,
+  onClick,
+  onPayClick,
+  onReviewClick,
+  onCancelClick,
+}) {
   const timeAgo = formatTimeAgo(new Date(order.created_at));
 
   return (
@@ -292,6 +355,25 @@ function RequestCard({ order, onClick, onPayClick, onReviewClick }) {
           >
             <FiCreditCard size={14} />
             Pay Now
+          </button>
+        </div>
+      )}
+
+      {order.status === "pending" && (
+        <div className="mt-4 pt-4 border-t border-[var(--border)] flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2 text-sm text-[var(--text-secondary)]">
+            <FiClock size={15} />
+            <span className="font-medium">Waiting for company review</span>
+          </div>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onCancelClick(order);
+            }}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg border border-red-200 text-red-600 text-sm font-semibold hover:bg-red-50 transition shrink-0"
+          >
+            <FiXCircle size={14} />
+            Cancel Request
           </button>
         </div>
       )}
@@ -437,6 +519,10 @@ export default function MyRequests() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState("all");
+  // Cancel modal state
+  const [cancelTarget, setCancelTarget] = useState(null);
+  const [cancelling, setCancelling] = useState(false);
+  const [cancelError, setCancelError] = useState("");
 
   usePageLoading(loading);
 
@@ -463,6 +549,40 @@ export default function MyRequests() {
     () => filterByTab(orders, activeTab),
     [orders, activeTab],
   );
+
+  // ── Cancel handlers ──────────────────────────────────────────────────────
+
+  const handleCancelClick = (order) => {
+    setCancelTarget(order);
+    setCancelError("");
+  };
+
+  const handleCancelDismiss = () => {
+    if (cancelling) return;
+    setCancelTarget(null);
+    setCancelError("");
+  };
+
+  const handleCancelConfirm = async () => {
+    if (!cancelTarget) return;
+    setCancelling(true);
+    setCancelError("");
+    try {
+      await cancelOrder(cancelTarget.id);
+      // Remove it from local state → no need for a refetch
+      setOrders((prev) => prev.filter((o) => o.id !== cancelTarget.id));
+      setCancelTarget(null);
+      showToast("Request cancelled successfully.");
+    } catch (err) {
+      const msg =
+        err?.response?.data?.detail ||
+        err?.response?.data?.message ||
+        "Failed to cancel the request. Please try again.";
+      setCancelError(msg);
+    } finally {
+      setCancelling(false);
+    }
+  };
 
   // Review modal state
   const [reviewTarget, setReviewTarget] = useState(null);
@@ -584,6 +704,7 @@ export default function MyRequests() {
               onClick={() => navigate(`/user/my-requests/${order.id}`)}
               onPayClick={handlePayClick}
               onReviewClick={handleReviewClick}
+              onCancelClick={handleCancelClick}
             />
           ))}
         </div>
@@ -597,6 +718,15 @@ export default function MyRequests() {
           onCancel={handlePayCancel}
           paying={paying}
           error={payError}
+        />
+      )}
+      {cancelTarget && (
+        <CancelModal
+          order={cancelTarget}
+          onConfirm={handleCancelConfirm}
+          onCancel={handleCancelDismiss}
+          cancelling={cancelling}
+          error={cancelError}
         />
       )}
       {reviewTarget && (
