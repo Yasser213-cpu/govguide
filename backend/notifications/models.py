@@ -6,6 +6,7 @@ class Notification(models.Model):
     ACCEPTED = "accepted"
     REJECTED = "rejected"
     PAID = "paid"
+    IN_PROGRESS = "in_progress"
     COMPLETED = "completed"
     CHAT_MESSAGE = "chat_message"
     NEW_ORDER = "new_order"
@@ -15,6 +16,7 @@ class Notification(models.Model):
         (ACCEPTED, "Accepted"),
         (REJECTED, "Rejected"),
         (PAID, "Paid"),
+        (IN_PROGRESS, "In Progress"),
         (COMPLETED, "Completed"),
         (CHAT_MESSAGE, "Chat Message"),
         (NEW_ORDER, "New Order"),

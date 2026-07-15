@@ -15,9 +15,10 @@ import {
 } from "react-icons/fi";
 import {
   getMyOrders,
-  payOrder,
   cancelOrder,
+  createCheckoutSession,
 } from "../../features/orders/api/Ordersapi";
+import { canPayOrder } from "../../utils/orderHelpers";
 import PageHeader from "../../components/layout/PageHeader";
 import { usePageLoading } from "../../context/PageLoadingContext";
 
@@ -338,8 +339,8 @@ function RequestCard({
         </div>
       </button>
 
-      {/* Pay Now CTA — only when accepted */}
-      {order.status === "accepted" && (
+      {/* Pay Now CTA — only when accepted and not yet paid */}
+      {canPayOrder(order) && (
         <div className="mt-4 pt-4 border-t border-[var(--border)] flex items-center justify-between gap-4">
           <div className="flex items-center gap-2 text-sm text-blue-600">
             <FiCreditCard size={15} />
@@ -378,22 +379,31 @@ function RequestCard({
       )}
 
       {order.status === "completed" && (
-        <div className="mt-4 pt-4 border-t border-[var(--border)] flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2 text-sm text-green-600">
-            <FiCheckCircle size={15} />
-            <span className="font-medium">Tell us about your experience</span>
+        <div className="mt-4 pt-4 border-t border-[var(--border)] flex flex-col gap-3">
+          <div className="flex items-start gap-2 text-sm text-green-600">
+            <FiCheckCircle size={15} className="mt-0.5 shrink-0" />
+            <span>
+              Order completed — your documents will be delivered within a
+              maximum of 3 days.
+            </span>
           </div>
-
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onReviewClick(order);
-            }}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-600 text-white text-sm font-semibold hover:bg-green-700 transition shrink-0"
-          >
-            <FiCheckCircle size={14} />
-            Leave Review
-          </button>
+          {!order.has_review && (
+            <div className="flex items-center justify-between gap-4">
+              <span className="text-sm text-green-600 font-medium">
+                Tell us about your experience
+              </span>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onReviewClick(order);
+                }}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-600 text-white text-sm font-semibold hover:bg-green-700 transition shrink-0"
+              >
+                <FiCheckCircle size={14} />
+                Leave Review
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -617,19 +627,15 @@ export default function MyRequests() {
     setPaying(true);
     setPayError("");
     try {
-      await payOrder(payTarget.id);
-      // Optimistically update status in local state → no need for a refetch
-      setOrders((prev) =>
-        prev.map((o) => (o.id === payTarget.id ? { ...o, status: "paid" } : o)),
-      );
-      setPayTarget(null);
+      const { checkout_url } = await createCheckoutSession(payTarget.id);
+      window.location.href = checkout_url;
     } catch (err) {
       const msg =
         err?.response?.data?.detail ||
+        err?.response?.data?.error ||
         err?.response?.data?.message ||
         "Payment failed. Please try again.";
       setPayError(msg);
-    } finally {
       setPaying(false);
     }
   };

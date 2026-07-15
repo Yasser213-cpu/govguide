@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Order, Document, OrderStatusHistory
+from .models import Order, Document, OrderStatusHistory, Payment
 
 
 # Register your models here.
@@ -19,3 +19,18 @@ class DocumentAdmin(admin.ModelAdmin):
 class OrderStatusHistoryAdmin(admin.ModelAdmin):
     model = OrderStatusHistory
     list_display = ["id", "status", "changed_at", "order"]
+
+
+@admin.register(Payment)
+class PaymentAdmin(admin.ModelAdmin):
+    list_display = [
+        "id",
+        "order",
+        "amount",
+        "currency",
+        "status",
+        "paid_at",
+        "created_at",
+    ]
+    list_filter = ["status", "currency"]
+    search_fields = ["order__id", "stripe_checkout_session_id"]

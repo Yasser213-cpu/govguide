@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from ..models import Order, Document, OrderStatusHistory
+from ..models import Order, Document, OrderStatusHistory, Payment
 from reviews.models import Review
 from procedures.models import Procedure, Requirement
 from companies.api.serializers import CompanyServicesSerializer
@@ -89,11 +89,19 @@ class DocumentUploadSerializer(serializers.ModelSerializer):
         return attrs
 
 
+class PaymentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Payment
+        fields = ["status", "amount", "currency", "paid_at"]
+        read_only_fields = fields
+
+
 class ClientOrderDetailSerializer(serializers.ModelSerializer):
     company = serializers.StringRelatedField(source="service.company")
     procedure = serializers.StringRelatedField(source="service.procedure")
     documents = DocumentUploadSerializer(many=True, read_only=True)
     has_review = serializers.SerializerMethodField()
+    payment = PaymentSerializer(read_only=True)
 
     class Meta:
         model = Order
@@ -107,6 +115,7 @@ class ClientOrderDetailSerializer(serializers.ModelSerializer):
             "documents",
             "created_at",
             "has_review",
+            "payment",
         ]
 
     def get_has_review(self, obj):
