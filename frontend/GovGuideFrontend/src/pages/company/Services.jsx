@@ -5,6 +5,7 @@ import axiosClient from "../../api/axiosClient";
 import { useCompany } from "../../context/CompanyContext";
 import { FiEdit2, FiTrash2 } from "react-icons/fi";
 import ServiceModal from "../../components/layout/company/ServiceModal";
+import ProcedureModal from "../../components/layout/company/ProcedureModal";
 import ConfirmDeleteModal from "../../components/layout/company/ConfirmDeleteModal";
 import Toast from "../../components/ui/Toast";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
@@ -30,6 +31,11 @@ export default function Services() {
 
   const [error, setError] = useState("");
 
+  // ===== Procedure creation modal =====
+  const [isCreatingProcedure, setIsCreatingProcedure] = useState(false);
+  const [savingProcedure, setSavingProcedure] = useState(false);
+  const [procedureError, setProcedureError] = useState("");
+
   const [toast, setToast] = useState({
     show: false,
     message: "",
@@ -43,6 +49,11 @@ export default function Services() {
     setEditingService(null);
     setIsCreating(false);
     setError("");
+  };
+
+  const resetProcedureModal = () => {
+    setIsCreatingProcedure(false);
+    setProcedureError("");
   };
 
   useEffect(() => {
@@ -190,6 +201,73 @@ export default function Services() {
     }
   };
 
+  // Creates a brand new procedure, then — if the person checked
+  // "add as a service" in the ProcedureModal — immediately creates the
+  // matching service for this company using the procedure id we just got.
+  const handleSaveProcedure = async (procedurePayload, servicePayload) => {
+    setSavingProcedure(true);
+    setProcedureError("");
+
+    try {
+      const procedureRes = await axiosClient.post(
+        `/api/v1/procedures/`,
+        procedurePayload,
+      );
+
+      const newProcedure = procedureRes.data;
+
+      if (servicePayload) {
+        try {
+          const serviceRes = await axiosClient.post(`/api/v1/services/`, {
+            company: company.id,
+            procedure: newProcedure.id,
+            ...servicePayload,
+          });
+
+          setServices((prev) => [serviceRes.data, ...prev]);
+
+          setToast({
+            show: true,
+            message: "Procedure and service created successfully.",
+            type: "success",
+          });
+        } catch (serviceErr) {
+          // The procedure was created fine, only the service step failed —
+          // surface that distinctly instead of a generic error.
+          console.error(
+            "Service creation failed:",
+            serviceErr.response?.data || serviceErr,
+          );
+
+          setToast({
+            show: true,
+            message:
+              "Procedure created, but adding it as a service failed. You can add it manually from '+ Add Service'.",
+            type: "error",
+          });
+        }
+      } else {
+        setToast({
+          show: true,
+          message: "Procedure created successfully.",
+          type: "success",
+        });
+      }
+
+      resetProcedureModal();
+    } catch (err) {
+      console.error("Procedure save failed:", err.response?.data || err);
+
+      setProcedureError(
+        err.response?.data?.detail ||
+          err.response?.data?.name?.[0] ||
+          "Something went wrong while creating the procedure.",
+      );
+    } finally {
+      setSavingProcedure(false);
+    }
+  };
+
   useEffect(() => {}, [isCreating, editingService]);
 
   return (
@@ -209,6 +287,15 @@ export default function Services() {
           className="mb-4 rounded-xl bg-green-600 px-4 py-2 text-white hover:bg-green-700"
         >
           + Add Service
+        </button>
+        <button
+          onClick={() => {
+            resetProcedureModal();
+            setIsCreatingProcedure(true);
+          }}
+          className="mb-4 ml-2 rounded-xl bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+        >
+          + Create New Service
         </button>
 
         {loading || companyLoading ? (
@@ -312,6 +399,14 @@ export default function Services() {
         onSave={handleSave}
         error={error}
         setError={setError}
+      />
+
+      <ProcedureModal
+        open={isCreatingProcedure}
+        saving={savingProcedure}
+        error={procedureError}
+        onClose={resetProcedureModal}
+        onSave={handleSaveProcedure}
       />
 
       <ConfirmDeleteModal

@@ -73,3 +73,15 @@ export const submitReview = async (orderId, reviewData) => {
 
   return response.data;
 };
+
+/**
+ * Cancel a pending order (deletes it).
+ * DELETE /api/v1/orders/{id}/
+ * Only valid when order status is "pending".
+ *
+ * @param {number} orderId
+ */
+export const cancelOrder = async (orderId) => {
+  const response = await axiosClient.delete(`/api/v1/orders/${orderId}/`);
+  return response.data;
+};

@@ -4,7 +4,7 @@ from reviews.api.views import ReviewAPIView, CreateReviewAPIView
 
 urlpatterns = [
     path("", views.ClientOrdersAPIView.as_view()),
-    path("<int:id>", views.ClientOrdersAPIView.as_view()),
+    path("<int:id>/", views.ClientOrdersAPIView.as_view()),
     path("<int:id>/documents", views.UploadOrderDocument.as_view()),
     path(
         "<int:pk>/status/",
