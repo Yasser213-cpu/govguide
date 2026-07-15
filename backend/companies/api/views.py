@@ -13,7 +13,8 @@ from reviews.api.serializer import ReviewSerializer
 from django.db.models.functions import Coalesce
 from django.db.models import Avg, Value
 from core.views import CrudAPIView
-
+import stripe
+from django.conf import settings
 
 class CompanyAPIView(CrudAPIView):
     model = Company
@@ -104,3 +105,51 @@ class CompanyReviewsAPIView(CrudAPIView):
         reviews = Review.objects.filter(order__service__company=company)
         serializer = ReviewSerializer(reviews, many=True)
         return Response(serializer.data)
+
+
+class CompanyStripeOnboardingAPIView(APIView):
+    permission_classes = [IsAuthenticated, isCompanyOwner]
+
+    def post(self, request):
+        company = request.user.company  
+
+        
+        if not company.stripe_account_id:
+            account = stripe.Account.create(
+                type="express",
+                country="us",
+                email=request.user.email,
+                capabilities={
+                    "card_payments": {"requested": True},
+                    "transfers": {"requested": True},
+                },
+            )
+            company.stripe_account_id = account.id
+            company.save(update_fields=["stripe_account_id"])
+
+        
+        account_link = stripe.AccountLink.create(
+            account=company.stripe_account_id,
+            refresh_url=f"{settings.FRONTEND_URL}/company/settings?stripe=refresh",
+            return_url=f"{settings.FRONTEND_URL}/company/settings?stripe=complete",
+            type="account_onboarding",
+        )
+
+        return Response({"onboarding_url": account_link.url})
+
+class CompanyStripeStatusAPIView(APIView):
+    permission_classes = [IsAuthenticated, isCompanyOwner]
+
+    def get(self, request):
+        company = request.user.company
+        return Response({
+            "connected": bool(company.stripe_account_id),
+            "onboarding_complete": company.stripe_onboarding_complete,
+        })
+
+class CompanyBalanceAPIView(APIView):
+    permission_classes = [IsAuthenticated, isCompanyOwner]
+
+    def get(self, request):
+        company = request.user.company
+        return Response({"balance": company.balance})

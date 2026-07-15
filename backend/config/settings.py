@@ -1,6 +1,7 @@
 from pathlib import Path
 from dotenv import load_dotenv
 import os
+from decimal import Decimal
 
 SENTRY_DSN = os.getenv("SENTRY_DSN")
 
@@ -186,3 +187,6 @@ LOGGING = {
         "level": "DEBUG",
     },
 }
+
+
+EGP_TO_USD_RATE = Decimal("0.0205")

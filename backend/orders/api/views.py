@@ -23,6 +23,9 @@ from django.conf import settings
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
+# نسبة عمولة المنصة — غيّرها للرقم اللي عايزه
+PLATFORM_FEE_PERCENT = 10
+
 
 class ClientOrdersAPIView(APIView):
 
@@ -225,11 +228,25 @@ class CreateCheckoutSessionAPIView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        company = order.service.company
+
+        # لو الشركة لسه معملتش Stripe onboarding، امنع الدفع
+        if not company.stripe_account_id or not company.stripe_onboarding_complete:
+            return Response(
+                {
+                    "error": (
+                        "This company has not completed payment setup yet. "
+                        "Please contact them or try again later."
+                    )
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         payment, created = Payment.objects.get_or_create(
             order=order,
             defaults={
                 "amount": order.service.company_service_fee,
-                "currency": "egp",
+                "currency": "usd",
             },
         )
 
@@ -243,19 +260,34 @@ class CreateCheckoutSessionAPIView(APIView):
             payment.status = Payment.PENDING
             payment.save(update_fields=["status"])
 
+        # القيمة بالجنيه زي ما هي مخزنة في الداتابيز
+        amount_egp = payment.amount
+
+        # تحويل للدولار وقت إرسالها لـ Stripe بس — الداتابيز فاضلة بالجنيه
+        amount_usd = amount_egp * settings.EGP_TO_USD_RATE
+        amount_in_cents = int(round(amount_usd * 100))  # Stripe بياخد أصغر وحدة (سنت)
+
+        application_fee = int(amount_in_cents * PLATFORM_FEE_PERCENT / 100)
+
         session = stripe.checkout.Session.create(
             payment_method_types=["card"],
             line_items=[
                 {
                     "price_data": {
-                        "currency": payment.currency,
+                        "currency": "usd",  # لـ Stripe بس، مش الداتابيز
                         "product_data": {"name": order.procedure.name},
-                        "unit_amount": int(payment.amount * 100),
+                        "unit_amount": amount_in_cents,
                     },
                     "quantity": 1,
                 }
             ],
             mode="payment",
+            payment_intent_data={
+                "application_fee_amount": application_fee,
+                "transfer_data": {
+                    "destination": company.stripe_account_id,
+                },
+            },
             success_url=(
                 f"{settings.FRONTEND_URL}/user/my-requests/{order.id}"
                 "?payment=success"

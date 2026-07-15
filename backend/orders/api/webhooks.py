@@ -46,13 +46,15 @@ class StripeWebhookAPIView(APIView):
             self._handle_checkout_failed(data_object)
         elif event_type == "payment_intent.payment_failed":
             self._handle_payment_intent_failed(data_object)
+        elif event_type == "account.updated":
+            self._handle_account_updated(data_object)
 
         return HttpResponse(status=200)
 
     def _get_payment(self, session):
         # `session` is a stripe StripeObject, not a dict — it has no
-        # .get() method. Use getattr (with defaults) or attribute
-        # access instead, which StripeObject supports via __getattr__.
+        # .get() method. Use getattr (with defaults) instead, which
+        # StripeObject supports via __getattr__.
         metadata = getattr(session, "metadata", None)
         payment_id = getattr(metadata, "payment_id", None) if metadata else None
 
@@ -123,3 +125,29 @@ class StripeWebhookAPIView(APIView):
         if payment_intent_id:
             payment.stripe_payment_intent_id = payment_intent_id
         payment.save(update_fields=["status", "stripe_payment_intent_id"])
+
+    @transaction.atomic
+    def _handle_account_updated(self, account):
+        # Fired whenever a connected company's Stripe account changes —
+        # most importantly, when they finish (or lose) onboarding.
+        from companies.models import Company
+
+        account_id = getattr(account, "id", None)
+        if not account_id:
+            return
+
+        charges_enabled = getattr(account, "charges_enabled", False)
+        payouts_enabled = getattr(account, "payouts_enabled", False)
+
+        try:
+            company = Company.objects.get(stripe_account_id=account_id)
+        except Company.DoesNotExist:
+            logger.warning(
+                "account.updated: no company found for account %s", account_id
+            )
+            return
+
+        is_complete = bool(charges_enabled and payouts_enabled)
+        if company.stripe_onboarding_complete != is_complete:
+            company.stripe_onboarding_complete = is_complete
+            company.save(update_fields=["stripe_onboarding_complete"])

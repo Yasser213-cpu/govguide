@@ -53,6 +53,17 @@ function getErrorMessage(err, fallback) {
   return fallback;
 }
 
+// Image types accepted for document uploads. HEIC/HEIF is included for
+// iPhone camera uploads, which don't always report a MIME type reliably.
+const ACCEPTED_IMAGE_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/heic",
+  "image/heif",
+];
+const ACCEPTED_IMAGE_ACCEPT_ATTR = "image/*";
+
 /**
  * ContactCompanyModal
  *
@@ -114,6 +125,29 @@ export default function ContactCompanyModal({
   if (!open) return null;
 
   const handleFileChange = (reqKey, file) => {
+    if (!file) {
+      setFiles((prev) => ({ ...prev, [reqKey]: file }));
+      setFileErrors((prev) => ({ ...prev, [reqKey]: undefined }));
+      return;
+    }
+
+    // Belt-and-suspenders: the <input accept="image/*"> steers most users
+    // toward images already, but some OS file pickers let people override
+    // that filter, so we re-check the MIME type here too.
+    const isImage =
+      ACCEPTED_IMAGE_TYPES.includes(file.type) ||
+      file.type.startsWith("image/");
+
+    if (!isImage) {
+      setFileErrors((prev) => ({
+        ...prev,
+        [reqKey]: "Only image files (JPG, PNG, WEBP, HEIC) are accepted.",
+      }));
+      // Reject the file — don't let an invalid type sit in state.
+      setFiles((prev) => ({ ...prev, [reqKey]: null }));
+      return;
+    }
+
     setFiles((prev) => ({ ...prev, [reqKey]: file }));
     setFileErrors((prev) => ({ ...prev, [reqKey]: undefined }));
   };
@@ -428,6 +462,9 @@ export default function ContactCompanyModal({
                 <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
                   Required Documents
                 </label>
+                <p className="text-xs text-[var(--text-secondary)] mb-3">
+                  Photos only (JPG, PNG, WEBP, HEIC).
+                </p>
 
                 {requirementsLoading && (
                   <div className="mb-3 flex items-center gap-2 text-xs text-[var(--text-secondary)]">
@@ -473,9 +510,10 @@ export default function ContactCompanyModal({
                             </span>
                             <label className="flex items-center gap-2 text-sm text-[var(--primary)] cursor-pointer hover:underline">
                               <FiUpload size={16} />
-                              {files[reqKey] ? "Change file" : "Upload file"}
+                              {files[reqKey] ? "Change photo" : "Upload photo"}
                               <input
                                 type="file"
+                                accept={ACCEPTED_IMAGE_ACCEPT_ATTR}
                                 className="hidden"
                                 onChange={(e) =>
                                   handleFileChange(
