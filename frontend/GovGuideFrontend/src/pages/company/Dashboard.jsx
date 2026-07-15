@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { FiClock, FiCheckCircle, FiFileText } from "react-icons/fi";
+import { FiClock, FiCheckCircle, FiFileText, FiDollarSign } from "react-icons/fi";
 
 import PageHeader from "../../components/layout/PageHeader";
 import DashboardStats from "../../components/dashboard/DashboardStats";
@@ -10,6 +10,7 @@ import {
   getCompanyOrder,
   updateOrderStatus,
 } from "../../features/orders/api/Ordersapi";
+import { getCompanyBalance } from "../../api/companyApi";
 import CompanyOrderCards from "../../components/company/dashboard/CompanyOrderCards";
 import OrderDetailsPanel from "../../components/company/dashboard/OrderDetailsPanel";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
@@ -41,6 +42,10 @@ export default function CompanyDashboard() {
   const [statusUpdating, setStatusUpdating] = useState(false);
   const [statusError, setStatusError] = useState("");
 
+  // Stripe balance
+  const [balance, setBalance] = useState(null);
+  const [balanceLoading, setBalanceLoading] = useState(true);
+
   const fetchOrders = useCallback(async () => {
     try {
       setOrdersLoading(true);
@@ -71,9 +76,25 @@ export default function CompanyDashboard() {
     }
   }, []);
 
+  const fetchBalance = useCallback(async () => {
+    try {
+      setBalanceLoading(true);
+      const { data } = await getCompanyBalance();
+      setBalance(data.balance);
+    } catch {
+      setBalance(null);
+    } finally {
+      setBalanceLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     fetchOrders();
   }, [fetchOrders]);
+
+  useEffect(() => {
+    fetchBalance();
+  }, [fetchBalance]);
 
   useEffect(() => {
     if (selectedOrderId) {
@@ -90,6 +111,12 @@ export default function CompanyDashboard() {
     () => orders.slice(0, DASHBOARD_ORDERS_LIMIT),
     [orders],
   );
+
+  const balanceDisplay = useMemo(() => {
+    if (balanceLoading) return "…";
+    if (balance === null) return "—";
+    return `${Number(balance).toFixed(2)} EGP`;
+  }, [balance, balanceLoading]);
 
   const statItems = useMemo(
     () => [
@@ -114,8 +141,15 @@ export default function CompanyDashboard() {
         color: "text-green-600",
         bg: "bg-green-100",
       },
+      {
+        title: "Available Balance",
+        value: balanceDisplay,
+        icon: FiDollarSign,
+        color: "text-emerald-600",
+        bg: "bg-emerald-100",
+      },
     ],
-    [stats],
+    [stats, balanceDisplay],
   );
 
   const handleSelectOrder = (orderId) => {
@@ -129,7 +163,11 @@ export default function CompanyDashboard() {
       setStatusUpdating(true);
       setStatusError("");
       await updateOrderStatus(selectedOrderId, nextStatus);
-      await Promise.all([fetchOrderDetail(selectedOrderId), fetchOrders()]);
+      await Promise.all([
+        fetchOrderDetail(selectedOrderId),
+        fetchOrders(),
+        fetchBalance(),
+      ]);
     } catch (err) {
       const msg =
         err?.response?.data?.status?.[0] ||

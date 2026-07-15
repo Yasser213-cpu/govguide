@@ -31,6 +31,13 @@ def mark_payment_success(payment, stripe_payment_intent_id=""):
             status=Order.PAID_STATUS,
         )
 
+        # ضيف نصيب الشركة للرصيد بتاعها
+        company = order.service.company
+        platform_fee_percent = 10  # نفس النسبة اللي في orders/api/views.py
+        net_amount = payment.amount * (100 - platform_fee_percent) / 100
+        company.balance += net_amount
+        company.save(update_fields=["balance"])
+
         company_owner = order.service.company.owner
         send_company_notification.delay(
             company_owner.id,

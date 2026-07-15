@@ -69,3 +69,14 @@ export const updateService = (id, data) =>
  */
 export const deleteService = (id) =>
   axiosClient.delete(`api/v1/services/${id}/`);
+
+
+// GET/POST company Stripe connect status
+export const getCompanyStripeStatus = () =>
+  axiosClient.get("/api/v1/companies/stripe/status/");
+
+export const startStripeOnboarding = () =>
+  axiosClient.post("/api/v1/companies/stripe/onboarding/");
+
+export const getCompanyBalance = () =>
+  axiosClient.get("/api/v1/companies/balance/");
